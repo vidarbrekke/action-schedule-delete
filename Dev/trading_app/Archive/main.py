@@ -1,7 +1,7 @@
 from indicators import (
-    SimpleMovingAverage,
-    ExponentialMovingAverage,
-    RelativeStrengthIndex,
+    SimpleMovingAverage, 
+    ExponentialMovingAverage, 
+    RelativeStrengthIndex, 
     MovingAverageConvergenceDivergence,
     BollingerBands
 )
@@ -38,19 +38,14 @@ def main():
    
     # Calculating MACD
     macd_calculator = MovingAverageConvergenceDivergence(macd_long_period, macd_short_period, macd_signal_period)
-    macd_line, signal_line = macd_calculator.calculate_macd(data)
-    data['MACD'] = macd_line
-    data['MACD_Signal'] = signal_line
+    data = macd_calculator.calculate_macd(data)
 
     # Calculating Bollinger Bands
     bb_calculator = BollingerBands(bb_period, bb_std_dev_multiplier)
-    middle_band, upper_band, lower_band = bb_calculator.calculate_bollinger_bands(data)
-    data['Middle_Band'] = middle_band
-    data['Upper_Band'] = upper_band
-    data['Lower_Band'] = lower_band
+    data = bb_calculator.calculate_bollinger_bands(data)
 
-    # Print out the full DataFrame to verify the calculations
-    print(data)
+    # Print out the first few rows to verify the calculations
+    print(data[['CLOSE', 'Middle_Band', 'Upper_Band', 'Lower_Band']].head())
 
 if __name__ == "__main__":
     main()
