@@ -1,3 +1,5 @@
+# db_setup.py
+
 import sqlite3
 import os
 import logging
@@ -7,7 +9,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Database configuration
-DATABASE_PATH = os.path.join("./data", "trading_app.db")
+DATABASE_PATH = os.path.join("data", "trading_app.db")
 SQL_CREATE_STOCKS_TABLE = """
     CREATE TABLE IF NOT EXISTS stocks (
         id INTEGER PRIMARY KEY,
@@ -77,10 +79,13 @@ def initialize_database():
             create_table(conn, SQL_CREATE_STOCKS_TABLE)
             create_table(conn, SQL_CREATE_PRICES_TABLE)
             logger.info("Tables created successfully.")
+            print("Created tables: stocks, prices")
         else:
             logger.info("Existing tables found. No need to create tables.")
+            print("Tables already exist: stocks, prices")
         print_tables_in_db(conn)
         conn.close()
+        print(f"Database path: {DATABASE_PATH}")
     else:
         logger.error("Unable to create or connect to the database.")
 

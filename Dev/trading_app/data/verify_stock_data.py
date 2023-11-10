@@ -1,11 +1,13 @@
+# verify_stock_data.py
 import sqlite3
-import sys
 import os
 import matplotlib.pyplot as plt
 import pandas as pd
+import sys
 
 def check_ticker_data(ticker):
-    database_path = "./data/trading_app.db"  # Adjust the path to your database file
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    database_path = os.path.join(script_dir, "trading_app.db")
 
     # Connect to the SQLite database
     conn = sqlite3.connect(database_path)
@@ -13,9 +15,10 @@ def check_ticker_data(ticker):
 
     # Check if the ticker exists in the 'stocks' table and get its ID
     cursor.execute("SELECT id FROM stocks WHERE symbol = ?", (ticker,))
-    stock_id = cursor.fetchone()
-    if stock_id:
-        stock_id = stock_id[0]
+    stock_id_row = cursor.fetchone()
+
+    if stock_id_row:
+        stock_id = stock_id_row[0]
         print(f"Ticker {ticker} found with ID {stock_id}. Fetching data...")
 
         # Fetch all data from the 'prices' table for the given ticker ID
@@ -38,12 +41,11 @@ def check_ticker_data(ticker):
             plt.legend()
 
             # Save the plot
-            plot_path = os.path.join(os.path.dirname(database_path), f"{ticker}_stock_chart.png")
+            plot_path = os.path.join(script_dir, f"{ticker}_stock_chart.png")
             plt.savefig(plot_path)
             print(f"Stock chart saved to {plot_path}")
         else:
             print(f"No data found for ticker {ticker} in 'prices' table.")
-
     else:
         print(f"Ticker {ticker} not found in 'stocks' table.")
 

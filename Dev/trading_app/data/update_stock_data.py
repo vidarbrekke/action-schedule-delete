@@ -1,14 +1,35 @@
+# update_stock_data.py
+
 import os
 import sys
 import yfinance as yf
 import sqlite3
 import pandas as pd
-from datetime import datetime
+import datetime
+
+import datetime
 
 def fetch_data_from_yfinance(ticker, last_update_date):
-    period = "5y" if last_update_date is None else "max"
-    stock_data = yf.download(ticker, start=last_update_date, period=period)
+    max_days = 729  # yfinance maximum allowed days for hourly data
+    end_date = datetime.datetime.now()
+
+    if last_update_date is None:
+        start_date = end_date - datetime.timedelta(days=max_days)
+    else:
+        # Convert last_update_date from string to datetime
+        last_update_date = datetime.datetime.strptime(last_update_date, '%Y-%m-%d %H:%M:%S')
+        # Calculate days difference
+        days_diff = (end_date - last_update_date).days
+
+        if days_diff > max_days:
+            start_date = end_date - datetime.timedelta(days=max_days)
+        else:
+            start_date = last_update_date
+
+    interval = '1h'
+    stock_data = yf.download(ticker, start=start_date.strftime('%Y-%m-%d'), end=end_date.strftime('%Y-%m-%d'), interval=interval)
     return stock_data
+
 
 def update_database_with_data(conn, ticker_id, stock_data):
     insert_sql = """
@@ -23,37 +44,20 @@ def update_database_with_data(conn, ticker_id, stock_data):
     """
     stock_data.reset_index(inplace=True)
     for _, row in stock_data.iterrows():
-        # Debugging print statements
-        print(f"Ticker ID: {ticker_id}, Type: {type(ticker_id)}")
-        print(f"Row data: {row}, Type: {type(row)}")
-        print(f"Row 'Date': {row['Date']}, Type: {type(row['Date'])}")
-        print(f"Row 'Open': {row['Open']}, Type: {type(row['Open'])}")
-        print(f"Row 'High': {row['High']}, Type: {type(row['High'])}")
-        print(f"Row 'Low': {row['Low']}, Type: {type(row['Low'])}")
-        print(f"Row 'Close': {row['Close']}, Type: {type(row['Close'])}")
-        print(f"Row 'Volume': {row['Volume']}, Type: {type(row['Volume'])}")
-
-        try:
-            conn.execute(insert_sql, (
-                ticker_id,
-                row['Date'].strftime('%Y-%m-%d'),
-                row['Open'],
-                row['High'],
-                row['Low'],
-                row['Close'],
-                row['Volume']
-            ))
-        except Exception as e:
-            print(f"Error inserting data: {e}")
-            break
+        conn.execute(insert_sql, (
+            ticker_id,
+            row['Datetime'].strftime('%Y-%m-%d %H:%M:%S'),
+            row['Open'],
+            row['High'],
+            row['Low'],
+            row['Close'],
+            row['Volume']
+        ))
 
 def main(ticker):
-    # Get the directory of the current script
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    # Join the directory path with the database filename
-    database_path = os.path.join(script_dir, "./trading_app.db") 
+    database_path = os.path.join(script_dir,"trading_app.db")
 
-    print(f"Connecting to database at {database_path}")
     conn = sqlite3.connect(database_path)
     last_update_query = """
         SELECT MAX(date) FROM prices WHERE stock_id = (
@@ -61,35 +65,28 @@ def main(ticker):
         )
     """
     cursor = conn.cursor()
-    print(f"Executing last update query for ticker: {ticker}")
     cursor.execute(last_update_query, (ticker,))
-    last_update_date = cursor.fetchone()[0]
-    print(f"Last update date for {ticker}: {last_update_date}")
+    last_update_result = cursor.fetchone()[0]
+    last_update_date = None if last_update_result is None else datetime.datetime.strptime(last_update_result, '%Y-%m-%d %H:%M:%S')
 
     stock_data = fetch_data_from_yfinance(ticker, last_update_date)
-    print(f"Fetched data for {ticker}: {stock_data}")
 
-    print(f"Retrieving ticker ID for {ticker}")
     cursor.execute("SELECT id FROM stocks WHERE symbol = ?", (ticker,))
     ticker_id = cursor.fetchone()
-    if ticker_id is not None:
-        ticker_id = ticker_id[0]
-    else:
-        print(f"Ticker {ticker} not found in database. Inserting new record.")
+    if ticker_id is None:
         conn.execute("INSERT INTO stocks (symbol) VALUES (?)", (ticker,))
         ticker_id = cursor.lastrowid
+    else:
+        ticker_id = ticker_id[0]
 
-    print(f"Updating database with data for ticker ID: {ticker_id}")
     update_database_with_data(conn, ticker_id, stock_data)
 
     conn.commit()
     conn.close()
-    print("Database update complete.")
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Usage: python update_stock_data.py <ticker>")
         sys.exit(1)
     ticker = sys.argv[1]
-    print(f"Starting update process for {ticker}")
     main(ticker)
