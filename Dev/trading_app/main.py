@@ -1,4 +1,4 @@
-from indicators import (
+from analysis.indicators import (
     SimpleMovingAverage,
     ExponentialMovingAverage,
     RelativeStrengthIndex,
