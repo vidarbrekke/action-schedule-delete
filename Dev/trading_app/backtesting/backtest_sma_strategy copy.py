@@ -93,35 +93,4 @@ def backtest_sma(symbol, start_date, end_date, short_period, long_period):
     data = fetch_data(symbol, start_date, end_date)
     data_with_sma, signal_column, position_column = sma_strategy(data, short_period, long_period)
     performance = calculate_performance(data_with_sma, position_column)
-    plot_path = plot_strategy(data_with_sma, symbol, f"SMA_{short_period}_{long_period}", performance, short_period, long_period, plots_dir)
-    return performance, plot_path
-
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Backtest SMA Strategy')
-    parser.add_argument('symbol', type=str, help='Stock symbol to backtest')
-    args = parser.parse_args()
-
-    symbol = args.symbol
-    start_date = '2022-04-01'
-    end_date = '2023-04-01'
-
-    data = fetch_data(symbol, start_date, end_date)
-    short_periods = [10, 20]
-    long_periods = [50, 100]
-
-    strategies = []
-    for short_period in short_periods:
-        for long_period in long_periods:
-            if short_period < long_period:
-                data_with_sma, signal_column, position_column = sma_strategy(data, short_period, long_period)
-                performance = calculate_performance(data_with_sma, position_column)
-                plot_path = plot_strategy(data_with_sma, symbol, f"SMA_{short_period}_{long_period}", performance, short_period, long_period, plots_dir)
-                print(f"Backtest Result for {symbol} ({short_period}, {long_period}): {performance}")
-                print(f"Plot saved as: {plot_path}")
-                strategies.append({'short_period': short_period, 'long_period': long_period, 'signal_column': signal_column})
-
-    data_with_consensus = consensus_strategy(data, strategies)
-    consensus_performance = calculate_performance(data_with_consensus, 'Consensus_Position')
-    consensus_plot_path = plot_strategy(data_with_consensus, symbol, 'Consensus_Strategy', consensus_performance, None, None, plots_dir)
-    print(f"Consensus Strategy Result for {symbol}: {consensus_performance}")
-    print(f"Consensus Plot saved as: {consensus_plot_path}")
+    plot_path = plot_strategy(data_with_sma, symbol, f"SMA_{short_period}_{long_period}",

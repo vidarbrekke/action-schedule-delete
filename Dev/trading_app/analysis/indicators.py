@@ -19,6 +19,7 @@ def add_indicators(data):
     data['SMA_10'] = ta.sma(data['close'], length=10)
     data['SMA_20'] = ta.sma(data['close'], length=20)
     data['SMA_50'] = ta.sma(data['close'], length=50)
+    data['SMA_100'] = ta.sma(data['close'], length=100)
 
     # Exponential Moving Average (EMA)
     data['EMA_10'] = ta.ema(data['close'], length=10)
