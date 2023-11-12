@@ -25,13 +25,18 @@ except ModuleNotFoundError as e:
 
 # SMA Strategy Function
 def sma_strategy(data, short_period, long_period):
-    data_with_indicators = indicators.add_indicators(data)
+    data_with_indicators = indicators.add_indicators(data).copy()  # Explicitly create a copy
     signal_column = f'Signal_{short_period}_{long_period}'
     position_column = f'Position_{short_period}_{long_period}'
+
+    # Generate signals
     data_with_indicators[signal_column] = np.where(
         data_with_indicators[f'SMA_{short_period}'] > data_with_indicators[f'SMA_{long_period}'], 1, 0)
     data_with_indicators[position_column] = data_with_indicators[signal_column].diff()
+
     return data_with_indicators, signal_column, position_column
+
+
 
 # Performance Calculation Function
 def calculate_performance(data, position_column):
@@ -49,6 +54,8 @@ def calculate_performance(data, position_column):
             profit += (sell_price - buy_price)
             holding = False
     return profit
+
+
 
 # Plotting Function
 def plot_strategy(data, symbol, strategy_name, performance_score, raw_score, short_period, long_period, output_dir):
@@ -97,13 +104,11 @@ def consensus_strategy(data, strategies):
     data['Consensus_Signal'] = np.where(consensus_signal > consensus_threshold, 1, 0)
 
     # Eliminate consecutive duplicate signals
-    data['Consensus_Signal'] = data['Consensus_Signal'].ne(data['Consensus_Signal'].shift())
+    data['Consensus_Signal'] = data['Consensus_Signal'].where(data['Consensus_Signal'].shift() != data['Consensus_Signal'], 0)
 
-    # Convert True/False to 1/0 and calculate position
-    data['Consensus_Signal'] = data['Consensus_Signal'].astype(int)
     data['Consensus_Position'] = data['Consensus_Signal'].diff()
-
     return data
+
 
 
 def calculate_raw_score(data, position_column):
