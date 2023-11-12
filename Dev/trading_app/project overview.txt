@@ -58,6 +58,7 @@ Continue to refine '/backtesting/backtest_sma_strategy.py"
 Enhancement and Testing:
 Continue enhancing the script for better performance and additional features.
 Rigorously test each component to ensure reliability.
+Fix bug that does not calculate the 
 
 
 
