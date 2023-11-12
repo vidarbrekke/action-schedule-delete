@@ -1,0 +1,87 @@
+Project Overview
+Project Title
+Automated Trading Bot Development
+Broad Objective
+Develop a comprehensive and automated trading bot. The development process involves testing various technical indicators and strategies to determine the most effective approach. The current focus is on implementing and backtesting Simple Moving Average (SMA) strategies.
+
+Overall Goal and Strategy
+		Phase 1 - Strategy Testing and Validation:
+	•	Objective: Identify and test various technical indicators and trading strategies.
+	•	Current Focus: Backtesting SMA strategies on stock data.
+	•	Approach: Develop Python scripts to automate the backtesting process, calculate performance, and visualize results.
+		Phase 2 - Automated Trading Bot Development:
+	•	Objective: Build an automated trading bot based on the insights gained from strategy testing.
+	•	Strategy Integration: Incorporate successful strategies and indicators into the bot's decision-making algorithms.
+	•	Automation and Real-Time Processing: Ensure the bot can execute trades automatically based on predefined criteria and real-time market data.
+
+Achievements in Current Phase
+	•	Successful Implementation of SMA Strategy Backtesting:
+	•	Created robust scripts for backtesting various SMA strategies.
+	•	Added functions for performance evaluation and plotting.
+	•	Introduction of Consensus Mechanism:
+	•	Developed a consensus strategy to amalgamate insights from multiple SMA strategies.
+	•	Enhanced script capabilities to handle complex data processing.
+
+Current Status and Immediate Goals
+	•	Resolving Technical Issues: Addressing the NameError in the enhanced SMA backtesting script.
+	•	Completing SMA Strategy Analysis: Finalizing the SMA strategy testing to draw conclusive insights.
+	•	Preparing for Phase 2: Laying the groundwork for the integration of tested strategies into the automated trading bot.
+
+Long-Term Vision
+	•	Robust Automated Trading System: Develop a trading bot that can autonomously make profitable trading decisions based on a variety of technical indicators and market conditions.
+	•	Continuous Improvement and Adaptation: Regularly update the bot's algorithms to adapt to changing market dynamics and incorporate new strategies.
+	•	Risk Management and Compliance: Ensure the bot adheres to risk management rules and complies with regulatory requirements.
+
+
+Current stage overview:
+
+
+Objective: Develop a Python script to backtest Simple Moving Average (SMA) strategies on stock data, calculate performance, and generate strategy plots.
+
+Goals and Strategies
+Backtesting SMA Strategies:
+Test various SMA strategies by comparing short and long SMA periods.
+Analyze stock performance based on different SMA combinations.
+Performance Calculation:
+Calculate the performance of each SMA strategy.
+Implement two performance metrics: buy/sell all and unweighted.
+Consensus Strategy Implementation:
+Develop a consensus strategy combining various SMA strategies.
+Evaluate the collective performance of these strategies.
+Achievements
+SMA Strategy Functionality:
+Successfully implemented SMA strategy backtesting.
+Developed functions to add SMA indicators and calculate buy/sell signals.
+Performance Calculation:
+Created a function to calculate strategy performance.
+Integrated two types of performance calculations.
+Consensus Strategy:
+Established a consensus mechanism across multiple strategies.
+Enhanced the script to calculate and plot consensus strategy performance.
+Directory Structure
+Root Directory: Contains main script and other directories.
+Analysis Directory: Stores analysis-related modules.
+Data Directory: Dedicated to data storage and management.
+Plots Directory: Used for saving strategy plot outputs.
+Backtesting Sub-directory: Houses backtesting scripts and plots.
+Current Status and Issue
+Last Working Task: Implementing enhancements in the SMA backtesting script.
+Encountered Issue: Facing a NameError related to the data_with_consensus variable.
+Script Version: The issue arose in the enhanced script. An older version without the latest enhancements is available.
+Functionality and Development Notes
+SMA Strategy Development:
+The script efficiently handles multiple SMA strategies.
+Includes plotting functionality for individual and consensus strategies.
+Consensus Mechanism:
+A key enhancement to combine multiple strategies.
+Requires careful handling of data frames and indicators.
+Error Handling and Modular Design:
+The script includes error handling for module imports and data fetching.
+Modular design for easy readability and maintenance.
+Next Steps
+Continue to develop 'backtest_sma_strategy.py" to include a raw score in addition to the score that is calculated with assuming every trade sells all bought stocks.
+Enhancement and Testing:
+Continue enhancing the script for better performance and additional features.
+Rigorously test each component to ensure reliability.
+Conclusion
+This document provides a comprehensive overview of the SMA Strategy Backtesting Application project. The goal is to ensure the next developer can quickly understand the project scope, current status, and pending tasks for a smooth transition.
