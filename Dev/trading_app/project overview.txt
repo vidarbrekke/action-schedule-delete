@@ -2,7 +2,7 @@ Project Overview
 Project Title
 Automated Trading Bot Development
 Broad Objective
-Develop a comprehensive and automated trading bot. The development process involves testing various technical indicators and strategies to determine the most effective approach. The current focus is on implementing and backtesting Simple Moving Average (SMA) strategies.
+Develop a comprehensive and automated trading bot. The development process involves testing various technical indicators and strategies to determine the most effective approach. The current focus is on implementing and backtesting Simple Moving Average (SMA) strategies as a first step.
 
 Overall Goal and Strategy
 		Phase 1 - Strategy Testing and Validation:
@@ -20,10 +20,8 @@ Achievements in Current Phase
 	•	Added functions for performance evaluation and plotting.
 	•	Introduction of Consensus Mechanism:
 	•	Developed a consensus strategy to amalgamate insights from multiple SMA strategies.
-	•	Enhanced script capabilities to handle complex data processing.
 
 Current Status and Immediate Goals
-	•	Resolving Technical Issues: Addressing the NameError in the enhanced SMA backtesting script.
 	•	Completing SMA Strategy Analysis: Finalizing the SMA strategy testing to draw conclusive insights.
 	•	Preparing for Phase 2: Laying the groundwork for the integration of tested strategies into the automated trading bot.
 
@@ -38,36 +36,13 @@ Current stage overview:
 
 Objective: Develop a Python script to backtest Simple Moving Average (SMA) strategies on stock data, calculate performance, and generate strategy plots.
 
-Goals and Strategies
-Backtesting SMA Strategies:
-Test various SMA strategies by comparing short and long SMA periods.
-Analyze stock performance based on different SMA combinations.
-Performance Calculation:
-Calculate the performance of each SMA strategy.
-Implement two performance metrics: buy/sell all and unweighted.
-Consensus Strategy Implementation:
-Develop a consensus strategy combining various SMA strategies.
-Evaluate the collective performance of these strategies.
-Achievements
-SMA Strategy Functionality:
-Successfully implemented SMA strategy backtesting.
-Developed functions to add SMA indicators and calculate buy/sell signals.
-Performance Calculation:
-Created a function to calculate strategy performance.
-Integrated two types of performance calculations.
-Consensus Strategy:
-Established a consensus mechanism across multiple strategies.
-Enhanced the script to calculate and plot consensus strategy performance.
 Directory Structure
 Root Directory: Contains main script and other directories.
 Analysis Directory: Stores analysis-related modules.
-Data Directory: Dedicated to data storage and management.
+Data Directory: Dedicated to data storage and management. This is where our current database is ("trading_app.db)
 Plots Directory: Used for saving strategy plot outputs.
 Backtesting Sub-directory: Houses backtesting scripts and plots.
 Current Status and Issue
-Last Working Task: Implementing enhancements in the SMA backtesting script.
-Encountered Issue: Facing a NameError related to the data_with_consensus variable.
-Script Version: The issue arose in the enhanced script. An older version without the latest enhancements is available.
 Functionality and Development Notes
 SMA Strategy Development:
 The script efficiently handles multiple SMA strategies.
@@ -79,9 +54,11 @@ Error Handling and Modular Design:
 The script includes error handling for module imports and data fetching.
 Modular design for easy readability and maintenance.
 Next Steps
-Continue to develop 'backtest_sma_strategy.py" to include a raw score in addition to the score that is calculated with assuming every trade sells all bought stocks.
+Continue to refine '/backtesting/backtest_sma_strategy.py"
 Enhancement and Testing:
 Continue enhancing the script for better performance and additional features.
 Rigorously test each component to ensure reliability.
-Conclusion
-This document provides a comprehensive overview of the SMA Strategy Backtesting Application project. The goal is to ensure the next developer can quickly understand the project scope, current status, and pending tasks for a smooth transition.
+
+
+
+
