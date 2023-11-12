@@ -23,23 +23,29 @@ except ModuleNotFoundError as e:
     print(f"Failed to import a module: {e}")
     sys.exit(1)
 
-# SMA Strategy Function
+# SMA Strategy Function with Debugging
 def sma_strategy(data, short_period, long_period):
-    data_with_indicators = indicators.add_indicators(data).copy()  # Explicitly create a copy
+    print(f"DEBUG: Executing SMA strategy for periods {short_period} and {long_period}")
+    data_with_indicators = indicators.add_indicators(data).copy()
     signal_column = f'Signal_{short_period}_{long_period}'
     position_column = f'Position_{short_period}_{long_period}'
 
-    # Generate signals
+    # Generate buy/sell signals based on SMA crossover
     data_with_indicators[signal_column] = np.where(
         data_with_indicators[f'SMA_{short_period}'] > data_with_indicators[f'SMA_{long_period}'], 1, 0)
+    # Calculate position changes (buy/sell actions)
     data_with_indicators[position_column] = data_with_indicators[signal_column].diff()
+
+    print(f"DEBUG: Signals for {signal_column} generated.")
+    # Print a small sample of the data to verify signal generation
+    print(f"DEBUG: Sample data with signals for periods {short_period}, {long_period}:\n{data_with_indicators[[signal_column, position_column]].head()}")
 
     return data_with_indicators, signal_column, position_column
 
 
-
-# Performance Calculation Function
+# Performance Calculation Function with Debugging
 def calculate_performance(data, position_column):
+    print(f"DEBUG: Calculating performance for column: {position_column}")
     if 'close' not in data.columns:
         raise KeyError("'close' column not found in data.")
     positions = data[data[position_column] != 0]
@@ -49,12 +55,14 @@ def calculate_performance(data, position_column):
         if row[position_column] == 1 and not holding:
             buy_price = row['close']
             holding = True
+            print(f"DEBUG: Buying at {buy_price}")
         elif row[position_column] == -1 and holding:
             sell_price = row['close']
             profit += (sell_price - buy_price)
             holding = False
+            print(f"DEBUG: Selling at {sell_price}, Profit: {sell_price - buy_price}")
+    print(f"DEBUG: Total Profit: {profit}")
     return profit
-
 
 
 # Plotting Function
@@ -94,22 +102,57 @@ def plot_strategy(data, symbol, strategy_name, performance_score, raw_score, sho
 
 
 
-# Consensus Strategy Function
-def consensus_strategy(data, strategies):
-    consensus_signal = np.zeros(len(data))
+# Consensus Strategy Function with Rolling Window
+def consensus_strategy(data, strategies, window_hours):
+    print(f"DEBUG: Executing consensus strategy with a {window_hours}-hour rolling window")
+
+    # Ensure the index of 'data' is a DateTimeIndex
+    data.index = pd.to_datetime(data.index)
+
+    # Convert window hours to a string representing a time delta
+    window = f'{window_hours}H'
+
+    # Create an empty DataFrame to store rolling signals
+    rolling_signals = pd.DataFrame(index=data.index)
+
+    # Iterate over each strategy and calculate rolling signals
     for strategy in strategies:
-        consensus_signal += (data[strategy['signal_column']] > 0).astype(int)
+        signal_column = strategy['signal_column']
 
+        # Convert strategy signals to binary (1 for buy, -1 for sell, 0 for no signal)
+        binary_signals = np.where(data[signal_column] > 0, 1, 
+                                  np.where(data[signal_column] < 0, -1, 0))
+        binary_signals = pd.Series(binary_signals, index=data.index)  # Convert to pandas Series
+
+        # Calculate the rolling sum of signals using a time-based window
+        rolling_signals[signal_column] = binary_signals.rolling(window).sum()
+
+    # Sum the signals across all strategies
+    data['Consensus_Signal'] = rolling_signals.sum(axis=1)
+    
+    # Determine consensus signals
     consensus_threshold = len(strategies) // 2
-    data['Consensus_Signal'] = np.where(consensus_signal > consensus_threshold, 1, 0)
+    data['Consensus_Signal'] = np.where(abs(data['Consensus_Signal']) > consensus_threshold, 
+                                        np.sign(data['Consensus_Signal']), 0)
 
-    # Eliminate consecutive duplicate signals
-    data['Consensus_Signal'] = data['Consensus_Signal'].where(data['Consensus_Signal'].shift() != data['Consensus_Signal'], 0)
-
+    # Calculate positions based on consensus signals
     data['Consensus_Position'] = data['Consensus_Signal'].diff()
+
     return data
 
 
+
+# Backtesting Function for SMA with Debugging
+def backtest_sma(symbol, start_date, end_date, short_period, long_period):
+    print(f"DEBUG: Backtesting SMA strategy for {symbol} from {start_date} to {end_date}")
+    data = fetch_data(symbol, start_date, end_date)
+    data_with_sma, signal_column, position_column = sma_strategy(data, short_period, long_period)
+    performance = calculate_performance(data_with_sma, position_column)
+    raw_score = calculate_raw_score(data_with_sma, position_column)
+    plot_path = plot_strategy(data_with_sma, symbol, f"SMA_{short_period}_{long_period}", performance, raw_score, short_period, long_period, plots_dir)
+    print(f"DEBUG: Backtest Result for {symbol} ({short_period}, {long_period}): {performance}, Raw Score: {raw_score}")
+    print(f"DEBUG: Plot saved as: {plot_path}")
+    return performance, plot_path
 
 def calculate_raw_score(data, position_column):
     if 'close' not in data.columns:
@@ -120,15 +163,6 @@ def calculate_raw_score(data, position_column):
     return total_return
 
 
-
-# Backtesting Function for SMA
-def backtest_sma(symbol, start_date, end_date, short_period, long_period):
-    data = fetch_data(symbol, start_date, end_date)
-    data_with_sma, signal_column, position_column = sma_strategy(data, short_period, long_period)
-    performance = calculate_performance(data_with_sma, position_column)
-    plot_path = plot_strategy(data_with_sma, symbol, f"SMA_{short_period}_{long_period}", performance, short_period, long_period, plots_dir)
-    return performance, plot_path
-
 # Main Execution
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Backtest SMA Strategy')
@@ -137,7 +171,7 @@ if __name__ == '__main__':
     symbol = args.symbol
     start_date = '2022-04-01'
     end_date = '2023-04-01'
-    
+
     # Fetch data once and use it for all strategies
     data = fetch_data(symbol, start_date, end_date)
 
@@ -149,21 +183,27 @@ if __name__ == '__main__':
     for short_period in short_periods:
         for long_period in long_periods:
             if short_period < long_period:
-                data_with_sma, signal_column, position_column = sma_strategy(data, short_period, long_period)
+                data, signal_column, position_column = sma_strategy(data, short_period, long_period)
                 
                 # Calculate performance based on the SMA strategy
-                performance = calculate_performance(data_with_sma, position_column)
+                performance = calculate_performance(data, position_column)
                 
                 # Calculate raw score
-                raw_score = calculate_raw_score(data_with_sma, position_column)
+                raw_score = calculate_raw_score(data, position_column)
 
                 # Plotting and other operations that use 'performance'
-                plot_path = plot_strategy(data_with_sma, symbol, f"SMA_{short_period}_{long_period}", performance, raw_score, short_period, long_period, plots_dir)
+                plot_path = plot_strategy(data, symbol, f"SMA_{short_period}_{long_period}", performance, raw_score, short_period, long_period, plots_dir)
                 print(f"Backtest Result for {symbol} ({short_period}, {long_period}): {performance}, Raw Score: {raw_score}")
                 print(f"Plot saved as: {plot_path}")
 
+                # Add strategy details for consensus
+                strategies.append({'short_period': short_period, 'long_period': long_period, 'signal_column': signal_column})
+
+    # Define rolling window for consensus
+    window_hours = 48  # Set the rolling window size in hours
+
     # Execute consensus strategy
-    data_with_consensus = consensus_strategy(data, strategies)
+    data_with_consensus = consensus_strategy(data, strategies, window_hours)
     consensus_performance = calculate_performance(data_with_consensus, 'Consensus_Position')
 
     # Calculate raw score for consensus (if applicable)
