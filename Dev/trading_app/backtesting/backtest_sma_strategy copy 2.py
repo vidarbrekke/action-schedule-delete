@@ -29,24 +29,20 @@ except ModuleNotFoundError as e:
 
 
 def sma_strategy(data, short_period, long_period, cooldown):
-    # Copying data and adding indicators (if any)
     data = indicators.add_indicators(data.copy())
+    signal_column = f'Signal_{short_period}_{long_period}'
+    position_column = f'Position_{short_period}_{long_period}'
+    cooldown_column = f'Cooldown_{short_period}_{long_period}'
+    data[cooldown_column] = 0
 
-    # Calculate SMAs
+    # Calculate SMA signals based on SMA crossings
     data['SMA_short'] = data['close'].rolling(window=short_period).mean()
     data['SMA_long'] = data['close'].rolling(window=long_period).mean()
-
-    data['SMA_short'].bfill(inplace=True)  # Backward fill for SMA_short
-    data['SMA_long'].bfill(inplace=True)   # Backward fill for SMA_long
-
-
- 
-    # Generate signals based on SMA crossovers
-    signal_column = f'Signal_{short_period}_{long_period}'
     data[signal_column] = np.where(data['SMA_short'] > data['SMA_long'], 1, 
                                   np.where(data['SMA_short'] < data['SMA_long'], -1, 0))
+    
 
-    # Initialize cooldown column
+    # Ensure this line correctly initializes the cooldown column for each strategy
     cooldown_column = f'Cooldown_{short_period}_{long_period}'
     data[cooldown_column] = 0
 
@@ -58,15 +54,10 @@ def sma_strategy(data, short_period, long_period, cooldown):
         elif data.at[i, signal_column] != 0:
             data.at[i, cooldown_column] = cooldown
 
-    # Debugging: Print sample SMA values and generated signals
-    print(data[['close', 'SMA_short', 'SMA_long', signal_column]].head(10))
-
- 
-    position_column = f'Position_{short_period}_{long_period}'
+    # Determine position changes
     data[position_column] = data[signal_column].diff()
 
     return data, signal_column, position_column, cooldown_column
-
 
 def calculate_performance_metrics(data, position_column):
     if 'close' not in data.columns:
@@ -121,13 +112,6 @@ def calculate_performance_metrics(data, position_column):
 
 
 def plot_strategy(data, symbol, strategy_name, metrics, short_period, long_period, output_dir):
-    
-    # Inside plot_strategy
-    if strategy_name == 'Consensus_Strategy':
-        print("Plotting Consensus Strategy...")
-        print(data[['date', 'Consensus_Position']].dropna().head())  # Check first few non-null entries
-
-
     plt.figure(figsize=(15, 8))
     date_column = data.columns[0]
     data[date_column] = pd.to_datetime(data[date_column])
@@ -142,10 +126,6 @@ def plot_strategy(data, symbol, strategy_name, metrics, short_period, long_perio
         position_column = f'Position_{short_period}_{long_period}'  # Use position column for plotting
     else:
         position_column = 'Consensus_Position'  # For consensus strategy
-
-    if strategy_name == 'Consensus_Strategy':
-        print(data[['date', 'Consensus_Position']].head())  # Print first few entries
-   
 
     # Plot buy and sell signals
     plt.scatter(data[date_column][data[position_column] == 1], data['close'][data[position_column] == 1], label='Buy Signal', marker='^', color='green')
@@ -176,44 +156,36 @@ def plot_strategy(data, symbol, strategy_name, metrics, short_period, long_perio
     return filepath
 
 
+
 def consensus_strategy(data, strategies, global_cooldown):
-    # Initialize consensus signal column
     data['Consensus_Signal'] = 0
+    data['Global_Cooldown'] = 0
 
     # Aggregate signals from all strategies
-
-    # Diagnostic code to examine individual strategy signals
     for strategy in strategies:
+        print(strategy)  # This will show the contents of each strategy dictionary
+
         signal_column = strategy['signal_column']
-        print(f"Signal Column: {signal_column}")
-        print(data[[signal_column]].dropna().head(10))  # Display the first 10 non-null signal values
+        cooldown_column = strategy['cooldown_column']
+        data['Consensus_Signal'] += np.where(data[cooldown_column] == 0, data[signal_column], 0)
 
-        # Add 1 for positive signals, subtract 1 for negative signals
-        data['Consensus_Signal'] += np.where(data[signal_column] > 0, 1, 
-                                             np.where(data[signal_column] < 0, -1, 0))
-
-    # Determine consensus action based on majority
+    # Apply majority rule for consensus signal
     consensus_threshold = len(strategies) // 2
-    data['Consensus_Signal'] = np.where(data['Consensus_Signal'] > consensus_threshold, 1, 
-                                        np.where(data['Consensus_Signal'] < -consensus_threshold, -1, 0))
+    data['Consensus_Decision'] = np.where(data['Consensus_Signal'] > consensus_threshold, 1, 
+                                          np.where(data['Consensus_Signal'] < -consensus_threshold, -1, 0))
 
-    # Apply cooldown logic
-    cooldown_counter = 0
-    for i in range(len(data)):
-        if cooldown_counter > 0:
-            data.at[i, 'Consensus_Signal'] = 0
-            cooldown_counter -= 1
-        elif data.at[i, 'Consensus_Signal'] != 0:
-            cooldown_counter = global_cooldown
+    # Apply global cooldown logic
+    for i in range(1, len(data)):
+        if data.at[i - 1, 'Global_Cooldown'] > 0:
+            data.at[i, 'Global_Cooldown'] = data.at[i - 1, 'Global_Cooldown'] - 1
+            data.at[i, 'Consensus_Decision'] = 0
+        elif abs(data.at[i, 'Consensus_Decision']) == 1:
+            data.at[i, 'Global_Cooldown'] = global_cooldown
 
-    # Calculate consensus positions to reflect valid trading actions
-    data['Consensus_Position'] = data['Consensus_Signal'].diff()
+    data['Consensus_Position'] = data['Consensus_Decision'].diff()
+
 
     return data
-
-
-
-
 
 
 def backtest_sma(symbol, start_date, end_date, short_periods, long_periods, cooldown):

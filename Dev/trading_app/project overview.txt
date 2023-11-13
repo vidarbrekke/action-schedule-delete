@@ -77,3 +77,13 @@ Once all the SMA strategies have been evaluated, one will count how many of the 
 There is also a cooldown parameter which tells the consensus algorithm to halt trading for a specific period of time after a trade has been made, as to not perform multiple trades in short succession.
 
 
+
+
+Should sell if it drops 4%
+
+Look into pairs trading:
+Pairs trading is a market-neutral trading strategy that seeks to take advantage of temporary anomalies between two related stocks or financial instruments. By going long on one stock and short on another, the strategy aims to profit regardless of the direction in which the market moves. The success of this strategy hinges on identifying pairs that have historically moved together, implying a strong correlation. When these pairs deviate from their historical norm (i.e., one stock surges while the other lags), a trading opportunity arises.
+
+Understanding Cointegration
+Before diving deep, it’s essential to understand the concept of cointegration. While correlation measures the linear relationship between two series, cointegration delves deeper, ensuring that the spread between the two series is stationary, i.e., it revolves around a mean. In simpler terms, even if two stocks are correlated, they might not be cointegrated. For pairs trading, we’re more interested in cointegrated pairs.
+
