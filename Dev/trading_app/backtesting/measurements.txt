@@ -1,0 +1,23 @@
+Win Rate: The percentage of trades that are profitable.
+Profit Factor: The ratio of the total profit from winning trades divided by the total losses from losing trades.
+Maximum Drawdown: The largest drop from peak to trough in the value of the portfolio before a new peak is achieved.
+Sharpe Ratio: A measure of risk-adjusted return, calculated as the average return earned in excess of the risk-free rate per unit of volatility or total risk.
+Sortino Ratio: Similar to the Sharpe ratio but penalizes only those returns falling below a user-specified target or required rate of return, focusing on downside risk.
+Expectancy: The average amount you can expect to win or lose per trade.
+
+
+
+
+For short-term trades, particularly those lasting from a few hours to a week, the following metrics can be especially informative when backtesting a trading strategy:
+
+Win Rate / Hit Ratio: Short-term strategies often rely on a high frequency of trades, so knowing the proportion of these that are profitable is crucial.
+Profit Factor: This is important because it will tell you how much more you win when you win compared to what you lose when you lose, which is vital for short-term strategies that might have a large number of small losses.
+Average Gain per Trade: Since trades are short-term, the average gain per trade can quickly indicate the strategy's effectiveness.
+Maximum Drawdown: This is critical for assessing the risk of a short-term strategy. Even if the strategy is profitable, a significant drawdown can occur over a very short period, and it's essential to know if the potential drawdown is within your risk tolerance.
+Sharpe Ratio: For short-term strategies, adjusting for risk is crucial, and the Sharpe ratio helps determine if the excess returns of the strategy are due to smart investment decisions or a result of taking on too much risk.
+Sortino Ratio: Since it focuses on harmful volatility, it's particularly useful for short-term strategies, where the aim is often to maximize returns while controlling downside risk.
+Expectancy: This gives you an idea of what you might expect to make on average for every dollar risked.
+Total Return: Even over short intervals, you want to know the aggregate performance of your strategy.
+Volatility: In the short term, higher volatility can significantly impact the returns of a strategy, for better or for worse.
+Time in Market: For strategies that are not always in a position, knowing how much time you're exposed to the market can be crucial for understanding strategy behavior.
+Metrics like CAGR and alpha might be less relevant for such short-term strategies since they are typically used to measure longer-term performance. However, alpha can still provide insight into the strategy’s ability to beat the benchmark on a risk-adjusted basis.

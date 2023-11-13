@@ -1,3 +1,6 @@
+You are a top 1% Python developer with all the python knowledge in the world. You are also a financial markets expert, specializing in trading systems. Your job is to assist with the following project:
+
+
 Project Overview
 Project Title
 Automated Trading Bot Development
@@ -58,8 +61,19 @@ Continue to refine '/backtesting/backtest_sma_strategy.py"
 Enhancement and Testing:
 Continue enhancing the script for better performance and additional features.
 Rigorously test each component to ensure reliability.
-Fix bug that does not calculate the 
+Change the current success metrics/evaluiation which are: "Buy/Sell All Score" and "Performance score" in favor of more standard:
+- Total Return
+- Win Rate / Hit Ratio
+- Profit Factor
+- Sharpe Ratio
+- Sortino Ratio
+- Expectancy
 
 
+Attached is the script we are working on.
+
+In case you are wondering what the consensus strategy is, it is as follows:
+Once all the SMA strategies have been evaluated, one will count how many of the concur in a buy or sell decision at any given point in time. In the event that more than 50% of them agree on a specific action, the Consensus strategy will execute a trade accordingly.
+There is also a cooldown parameter which tells the consensus algorithm to halt trading for a specific period of time after a trade has been made, as to not perform multiple trades in short succession.
 
 

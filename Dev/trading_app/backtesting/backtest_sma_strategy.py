@@ -7,12 +7,17 @@ from datetime import datetime
 import sys
 import argparse
 
-# Define root and subdirectories for organizing the project structure.
+# Define root, analysis, data, and plots directories
 root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 analysis_dir = os.path.join(root_dir, 'analysis')
 data_dir = os.path.join(root_dir, 'data')
 plots_dir = os.path.join(root_dir, 'backtesting', 'plots')
-sys.path.extend([analysis_dir, data_dir])
+sys.path.append(analysis_dir)
+sys.path.append(data_dir)
+
+# Create the 'plots' directory if it doesn't exist
+if not os.path.exists(plots_dir):
+    os.makedirs(plots_dir)
 
 # Import custom modules. Handle ModuleNotFoundError for clean exit if custom modules are missing.
 try:
@@ -24,96 +29,114 @@ except ModuleNotFoundError as e:
 
 def sma_strategy(data, short_period, long_period):
     """
-    Apply SMA (Simple Moving Average) strategy to the given stock data.
-    This function adds SMA indicators to the data and generates buy/sell signals based on SMA crossover.
+    Implement the SMA strategy for a given stock data.
 
-    Args:
-    - data: DataFrame containing stock data
-    - short_period: Integer for short period SMA
-    - long_period: Integer for long period SMA
-
-    Returns:
-    - Updated DataFrame with SMA indicators and buy/sell signals
-    """
-    data = indicators.add_indicators(data.copy())
-    signal_column = f'Signal_{short_period}_{long_period}'
-    position_column = f'Position_{short_period}_{long_period}'
-
-    # Generate buy/sell signals based on SMA crossover
-    data[signal_column] = np.where(data[f'SMA_{short_period}'] > data[f'SMA_{long_period}'], 1, 0)
-    # Calculate position changes (1 for buy, -1 for sell, 0 for hold)
-    data[position_column] = data[signal_column].diff()
-    return data, signal_column, position_column
-
-def calculate_performance(data, position_column):
-    """
-    Calculate the overall profit/loss based on the trading strategy.
-
-    Args:
-    - data: DataFrame containing stock data with buy/sell signals
-    - position_column: String name of the column containing position signals
+    Parameters:
+    data (DataFrame): DataFrame containing stock price data.
+    short_period (int): Period for the short-term SMA.
+    long_period (int): Period for the long-term SMA.
 
     Returns:
-    - Float representing the total profit or loss
+    DataFrame: DataFrame with additional columns for SMA values, signals, and positions.
     """
+    # Check if 'close' column exists in the data
     if 'close' not in data.columns:
         raise KeyError("'close' column not found in data.")
-    
-    profit = 0
-    holding = False
-    for _, row in data[data[position_column] != 0].iterrows():
-        # Calculate profit for each buy-sell cycle
-        if row[position_column] == 1 and not holding:
-            buy_price = row['close']
-            holding = True
-        elif row[position_column] == -1 and holding:
-            profit += row['close'] - buy_price
-            holding = False
-    return profit
 
-def plot_strategy(data, symbol, strategy_name, buy_sell_all_score, performance_score, short_period, long_period, output_dir, cooldown=None):
-    """
-    Plot the stock price, SMA lines, and buy/sell signals.
+    # Calculate the short-term and long-term SMA
+    data[f'SMA_{short_period}'] = data['close'].rolling(window=short_period).mean()
+    data[f'SMA_{long_period}'] = data['close'].rolling(window=long_period).mean()
 
-    Args:
-    - data: DataFrame containing stock data and signals
-    - symbol: Stock symbol
-    - strategy_name: Name of the strategy used
-    - buy_sell_all_score: Score calculated based on the strategy
-    - performance_score: Raw score of the strategy's performance
-    - short_period, long_period: SMA periods
-    - output_dir: Directory to save the plot
-    - cooldown: Cooldown period for trades (optional)
+    # Generate buy/sell signals based on SMA crossover
+    data['Signal'] = np.where(data[f'SMA_{short_period}'] > data[f'SMA_{long_period}'], 1, 
+                             np.where(data[f'SMA_{short_period}'] < data[f'SMA_{long_period}'], -1, 0))
 
-    Returns:
-    - Path to the saved plot file
-    """
+    # Track position changes
+    data['Position'] = data['Signal'].diff()
+    position_column = f'Position_{short_period}_{long_period}'
+    data[position_column] = data['Signal'].diff()
+
+    signal_column = f'Signal_{short_period}_{long_period}'
+    position_column = f'Position_{short_period}_{long_period}'
+    data[signal_column] = np.where(data[f'SMA_{short_period}'] > data[f'SMA_{long_period}'], 1, 
+                                   np.where(data[f'SMA_{short_period}'] < data[f'SMA_{long_period}'], -1, 0))
+   
+    data[position_column] = data[signal_column].diff()
+    return data
+
+
+def calculate_performance_metrics(data, position_column):
+    if 'close' not in data.columns:
+        raise KeyError("'close' column not found in data.")
+
+    if position_column not in data.columns:
+        raise KeyError(f"'{position_column}' column not found in data.")
+
+    data['daily_return'] = data['close'].pct_change()
+    data['strategy_return'] = data['daily_return'] * data[position_column].shift()
+
+    total_return = data['strategy_return'].cumsum().iloc[-1]
+
+
+    trades = data[position_column].diff().abs()
+    wins = ((data['strategy_return'] > 0) & trades).sum()
+    total_trades = trades.sum()
+    win_rate = wins / total_trades if total_trades > 0 else 0
+
+    gross_profit = data[data['strategy_return'] > 0]['strategy_return'].sum()
+    gross_loss = -data[data['strategy_return'] < 0]['strategy_return'].sum()
+    profit_factor = gross_profit / gross_loss if gross_loss > 0 else 0
+
+    sharpe_ratio = data['strategy_return'].mean() / data['strategy_return'].std() * np.sqrt(252)
+
+    negative_return = data[data['strategy_return'] < 0]['strategy_return']
+    sortino_ratio = data['strategy_return'].mean() / negative_return.std() * np.sqrt(252)
+
+    expectancy = (win_rate * gross_profit) - ((1 - win_rate) * gross_loss)
+
+    metrics = {
+        'total_return': total_return,
+        'win_rate': win_rate,
+        'profit_factor': profit_factor,
+        'sharpe_ratio': sharpe_ratio,
+        'sortino_ratio': sortino_ratio,
+        'expectancy': expectancy
+    }
+
+    return metrics
+
+def plot_strategy(data, symbol, strategy_name, metrics, short_period, long_period, output_dir):
     plt.figure(figsize=(15, 8))
-    date_column = data.columns[0]
-    data[date_column] = pd.to_datetime(data[date_column])
+    
+    # Plotting the close prices
+    plt.plot(data.index, data['close'], label='Price', alpha=0.7, color='lightblue')
 
-    # Plot price line
-    plt.plot(data[date_column], data['close'], label='Price', alpha=0.7, color='lightblue')
-
-    # Plot SMA lines if applicable
+    # Plotting SMA lines if applicable
     if short_period and long_period:
-        plt.plot(data[date_column], data[f'SMA_{short_period}'], label=f'SMA {short_period}', alpha=0.7)
-        plt.plot(data[date_column], data[f'SMA_{long_period}'], label=f'SMA {long_period}', alpha=0.7)
+        plt.plot(data.index, data[f'SMA_{short_period}'], label=f'SMA {short_period}', alpha=0.7)
+        plt.plot(data.index, data[f'SMA_{long_period}'], label=f'SMA {long_period}', alpha=0.7)
 
-    # Plot buy/sell signals
-    position_column = f'Position_{short_period}_{long_period}' if short_period and long_period else 'Consensus_Position'
-    plt.scatter(data[date_column][data[position_column] == 1], data['close'][data[position_column] == 1], label='Buy Signal', marker='^', color='green')
-    plt.scatter(data[date_column][data[position_column] == -1], data['close'][data[position_column] == -1], label='Sell Signal', marker='v', color='red')
+    # Plotting buy/sell signals
+    plt.scatter(data.index[data['Position'] == 1], data['close'][data['Position'] == 1], label='Buy Signal', marker='^', color='green')
+    plt.scatter(data.index[data['Position'] == -1], data['close'][data['Position'] == -1], label='Sell Signal', marker='v', color='red')
 
-    # Include cooldown in plot title if applicable
-    cooldown_text = f' (Cooldown: {cooldown})' if cooldown is not None else ''
-    plt.title(f"{symbol} {strategy_name}{cooldown_text} Strategy (Buy/Sell All Score: {buy_sell_all_score}, Performance: {performance_score})")
+    # Adding metrics to the plot with conditional coloring
+    vertical_position = 0.99
+    for key, value in metrics.items():
+        # Define favorable and unfavorable conditions
+        color = 'green' if value > 0 else 'red'
+        
+        # Plot each metric with its color
+        plt.text(0.01, vertical_position, f"{key}: {value:.2f}", transform=plt.gca().transAxes, verticalalignment='top', color=color, fontsize=14)
+        vertical_position -= 0.05  # Adjust this value as needed to avoid overlap
+
+    # Setting titles and labels
+    plt.title(f"{symbol} - {strategy_name}")
     plt.xlabel('Date')
     plt.ylabel('Price')
     plt.legend()
     plt.grid(True)
-    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m/%d/%y'))
-    plt.gca().xaxis.set_major_locator(mdates.WeekdayLocator(interval=1))
+    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
     plt.xticks(rotation=45)
 
     # Save plot to file
@@ -121,103 +144,89 @@ def plot_strategy(data, symbol, strategy_name, buy_sell_all_score, performance_s
     filepath = os.path.join(output_dir, filename)
     plt.savefig(filepath, dpi=300)
     plt.close()
+
     return filepath
 
-# Consensus Strategy Function
+
 def consensus_strategy(data, strategies, cooldown):
     """
-    Apply a consensus strategy across multiple trading strategies.
+    Implement a consensus strategy based on multiple SMA strategies.
 
-    Args:
-    - data: DataFrame containing stock data and signals
-    - strategies: List of strategy configurations
-    - cooldown: Integer representing the cooldown period after each trade
+    Parameters:
+    data (DataFrame): DataFrame containing stock price data and strategy signals.
+    strategies (list): List of dictionaries containing strategy details (signal columns).
+    cooldown (int): Cooldown period after executing a trade.
 
     Returns:
-    - DataFrame with consensus signals and positions
+    DataFrame: DataFrame with an additional column for the consensus strategy signals.
     """
-    # Initialize consensus signal
-    consensus_signal = np.zeros(len(data))
+    # Initialize consensus signal column
+    data['Consensus_Signal'] = 0
     for strategy in strategies:
-        # Aggregate signals from all strategies
-        signal_data = np.where(data[strategy['signal_column']] > 0, 1, 
-                               np.where(data[strategy['signal_column']] < 0, -1, 0))
-        consensus_signal += signal_data
+        signal_column = strategy['signal_column']
+  
+      # Aggregate signals from all strategies
+        data['Consensus_Signal'] += np.where(data[signal_column] > 0, 1, 
+                                             np.where(data[signal_column] < 0, -1, 0))
 
-    # Set consensus threshold based on the number of strategies
+    # Determine consensus action based on majority
     consensus_threshold = len(strategies) // 2
-    data['Consensus_Signal'] = np.where(consensus_signal > consensus_threshold, 1, 
-                                        np.where(consensus_signal < -consensus_threshold, -1, 0))
+    data['Consensus_Signal'] = np.where(data['Consensus_Signal'] > consensus_threshold, 1, 
+                                        np.where(data['Consensus_Signal'] < -consensus_threshold, -1, 0))
 
     # Apply cooldown logic
     cooldown_counter = 0
     for i in range(len(data)):
         if cooldown_counter > 0:
-            # Invalidate the current signal during cooldown
             data.at[i, 'Consensus_Signal'] = 0
             cooldown_counter -= 1
         elif data.at[i, 'Consensus_Signal'] != 0:
-            # Reset cooldown counter on a new trade action
             cooldown_counter = cooldown
 
-    # Calculate position changes
+    # Adjusting consensus positions to reflect valid trading actions
     data['Consensus_Position'] = data['Consensus_Signal'].diff()
+
     return data
-
-def calculate_raw_score(data, position_column):
-    """
-    Calculate the raw score based on the sum of buy and sell signal values.
-
-    Args:
-    - data: DataFrame containing stock data and signals
-    - position_column: Name of the column containing position signals
-
-    Returns:
-    - Float representing the raw score
-    """
-    buy_signals = data[data[position_column] == 1]
-    sell_signals = data[data[position_column] == -1]
-    total_return = sell_signals['close'].sum() - buy_signals['close'].sum()
-    return total_return
 
 def backtest_sma(symbol, start_date, end_date, short_periods, long_periods, cooldown):
     """
     Backtest SMA strategies and consensus strategy on given stock data.
 
-    Args:
-    - symbol: Stock symbol
-    - start_date, end_date: Date range for backtesting
-    - short_periods, long_periods: Lists of SMA periods
-    - cooldown: Cooldown period for consensus strategy
+    Parameters:
+    symbol (str): Stock symbol to backtest.
+    start_date (str): Start date of the backtesting period.
+    end_date (str): End date of the backtesting period.
+    short_periods (list): List of short SMA periods.
+    long_periods (list): List of long SMA periods.
+    cooldown (int): Cooldown period for the consensus strategy.
 
-    Prints results and saves plot for each strategy.
     """
+    # Fetch stock data
     data = fetch_data(symbol, start_date, end_date)
+    
     strategies = []
-
-    # Apply SMA strategies and gather results
     for short_period in short_periods:
         for long_period in long_periods:
             if short_period < long_period:
-                sma_data, signal_column, position_column = sma_strategy(data, short_period, long_period)
-                data[signal_column] = sma_data[signal_column]  # Update main data with new signal
-                data[position_column] = sma_data[position_column]  # Update main data with new position
-
-                buy_sell_all_score = calculate_performance(sma_data, position_column)
-                performance_score = calculate_raw_score(sma_data, position_column)
-                plot_path = plot_strategy(sma_data, symbol, f"SMA_{short_period}_{long_period}", buy_sell_all_score, performance_score, short_period, long_period, plots_dir)
-                print(f"Result for {symbol} ({short_period}, {long_period}): Buy/Sell All={buy_sell_all_score}, Performance={performance_score}, Plot={plot_path}")
+                # Apply SMA strategy and update 'data'
+                sma_data = sma_strategy(data, short_period, long_period)
+        
+                signal_column = f'Signal_{short_period}_{long_period}'
+                position_column = f'Position_{short_period}_{long_period}'
                 
-                strategies.append({'short_period': short_period, 'long_period': long_period, 'signal_column': signal_column})
+                metrics = calculate_performance_metrics(sma_data, position_column)
 
- # Apply consensus strategy to the data, using the strategies list and the specified cooldown period
-    data_with_consensus = consensus_strategy(data, strategies, cooldown)    
-    # Calculate the Buy/Sell All score and the raw performance score for the consensus strategy
-    consensus_buy_sell_all_score = calculate_performance(data_with_consensus, 'Consensus_Position')
-    consensus_performance_score = calculate_raw_score(data_with_consensus, 'Consensus_Position')
-    # Plot the consensus strategy results
-    consensus_plot_path = plot_strategy(data_with_consensus, symbol, 'Consensus_Strategy', consensus_buy_sell_all_score, consensus_performance_score, None, None, plots_dir, cooldown=cooldown)
-    print(f"Consensus Result for {symbol}: Buy/Sell All={consensus_buy_sell_all_score}, Performance={consensus_performance_score}, Plot={consensus_plot_path}")
+                # Plot and save the strategy results
+                plot_filepath = plot_strategy(sma_data, symbol, f'SMA_{short_period}_{long_period}', metrics, short_period, long_period, plots_dir)
+                print(f"Plot saved to {plot_filepath}")
+
+                strategies.append({'signal_column': signal_column, 'position_column': position_column})
+
+    # Apply and evaluate the consensus strategy
+    consensus_data = consensus_strategy(data.copy(), strategies, cooldown)
+    consensus_metrics = calculate_performance_metrics(consensus_data, 'Consensus_Position')
+    consensus_plot_filepath = plot_strategy(consensus_data, symbol, 'Consensus_Strategy', consensus_metrics, None, None, plots_dir)
+    print(f"Consensus plot saved to {consensus_plot_filepath}")
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Backtest SMA Strategy')
@@ -226,6 +235,6 @@ if __name__ == '__main__':
     symbol = args.symbol
     start_date, end_date = '2022-04-01', '2023-04-01'
     short_periods, long_periods = [10, 20], [50, 100]
-    cooldown = 10  # Cooldown period
-    
+    cooldown = 50  # Example cooldown period
+
     backtest_sma(symbol, start_date, end_date, short_periods, long_periods, cooldown)
