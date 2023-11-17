@@ -1,0 +1,43 @@
+{
+    "tickers": ["AAPL", "MSFT", "GOOG", "AMD"],
+    "initial_balance": 1000,
+    "strategies": {
+      "SMA_20_50": {
+        "short_window": 20,
+        "long_window": 50,
+        "stop_loss_percent": 0.03,
+        "max_drawdown_percent": 0.15,
+        "risk_per_trade_percent": 0.01,
+        "cooldown_period_minutes": 30,
+        "first_trade_limit_percent": 0.25
+      },
+      "SMA_20_30": {
+        "short_window": 20,
+        "long_window": 30,
+        "stop_loss_percent": 0.03,
+        "max_drawdown_percent": 0.15,
+        "risk_per_trade_percent": 0.01,
+        "cooldown_period_minutes": 30,
+        "first_trade_limit_percent": 0.25
+      },
+      "SMA_10_50": {
+        "short_window": 10,
+        "long_window": 50,
+        "stop_loss_percent": 0.03,
+        "max_drawdown_percent": 0.15,
+        "risk_per_trade_percent": 0.01,
+        "cooldown_period_minutes": 30,
+        "first_trade_limit_percent": 0.25
+      },
+      "SMA_10_30": {
+        "short_window": 10,
+        "long_window": 30,
+        "stop_loss_percent": 0.03,
+        "max_drawdown_percent": 0.15,
+        "risk_per_trade_percent": 0.01,
+        "cooldown_period_minutes": 30,
+        "first_trade_limit_percent": 0.25
+      }
+    }
+  }
+  
