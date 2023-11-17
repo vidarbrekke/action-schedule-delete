@@ -1,5 +1,5 @@
 {
-    "tickers": ["AAPL","GOOG", "AMD"],
+    "tickers": ["AAPL","GOOG", "AMD", "nvda", "TSLA", "PYPL"],
     "initial_balance": 1000,
     "strategies": {
       "SMA_20_50": {

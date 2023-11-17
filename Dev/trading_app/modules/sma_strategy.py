@@ -16,29 +16,19 @@ def calculate_sma(data, window):
 
     return data['close'].rolling(window=window, min_periods=1).mean()
 
-def generate_sma_signals(data, short_window, long_window):
-    """
-    Generates buy and sell signals based on SMA crossovers.
-    Args:
-    data (pd.DataFrame): DataFrame containing stock price data.
-    short_window (int): Window size for the short SMA.
-    long_window (int): Window size for the long SMA.
-    Returns:
-    pd.DataFrame: DataFrame with SMA values and buy/sell signals.
-    """
-    if short_window <= 0 or long_window <= 0:
-        raise ValueError("Window sizes must be positive integers.")
-    if short_window >= long_window:
-        raise ValueError("Short window must be smaller than long window.")
 
-    data = data.copy()
+def generate_sma_signals(data, short_window, long_window):
+    # Reset index to ensure it starts from 0 and avoid KeyError
+    data = data.reset_index(drop=True)
+    
     data['short_sma'] = calculate_sma(data, short_window)
     data['long_sma'] = calculate_sma(data, long_window)
     data['signal'] = 0
-    data['signal'] = (data['short_sma'] > data['long_sma']).astype(int)
+
+    for i in range(1, len(data)):
+        if data['short_sma'][i] > data['long_sma'][i] and data['short_sma'][i-1] <= data['long_sma'][i-1]:
+            data.at[i, 'signal'] = 1  # Buy
+        elif data['short_sma'][i] < data['long_sma'][i] and data['short_sma'][i-1] > data['long_sma'][i-1]:
+            data.at[i, 'signal'] = -1  # Sell
 
     return data
-
-# Example usage:
-# data = pd.read_csv('stock_data.csv')
-# sma_signals = generate_sma_signals(data, short_window=20, long_window=50)
