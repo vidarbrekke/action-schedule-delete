@@ -7,13 +7,33 @@ import pandas as pd
 from sqlalchemy.orm import sessionmaker
 from database import engine, StockData
 from sma_strategy import generate_sma_signals  # Adjust as needed
+from data_acquisition import fetch_and_update_stock_data
+
 
 Session = sessionmaker(bind=engine)
 
-def backtest_strategy(data, strategy_func, **strategy_params):
+def backtest_strategy(data, ticker, strategy_func, strategy_params):
+    for strategy_name, params in strategy_params.items():
+        print(f"Running {strategy_name} on {ticker}")
+        
+        # Extract short_window and long_window
+        short_window = params.get('short_window')
+        long_window = params.get('long_window')
+
+        if short_window is not None and long_window is not None:
+            # Pass short_window and long_window as explicit arguments
+            data_with_signals = strategy_func(data, short_window, long_window)
+            # ... rest of your backtesting logic
+        else:
+            print(f"Missing window parameters for strategy {strategy_name}")
+            continue
+
+
+
     # Filter out SMA-specific parameters
     sma_params = {k: v for k, v in strategy_params.items() if k in ['short_window', 'long_window']}
-    data_with_signals = strategy_func(data, **sma_params)
+    data_with_signals = strategy_func(data, short_window, long_window)
+
 
     initial_balance = strategy_params.get('initial_balance', 1000)
     position = 0  # Initialize position
@@ -22,8 +42,9 @@ def backtest_strategy(data, strategy_func, **strategy_params):
     # ... other risk management parameters
     
     if data_with_signals.empty:
-            print(f"No data available for backtesting {ticker}.")
-            return {'final_balance': balance, 'total_return': 0.0}
+        print(f"No data available for backtesting {ticker}.")
+        return {'final_balance': balance, 'total_return': 0.0}
+
 
     # Simulate trades with risk management
     for index, row in data_with_signals.iterrows():
@@ -66,12 +87,19 @@ if __name__ == "__main__":
     session = Session()
 
     for ticker in config['tickers']:
-        # Fetch data for the ticker from the database
+        # Check if data exists for the ticker
+        last_record = session.query(StockData).filter(StockData.ticker == ticker).order_by(StockData.date.desc()).first()
+        
+        if not last_record:
+            # Fetch maximum amount of data for new tickers
+            print(f"No data found for {ticker}. Fetching maximum available data.")
+            fetch_and_update_stock_data(ticker)
+        else:
+            # Update existing data
+            fetch_and_update_stock_data(ticker, last_record.date.strftime('%Y-%m-%d'))
+
+        # Now proceed with backtesting using the updated data
         query = session.query(StockData).filter(StockData.ticker == ticker)
         data = pd.read_sql(query.statement, session.bind)
-
-        # Run backtesting for each strategy
-        for strategy_name, strategy_params in config['strategies'].items():
-            print(f"Backtesting {strategy_name} on {ticker}")
-            results = backtest_strategy(data, generate_sma_signals, **strategy_params)
-            print(results)
+        results = backtest_strategy(data, ticker, generate_sma_signals, config['strategies'])
+        print(f"Backtesting results for {ticker}:", results)
