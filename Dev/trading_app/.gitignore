@@ -39,5 +39,8 @@ dist/
 # Local FastAPI server files
 instance/
 
-# images
-*.png
+# plots
+plots/
+
+# reports
+reports/
