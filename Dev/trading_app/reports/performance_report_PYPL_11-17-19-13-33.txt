@@ -1,0 +1,76 @@
+Strategy Name: SMA_20_50
+Ticker: PYPL
+Metrics:
+strategy: SMA_20_50
+final_balance: 633.1000061035156
+total_return: -0.36689999389648437
+win_rate: 0.5
+profit_factor: 0.9039810312968467
+expectancy: -36.689999389648435
+Strategy Parameters:
+short_window: 20
+long_window: 50
+stop_loss_percent: 0.03
+max_drawdown_percent: 0.15
+risk_per_trade_percent: 0.01
+cooldown_period_minutes: 30
+first_trade_limit_percent: 0.25
+
+
+Strategy Name: SMA_20_30
+Ticker: PYPL
+Metrics:
+strategy: SMA_20_30
+final_balance: 613.2799911499023
+total_return: -0.38672000885009766
+win_rate: 0.47368421052631576
+profit_factor: 0.8693159651403173
+expectancy: -50.258947673596836
+Strategy Parameters:
+short_window: 20
+long_window: 30
+stop_loss_percent: 0.03
+max_drawdown_percent: 0.15
+risk_per_trade_percent: 0.01
+cooldown_period_minutes: 30
+first_trade_limit_percent: 0.25
+
+
+Strategy Name: SMA_10_50
+Ticker: PYPL
+Metrics:
+strategy: SMA_10_50
+final_balance: 818.3400192260742
+total_return: -0.18165998077392578
+win_rate: 0.45454545454545453
+profit_factor: 0.8061299447711809
+expectancy: -88.83090695467862
+Strategy Parameters:
+short_window: 10
+long_window: 50
+stop_loss_percent: 0.03
+max_drawdown_percent: 0.15
+risk_per_trade_percent: 0.01
+cooldown_period_minutes: 30
+first_trade_limit_percent: 0.25
+
+
+Strategy Name: SMA_10_30
+Ticker: PYPL
+Metrics:
+strategy: SMA_10_30
+final_balance: 671.8000869750977
+total_return: -0.32819991302490237
+win_rate: 0.47058823529411764
+profit_factor: 0.8628280946244372
+expectancy: -56.07175939223345
+Strategy Parameters:
+short_window: 10
+long_window: 30
+stop_loss_percent: 0.03
+max_drawdown_percent: 0.15
+risk_per_trade_percent: 0.01
+cooldown_period_minutes: 30
+first_trade_limit_percent: 0.25
+
+

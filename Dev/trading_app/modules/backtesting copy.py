@@ -17,47 +17,49 @@ from sma_strategy import generate_sma_signals
 Session = sessionmaker(bind=engine)
 
 def plot_strategy_performance(data, strategy_name, strategy_params, metrics, ticker, timestamp):
-
     # Ensure the plots directory exists
     plots_dir = "plots"
     os.makedirs(plots_dir, exist_ok=True)
-    
-    # Timestamp for file naming
-    timestamp = datetime.datetime.now().strftime("%m-%d-%M-%S")
-    
+
     fig, ax1 = plt.subplots(figsize=(10, 6), dpi=400)
 
-    # Plotting stock prices, SMA lines, and signals
+    # Plotting stock prices and SMA lines
     ax1.plot(data['date'], data['close'], label='Close Price', color='blue', alpha=0.6)
     ax1.plot(data['date'], data['short_sma'], label=f'Short SMA ({strategy_params["short_window"]})', color='orange', alpha=0.6)
     ax1.plot(data['date'], data['long_sma'], label=f'Long SMA ({strategy_params["long_window"]})', color='purple', alpha=0.6)
-    ax1.scatter(data[data['signal'] == 1]['date'], data[data['signal'] == 1]['close'], label='Buy Signal', marker='^', color='green', alpha=1)
-    ax1.scatter(data[data['signal'] == -1]['date'], data[data['signal'] == -1]['close'], label='Sell Signal', marker='v', color='red', alpha=1)
+
+    # Plotting signals on the top layer with no transparency
+    ax1.scatter(data[data['signal'] == 1]['date'], data[data['signal'] == 1]['close'], label='Buy Signal', marker='^', color='green')
+    ax1.scatter(data[data['signal'] == -1]['date'], data[data['signal'] == -1]['close'], label='Sell Signal', marker='v', color='red')
+
+    # Other plot settings
     ax1.set_title(f'{ticker} - {strategy_name} Strategy Performance')
     ax1.set_xlabel('Date')
     ax1.set_ylabel('Price')
-    ax1.legend()
+    ax1.legend(loc='upper left')
     ax1.xaxis.set_major_locator(mticker.MaxNLocator(10))
     ax1.grid(True)
 
     # Displaying strategy parameters and metrics in separate columns
-    fig.subplots_adjust(bottom=0.25)  # Adjust the bottom to provide space for text
+    fig.subplots_adjust(bottom=0.25)
     params_text = "\n".join([f"{key}: {value}" for key, value in strategy_params.items()])
     ax1.text(0.05, -0.25, f"Strategy Parameters:\n{params_text}", verticalalignment='top', horizontalalignment='left', fontsize=8, transform=ax1.transAxes)
 
-    #  Displaying metrics with color coding
+    # Displaying metrics with color coding
+    initial_balance = strategy_params.get('initial_balance', 1000)
     y_offset = -0.25
     ax1.text(0.5, y_offset, "Metrics:", verticalalignment='top', horizontalalignment='left', fontsize=8, transform=ax1.transAxes)
     for key, value in metrics.items():
         y_offset -= 0.05
-        # Check if value is a number and format it to two decimal places
         display_value = f"{value:.2f}" if isinstance(value, (int, float)) else value
-        color = 'green' if isinstance(value, (int, float)) and value > 0 else 'black'
+        color = 'green' if (key == 'final_balance' and value > initial_balance) or (key != 'final_balance' and isinstance(value, (int, float)) and value > 0) else 'black'
         ax1.text(0.5, y_offset, f"{key}: {display_value}", verticalalignment='top', horizontalalignment='left', fontsize=8, color=color, transform=ax1.transAxes)
 
     plt.tight_layout()
     plt.savefig(os.path.join(plots_dir, f"{ticker}_{strategy_name}_performance_{timestamp}.png"))
     plt.close()
+
+
 
 def save_performance_report(all_reports, reports_dir, ticker):
     # Ensure the reports directory exists

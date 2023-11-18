@@ -1,0 +1,76 @@
+Strategy Name: SMA_20_50
+Ticker: GOOG
+Metrics:
+strategy: SMA_20_50
+final_balance: 868.3089752197266
+total_return: -0.13169102478027345
+win_rate: 0.4666666666666667
+profit_factor: 0.8551506296937329
+expectancy: -64.2594004313151
+Strategy Parameters:
+short_window: 20
+long_window: 50
+stop_loss_percent: 0.03
+max_drawdown_percent: 0.15
+risk_per_trade_percent: 0.01
+cooldown_period_minutes: 30
+first_trade_limit_percent: 0.25
+
+
+Strategy Name: SMA_20_30
+Ticker: GOOG
+Metrics:
+strategy: SMA_20_30
+final_balance: 781.716438293457
+total_return: -0.21828356170654298
+win_rate: 0.4782608695652174
+profit_factor: 0.9001740756907539
+expectancy: -39.64276288903278
+Strategy Parameters:
+short_window: 20
+long_window: 30
+stop_loss_percent: 0.03
+max_drawdown_percent: 0.15
+risk_per_trade_percent: 0.01
+cooldown_period_minutes: 30
+first_trade_limit_percent: 0.25
+
+
+Strategy Name: SMA_10_50
+Ticker: GOOG
+Metrics:
+strategy: SMA_10_50
+final_balance: 737.1455307006836
+total_return: -0.2628544692993164
+win_rate: 0.47368421052631576
+profit_factor: 0.8701366708729209
+expectancy: -50.33444494950144
+Strategy Parameters:
+short_window: 10
+long_window: 50
+stop_loss_percent: 0.03
+max_drawdown_percent: 0.15
+risk_per_trade_percent: 0.01
+cooldown_period_minutes: 30
+first_trade_limit_percent: 0.25
+
+
+Strategy Name: SMA_10_30
+Ticker: GOOG
+Metrics:
+strategy: SMA_10_30
+final_balance: 626.8421401977539
+total_return: -0.3731578598022461
+win_rate: 0.4782608695652174
+profit_factor: 0.8893184720574518
+expectancy: -40.34599337370499
+Strategy Parameters:
+short_window: 10
+long_window: 30
+stop_loss_percent: 0.03
+max_drawdown_percent: 0.15
+risk_per_trade_percent: 0.01
+cooldown_period_minutes: 30
+first_trade_limit_percent: 0.25
+
+

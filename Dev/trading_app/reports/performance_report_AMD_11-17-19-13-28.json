@@ -1,0 +1,86 @@
+[
+    {
+        "strategy_name": "SMA_20_50",
+        "ticker": "AMD",
+        "metrics": {
+            "strategy": "SMA_20_50",
+            "final_balance": 722.8599395751953,
+            "total_return": -0.2771400604248047,
+            "win_rate": 0.45454545454545453,
+            "profit_factor": 0.7534221978440978,
+            "expectancy": -90.5563701282848
+        },
+        "strategy_params": {
+            "short_window": 20,
+            "long_window": 50,
+            "stop_loss_percent": 0.03,
+            "max_drawdown_percent": 0.15,
+            "risk_per_trade_percent": 0.01,
+            "cooldown_period_minutes": 30,
+            "first_trade_limit_percent": 0.25
+        }
+    },
+    {
+        "strategy_name": "SMA_20_30",
+        "ticker": "AMD",
+        "metrics": {
+            "strategy": "SMA_20_30",
+            "final_balance": 728.1801223754883,
+            "total_return": -0.2718198776245117,
+            "win_rate": 0.47619047619047616,
+            "profit_factor": 0.8724254745985,
+            "expectancy": -47.18094707670666
+        },
+        "strategy_params": {
+            "short_window": 20,
+            "long_window": 30,
+            "stop_loss_percent": 0.03,
+            "max_drawdown_percent": 0.15,
+            "risk_per_trade_percent": 0.01,
+            "cooldown_period_minutes": 30,
+            "first_trade_limit_percent": 0.25
+        }
+    },
+    {
+        "strategy_name": "SMA_10_50",
+        "ticker": "AMD",
+        "metrics": {
+            "strategy": "SMA_10_50",
+            "final_balance": 643.4600257873535,
+            "total_return": -0.3565399742126465,
+            "win_rate": 0.4666666666666667,
+            "profit_factor": 0.807743454002535,
+            "expectancy": -63.71266555786133
+        },
+        "strategy_params": {
+            "short_window": 10,
+            "long_window": 50,
+            "stop_loss_percent": 0.03,
+            "max_drawdown_percent": 0.15,
+            "risk_per_trade_percent": 0.01,
+            "cooldown_period_minutes": 30,
+            "first_trade_limit_percent": 0.25
+        }
+    },
+    {
+        "strategy_name": "SMA_10_30",
+        "ticker": "AMD",
+        "metrics": {
+            "strategy": "SMA_10_30",
+            "final_balance": 1025.410140991211,
+            "total_return": 0.025410140991210937,
+            "win_rate": 0.47368421052631576,
+            "profit_factor": 0.8951324583474574,
+            "expectancy": -49.117361771432975
+        },
+        "strategy_params": {
+            "short_window": 10,
+            "long_window": 30,
+            "stop_loss_percent": 0.03,
+            "max_drawdown_percent": 0.15,
+            "risk_per_trade_percent": 0.01,
+            "cooldown_period_minutes": 30,
+            "first_trade_limit_percent": 0.25
+        }
+    }
+]
