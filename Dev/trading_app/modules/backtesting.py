@@ -160,13 +160,23 @@ def backtest_strategy(data, ticker, strategy_func, from_config=True, strategy_pa
             profit_factor = total_winning / total_losing if total_losing > 0 else np.inf
             expectancy = sum(trade_results) / total_trades if total_trades > 0 else 0
 
+            # Assuming 'data' is your DataFrame with historical stock prices
+            buy_and_hold_initial = data.iloc[0]['close']
+            buy_and_hold_final = data.iloc[-1]['close']
+            buy_and_hold_balance = initial_balance * (buy_and_hold_final / buy_and_hold_initial)
+
+            # Calculating the dollar value difference, inverted
+            buy_and_hold_comparison_value = final_balance - buy_and_hold_balance
+
+
             metrics = {
-                'strategy': strategy_name,
-                'final_balance': final_balance,
-                'total_return': total_return,
-                'win_rate': win_rate,
-                'profit_factor': profit_factor,
-                'expectancy': expectancy
+                'Strategy': strategy_name,
+                'Final Balance': final_balance,
+                'Net gain over buy-and-hold': buy_and_hold_comparison_value,
+                'Total Return': total_return,
+                'Win Rate': win_rate,
+                'Profit Factor': profit_factor,
+                'Expectancy': expectancy
                 # Additional metrics can be added here
             }
 
