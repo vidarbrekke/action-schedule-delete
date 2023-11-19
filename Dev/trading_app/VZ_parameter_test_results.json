@@ -1,0 +1,938 @@
+{
+    "SW_5_LW_40_Risk_0.5_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "VZ",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 739.4399909973145,
+                "total_return": -0.26056000900268556,
+                "win_rate": 0.4827586206896552,
+                "profit_factor": 0.9206888724751571,
+                "expectancy": -33.97103447749697
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 5,
+                "long_window": 40,
+                "risk_per_trade_percent": 0.6,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_5_LW_40_Risk_0.5_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "VZ",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 739.4399909973145,
+                "total_return": -0.26056000900268556,
+                "win_rate": 0.4827586206896552,
+                "profit_factor": 0.9206888724751571,
+                "expectancy": -33.97103447749697
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 5,
+                "long_window": 40,
+                "risk_per_trade_percent": 0.6,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_5_LW_40_Risk_1_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "VZ",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 739.4399909973145,
+                "total_return": -0.26056000900268556,
+                "win_rate": 0.4827586206896552,
+                "profit_factor": 0.9206888724751571,
+                "expectancy": -33.97103447749697
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 5,
+                "long_window": 40,
+                "risk_per_trade_percent": 1.2,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_5_LW_40_Risk_1_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "VZ",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 739.4399909973145,
+                "total_return": -0.26056000900268556,
+                "win_rate": 0.4827586206896552,
+                "profit_factor": 0.9206888724751571,
+                "expectancy": -33.97103447749697
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 5,
+                "long_window": 40,
+                "risk_per_trade_percent": 1.2,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_5_LW_40_Risk_1.5_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "VZ",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 739.4399909973145,
+                "total_return": -0.26056000900268556,
+                "win_rate": 0.4827586206896552,
+                "profit_factor": 0.9206888724751571,
+                "expectancy": -33.97103447749697
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 5,
+                "long_window": 40,
+                "risk_per_trade_percent": 1.7999999999999998,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_5_LW_40_Risk_1.5_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "VZ",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 739.4399909973145,
+                "total_return": -0.26056000900268556,
+                "win_rate": 0.4827586206896552,
+                "profit_factor": 0.9206888724751571,
+                "expectancy": -33.97103447749697
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 5,
+                "long_window": 40,
+                "risk_per_trade_percent": 1.7999999999999998,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_5_LW_50_Risk_0.5_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "VZ",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 676.2598457336426,
+                "total_return": -0.32374015426635744,
+                "win_rate": 0.4827586206896552,
+                "profit_factor": 0.9179013700055083,
+                "expectancy": -33.65103951815901
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 5,
+                "long_window": 50,
+                "risk_per_trade_percent": 0.6,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_5_LW_50_Risk_0.5_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "VZ",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 676.2598457336426,
+                "total_return": -0.32374015426635744,
+                "win_rate": 0.4827586206896552,
+                "profit_factor": 0.9179013700055083,
+                "expectancy": -33.65103951815901
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 5,
+                "long_window": 50,
+                "risk_per_trade_percent": 0.6,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_5_LW_50_Risk_1_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "VZ",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 676.2598457336426,
+                "total_return": -0.32374015426635744,
+                "win_rate": 0.4827586206896552,
+                "profit_factor": 0.9179013700055083,
+                "expectancy": -33.65103951815901
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 5,
+                "long_window": 50,
+                "risk_per_trade_percent": 1.2,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_5_LW_50_Risk_1_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "VZ",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 676.2598457336426,
+                "total_return": -0.32374015426635744,
+                "win_rate": 0.4827586206896552,
+                "profit_factor": 0.9179013700055083,
+                "expectancy": -33.65103951815901
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 5,
+                "long_window": 50,
+                "risk_per_trade_percent": 1.2,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_5_LW_50_Risk_1.5_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "VZ",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 676.2598457336426,
+                "total_return": -0.32374015426635744,
+                "win_rate": 0.4827586206896552,
+                "profit_factor": 0.9179013700055083,
+                "expectancy": -33.65103951815901
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 5,
+                "long_window": 50,
+                "risk_per_trade_percent": 1.7999999999999998,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_5_LW_50_Risk_1.5_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "VZ",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 676.2598457336426,
+                "total_return": -0.32374015426635744,
+                "win_rate": 0.4827586206896552,
+                "profit_factor": 0.9179013700055083,
+                "expectancy": -33.65103951815901
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 5,
+                "long_window": 50,
+                "risk_per_trade_percent": 1.7999999999999998,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_15_LW_40_Risk_0.5_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "VZ",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 565.4197311401367,
+                "total_return": -0.4345802688598633,
+                "win_rate": 0.47368421052631576,
+                "profit_factor": 0.8702597183755283,
+                "expectancy": -51.475276947021484
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 15,
+                "long_window": 40,
+                "risk_per_trade_percent": 0.6,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_15_LW_40_Risk_0.5_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "VZ",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 565.4197311401367,
+                "total_return": -0.4345802688598633,
+                "win_rate": 0.47368421052631576,
+                "profit_factor": 0.8702597183755283,
+                "expectancy": -51.475276947021484
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 15,
+                "long_window": 40,
+                "risk_per_trade_percent": 0.6,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_15_LW_40_Risk_1_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "VZ",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 565.4197311401367,
+                "total_return": -0.4345802688598633,
+                "win_rate": 0.47368421052631576,
+                "profit_factor": 0.8702597183755283,
+                "expectancy": -51.475276947021484
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 15,
+                "long_window": 40,
+                "risk_per_trade_percent": 1.2,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_15_LW_40_Risk_1_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "VZ",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 565.4197311401367,
+                "total_return": -0.4345802688598633,
+                "win_rate": 0.47368421052631576,
+                "profit_factor": 0.8702597183755283,
+                "expectancy": -51.475276947021484
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 15,
+                "long_window": 40,
+                "risk_per_trade_percent": 1.2,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_15_LW_40_Risk_1.5_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "VZ",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 565.4197311401367,
+                "total_return": -0.4345802688598633,
+                "win_rate": 0.47368421052631576,
+                "profit_factor": 0.8702597183755283,
+                "expectancy": -51.475276947021484
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 15,
+                "long_window": 40,
+                "risk_per_trade_percent": 1.7999999999999998,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_15_LW_40_Risk_1.5_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "VZ",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 565.4197311401367,
+                "total_return": -0.4345802688598633,
+                "win_rate": 0.47368421052631576,
+                "profit_factor": 0.8702597183755283,
+                "expectancy": -51.475276947021484
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 15,
+                "long_window": 40,
+                "risk_per_trade_percent": 1.7999999999999998,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_15_LW_50_Risk_0.5_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "VZ",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 588.1199111938477,
+                "total_return": -0.41188008880615234,
+                "win_rate": 0.47619047619047616,
+                "profit_factor": 0.8773510831928905,
+                "expectancy": -47.217146737234934
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 15,
+                "long_window": 50,
+                "risk_per_trade_percent": 0.6,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_15_LW_50_Risk_0.5_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "VZ",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 588.1199111938477,
+                "total_return": -0.41188008880615234,
+                "win_rate": 0.47619047619047616,
+                "profit_factor": 0.8773510831928905,
+                "expectancy": -47.217146737234934
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 15,
+                "long_window": 50,
+                "risk_per_trade_percent": 0.6,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_15_LW_50_Risk_1_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "VZ",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 588.1199111938477,
+                "total_return": -0.41188008880615234,
+                "win_rate": 0.47619047619047616,
+                "profit_factor": 0.8773510831928905,
+                "expectancy": -47.217146737234934
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 15,
+                "long_window": 50,
+                "risk_per_trade_percent": 1.2,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_15_LW_50_Risk_1_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "VZ",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 588.1199111938477,
+                "total_return": -0.41188008880615234,
+                "win_rate": 0.47619047619047616,
+                "profit_factor": 0.8773510831928905,
+                "expectancy": -47.217146737234934
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 15,
+                "long_window": 50,
+                "risk_per_trade_percent": 1.2,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_15_LW_50_Risk_1.5_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "VZ",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 588.1199111938477,
+                "total_return": -0.41188008880615234,
+                "win_rate": 0.47619047619047616,
+                "profit_factor": 0.8773510831928905,
+                "expectancy": -47.217146737234934
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 15,
+                "long_window": 50,
+                "risk_per_trade_percent": 1.7999999999999998,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_15_LW_50_Risk_1.5_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "VZ",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 588.1199111938477,
+                "total_return": -0.41188008880615234,
+                "win_rate": 0.47619047619047616,
+                "profit_factor": 0.8773510831928905,
+                "expectancy": -47.217146737234934
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 15,
+                "long_window": 50,
+                "risk_per_trade_percent": 1.7999999999999998,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_20_LW_40_Risk_0.5_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "VZ",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 583.2100505828857,
+                "total_return": -0.4167899494171143,
+                "win_rate": 0.47368421052631576,
+                "profit_factor": 0.8714759687731594,
+                "expectancy": -52.44578642594187
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 20,
+                "long_window": 40,
+                "risk_per_trade_percent": 0.6,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_20_LW_40_Risk_0.5_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "VZ",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 583.2100505828857,
+                "total_return": -0.4167899494171143,
+                "win_rate": 0.47368421052631576,
+                "profit_factor": 0.8714759687731594,
+                "expectancy": -52.44578642594187
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 20,
+                "long_window": 40,
+                "risk_per_trade_percent": 0.6,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_20_LW_40_Risk_1_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "VZ",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 583.2100505828857,
+                "total_return": -0.4167899494171143,
+                "win_rate": 0.47368421052631576,
+                "profit_factor": 0.8714759687731594,
+                "expectancy": -52.44578642594187
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 20,
+                "long_window": 40,
+                "risk_per_trade_percent": 1.2,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_20_LW_40_Risk_1_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "VZ",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 583.2100505828857,
+                "total_return": -0.4167899494171143,
+                "win_rate": 0.47368421052631576,
+                "profit_factor": 0.8714759687731594,
+                "expectancy": -52.44578642594187
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 20,
+                "long_window": 40,
+                "risk_per_trade_percent": 1.2,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_20_LW_40_Risk_1.5_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "VZ",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 583.2100505828857,
+                "total_return": -0.4167899494171143,
+                "win_rate": 0.47368421052631576,
+                "profit_factor": 0.8714759687731594,
+                "expectancy": -52.44578642594187
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 20,
+                "long_window": 40,
+                "risk_per_trade_percent": 1.7999999999999998,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_20_LW_40_Risk_1.5_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "VZ",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 583.2100505828857,
+                "total_return": -0.4167899494171143,
+                "win_rate": 0.47368421052631576,
+                "profit_factor": 0.8714759687731594,
+                "expectancy": -52.44578642594187
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 20,
+                "long_window": 40,
+                "risk_per_trade_percent": 1.7999999999999998,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_20_LW_50_Risk_0.5_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "VZ",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 784.7899322509766,
+                "total_return": -0.21521006774902343,
+                "win_rate": 0.46153846153846156,
+                "profit_factor": 0.8412049603782542,
+                "expectancy": -75.08000447199895
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 20,
+                "long_window": 50,
+                "risk_per_trade_percent": 0.6,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_20_LW_50_Risk_0.5_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "VZ",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 784.7899322509766,
+                "total_return": -0.21521006774902343,
+                "win_rate": 0.46153846153846156,
+                "profit_factor": 0.8412049603782542,
+                "expectancy": -75.08000447199895
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 20,
+                "long_window": 50,
+                "risk_per_trade_percent": 0.6,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_20_LW_50_Risk_1_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "VZ",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 784.7899322509766,
+                "total_return": -0.21521006774902343,
+                "win_rate": 0.46153846153846156,
+                "profit_factor": 0.8412049603782542,
+                "expectancy": -75.08000447199895
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 20,
+                "long_window": 50,
+                "risk_per_trade_percent": 1.2,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_20_LW_50_Risk_1_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "VZ",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 784.7899322509766,
+                "total_return": -0.21521006774902343,
+                "win_rate": 0.46153846153846156,
+                "profit_factor": 0.8412049603782542,
+                "expectancy": -75.08000447199895
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 20,
+                "long_window": 50,
+                "risk_per_trade_percent": 1.2,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_20_LW_50_Risk_1.5_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "VZ",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 784.7899322509766,
+                "total_return": -0.21521006774902343,
+                "win_rate": 0.46153846153846156,
+                "profit_factor": 0.8412049603782542,
+                "expectancy": -75.08000447199895
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 20,
+                "long_window": 50,
+                "risk_per_trade_percent": 1.7999999999999998,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_20_LW_50_Risk_1.5_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "VZ",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 784.7899322509766,
+                "total_return": -0.21521006774902343,
+                "win_rate": 0.46153846153846156,
+                "profit_factor": 0.8412049603782542,
+                "expectancy": -75.08000447199895
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 20,
+                "long_window": 50,
+                "risk_per_trade_percent": 1.7999999999999998,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ]
+}

@@ -1,0 +1,938 @@
+{
+    "SW_5_LW_40_Risk_0.5_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "JPM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 852.2299728393555,
+                "total_return": -0.14777002716064452,
+                "win_rate": 0.47058823529411764,
+                "profit_factor": 0.8700869158049188,
+                "expectancy": -53.23647128834444
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 5,
+                "long_window": 40,
+                "risk_per_trade_percent": 0.6,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_5_LW_40_Risk_0.5_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "JPM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 852.2299728393555,
+                "total_return": -0.14777002716064452,
+                "win_rate": 0.47058823529411764,
+                "profit_factor": 0.8700869158049188,
+                "expectancy": -53.23647128834444
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 5,
+                "long_window": 40,
+                "risk_per_trade_percent": 0.6,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_5_LW_40_Risk_1_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "JPM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 852.2299728393555,
+                "total_return": -0.14777002716064452,
+                "win_rate": 0.47058823529411764,
+                "profit_factor": 0.8700869158049188,
+                "expectancy": -53.23647128834444
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 5,
+                "long_window": 40,
+                "risk_per_trade_percent": 1.2,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_5_LW_40_Risk_1_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "JPM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 852.2299728393555,
+                "total_return": -0.14777002716064452,
+                "win_rate": 0.47058823529411764,
+                "profit_factor": 0.8700869158049188,
+                "expectancy": -53.23647128834444
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 5,
+                "long_window": 40,
+                "risk_per_trade_percent": 1.2,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_5_LW_40_Risk_1.5_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "JPM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 852.2299728393555,
+                "total_return": -0.14777002716064452,
+                "win_rate": 0.47058823529411764,
+                "profit_factor": 0.8700869158049188,
+                "expectancy": -53.23647128834444
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 5,
+                "long_window": 40,
+                "risk_per_trade_percent": 1.7999999999999998,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_5_LW_40_Risk_1.5_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "JPM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 852.2299728393555,
+                "total_return": -0.14777002716064452,
+                "win_rate": 0.47058823529411764,
+                "profit_factor": 0.8700869158049188,
+                "expectancy": -53.23647128834444
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 5,
+                "long_window": 40,
+                "risk_per_trade_percent": 1.7999999999999998,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_5_LW_50_Risk_0.5_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "JPM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 869.070068359375,
+                "total_return": -0.130929931640625,
+                "win_rate": 0.46153846153846156,
+                "profit_factor": 0.8293290944018764,
+                "expectancy": -68.321532029372
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 5,
+                "long_window": 50,
+                "risk_per_trade_percent": 0.6,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_5_LW_50_Risk_0.5_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "JPM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 869.070068359375,
+                "total_return": -0.130929931640625,
+                "win_rate": 0.46153846153846156,
+                "profit_factor": 0.8293290944018764,
+                "expectancy": -68.321532029372
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 5,
+                "long_window": 50,
+                "risk_per_trade_percent": 0.6,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_5_LW_50_Risk_1_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "JPM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 869.070068359375,
+                "total_return": -0.130929931640625,
+                "win_rate": 0.46153846153846156,
+                "profit_factor": 0.8293290944018764,
+                "expectancy": -68.321532029372
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 5,
+                "long_window": 50,
+                "risk_per_trade_percent": 1.2,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_5_LW_50_Risk_1_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "JPM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 869.070068359375,
+                "total_return": -0.130929931640625,
+                "win_rate": 0.46153846153846156,
+                "profit_factor": 0.8293290944018764,
+                "expectancy": -68.321532029372
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 5,
+                "long_window": 50,
+                "risk_per_trade_percent": 1.2,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_5_LW_50_Risk_1.5_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "JPM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 869.070068359375,
+                "total_return": -0.130929931640625,
+                "win_rate": 0.46153846153846156,
+                "profit_factor": 0.8293290944018764,
+                "expectancy": -68.321532029372
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 5,
+                "long_window": 50,
+                "risk_per_trade_percent": 1.7999999999999998,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_5_LW_50_Risk_1.5_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "JPM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 869.070068359375,
+                "total_return": -0.130929931640625,
+                "win_rate": 0.46153846153846156,
+                "profit_factor": 0.8293290944018764,
+                "expectancy": -68.321532029372
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 5,
+                "long_window": 50,
+                "risk_per_trade_percent": 1.7999999999999998,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_15_LW_40_Risk_0.5_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "JPM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 982.0899658203125,
+                "total_return": -0.0179100341796875,
+                "win_rate": 0.5,
+                "profit_factor": 0.9959220397826707,
+                "expectancy": -1.79100341796875
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 15,
+                "long_window": 40,
+                "risk_per_trade_percent": 0.6,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_15_LW_40_Risk_0.5_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "JPM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 982.0899658203125,
+                "total_return": -0.0179100341796875,
+                "win_rate": 0.5,
+                "profit_factor": 0.9959220397826707,
+                "expectancy": -1.79100341796875
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 15,
+                "long_window": 40,
+                "risk_per_trade_percent": 0.6,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_15_LW_40_Risk_1_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "JPM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 982.0899658203125,
+                "total_return": -0.0179100341796875,
+                "win_rate": 0.5,
+                "profit_factor": 0.9959220397826707,
+                "expectancy": -1.79100341796875
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 15,
+                "long_window": 40,
+                "risk_per_trade_percent": 1.2,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_15_LW_40_Risk_1_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "JPM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 982.0899658203125,
+                "total_return": -0.0179100341796875,
+                "win_rate": 0.5,
+                "profit_factor": 0.9959220397826707,
+                "expectancy": -1.79100341796875
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 15,
+                "long_window": 40,
+                "risk_per_trade_percent": 1.2,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_15_LW_40_Risk_1.5_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "JPM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 982.0899658203125,
+                "total_return": -0.0179100341796875,
+                "win_rate": 0.5,
+                "profit_factor": 0.9959220397826707,
+                "expectancy": -1.79100341796875
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 15,
+                "long_window": 40,
+                "risk_per_trade_percent": 1.7999999999999998,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_15_LW_40_Risk_1.5_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "JPM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 982.0899658203125,
+                "total_return": -0.0179100341796875,
+                "win_rate": 0.5,
+                "profit_factor": 0.9959220397826707,
+                "expectancy": -1.79100341796875
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 15,
+                "long_window": 40,
+                "risk_per_trade_percent": 1.7999999999999998,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_15_LW_50_Risk_0.5_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "JPM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 930.0900802612305,
+                "total_return": -0.06990991973876953,
+                "win_rate": 0.5,
+                "profit_factor": 0.9788251852928843,
+                "expectancy": -8.738739967346191
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 15,
+                "long_window": 50,
+                "risk_per_trade_percent": 0.6,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_15_LW_50_Risk_0.5_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "JPM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 930.0900802612305,
+                "total_return": -0.06990991973876953,
+                "win_rate": 0.5,
+                "profit_factor": 0.9788251852928843,
+                "expectancy": -8.738739967346191
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 15,
+                "long_window": 50,
+                "risk_per_trade_percent": 0.6,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_15_LW_50_Risk_1_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "JPM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 930.0900802612305,
+                "total_return": -0.06990991973876953,
+                "win_rate": 0.5,
+                "profit_factor": 0.9788251852928843,
+                "expectancy": -8.738739967346191
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 15,
+                "long_window": 50,
+                "risk_per_trade_percent": 1.2,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_15_LW_50_Risk_1_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "JPM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 930.0900802612305,
+                "total_return": -0.06990991973876953,
+                "win_rate": 0.5,
+                "profit_factor": 0.9788251852928843,
+                "expectancy": -8.738739967346191
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 15,
+                "long_window": 50,
+                "risk_per_trade_percent": 1.2,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_15_LW_50_Risk_1.5_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "JPM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 930.0900802612305,
+                "total_return": -0.06990991973876953,
+                "win_rate": 0.5,
+                "profit_factor": 0.9788251852928843,
+                "expectancy": -8.738739967346191
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 15,
+                "long_window": 50,
+                "risk_per_trade_percent": 1.7999999999999998,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_15_LW_50_Risk_1.5_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "JPM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 930.0900802612305,
+                "total_return": -0.06990991973876953,
+                "win_rate": 0.5,
+                "profit_factor": 0.9788251852928843,
+                "expectancy": -8.738739967346191
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 15,
+                "long_window": 50,
+                "risk_per_trade_percent": 1.7999999999999998,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_20_LW_40_Risk_0.5_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "JPM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 991.3200836181641,
+                "total_return": -0.008679916381835937,
+                "win_rate": 0.5,
+                "profit_factor": 0.9983034280668586,
+                "expectancy": -0.7233263651529948
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 20,
+                "long_window": 40,
+                "risk_per_trade_percent": 0.6,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_20_LW_40_Risk_0.5_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "JPM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 991.3200836181641,
+                "total_return": -0.008679916381835937,
+                "win_rate": 0.5,
+                "profit_factor": 0.9983034280668586,
+                "expectancy": -0.7233263651529948
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 20,
+                "long_window": 40,
+                "risk_per_trade_percent": 0.6,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_20_LW_40_Risk_1_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "JPM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 991.3200836181641,
+                "total_return": -0.008679916381835937,
+                "win_rate": 0.5,
+                "profit_factor": 0.9983034280668586,
+                "expectancy": -0.7233263651529948
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 20,
+                "long_window": 40,
+                "risk_per_trade_percent": 1.2,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_20_LW_40_Risk_1_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "JPM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 991.3200836181641,
+                "total_return": -0.008679916381835937,
+                "win_rate": 0.5,
+                "profit_factor": 0.9983034280668586,
+                "expectancy": -0.7233263651529948
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 20,
+                "long_window": 40,
+                "risk_per_trade_percent": 1.2,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_20_LW_40_Risk_1.5_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "JPM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 991.3200836181641,
+                "total_return": -0.008679916381835937,
+                "win_rate": 0.5,
+                "profit_factor": 0.9983034280668586,
+                "expectancy": -0.7233263651529948
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 20,
+                "long_window": 40,
+                "risk_per_trade_percent": 1.7999999999999998,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_20_LW_40_Risk_1.5_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "JPM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 991.3200836181641,
+                "total_return": -0.008679916381835937,
+                "win_rate": 0.5,
+                "profit_factor": 0.9983034280668586,
+                "expectancy": -0.7233263651529948
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 20,
+                "long_window": 40,
+                "risk_per_trade_percent": 1.7999999999999998,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_20_LW_50_Risk_0.5_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "JPM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 934.699951171875,
+                "total_return": -0.065300048828125,
+                "win_rate": 0.5,
+                "profit_factor": 0.98208719686575,
+                "expectancy": -8.162506103515625
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 20,
+                "long_window": 50,
+                "risk_per_trade_percent": 0.6,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_20_LW_50_Risk_0.5_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "JPM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 934.699951171875,
+                "total_return": -0.065300048828125,
+                "win_rate": 0.5,
+                "profit_factor": 0.98208719686575,
+                "expectancy": -8.162506103515625
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 20,
+                "long_window": 50,
+                "risk_per_trade_percent": 0.6,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_20_LW_50_Risk_1_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "JPM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 934.699951171875,
+                "total_return": -0.065300048828125,
+                "win_rate": 0.5,
+                "profit_factor": 0.98208719686575,
+                "expectancy": -8.162506103515625
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 20,
+                "long_window": 50,
+                "risk_per_trade_percent": 1.2,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_20_LW_50_Risk_1_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "JPM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 934.699951171875,
+                "total_return": -0.065300048828125,
+                "win_rate": 0.5,
+                "profit_factor": 0.98208719686575,
+                "expectancy": -8.162506103515625
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 20,
+                "long_window": 50,
+                "risk_per_trade_percent": 1.2,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_20_LW_50_Risk_1.5_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "JPM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 934.699951171875,
+                "total_return": -0.065300048828125,
+                "win_rate": 0.5,
+                "profit_factor": 0.98208719686575,
+                "expectancy": -8.162506103515625
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 20,
+                "long_window": 50,
+                "risk_per_trade_percent": 1.7999999999999998,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_20_LW_50_Risk_1.5_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "JPM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 934.699951171875,
+                "total_return": -0.065300048828125,
+                "win_rate": 0.5,
+                "profit_factor": 0.98208719686575,
+                "expectancy": -8.162506103515625
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 20,
+                "long_window": 50,
+                "risk_per_trade_percent": 1.7999999999999998,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ]
+}

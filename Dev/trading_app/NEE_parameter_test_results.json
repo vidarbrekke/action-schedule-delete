@@ -1,0 +1,938 @@
+{
+    "SW_5_LW_40_Risk_0.5_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "NEE",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 872.9401168823242,
+                "total_return": -0.12705988311767577,
+                "win_rate": 0.47368421052631576,
+                "profit_factor": 0.8908072859084506,
+                "expectancy": -51.979466689260384
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 5,
+                "long_window": 40,
+                "risk_per_trade_percent": 0.4,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_5_LW_40_Risk_0.5_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "NEE",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 872.9401168823242,
+                "total_return": -0.12705988311767577,
+                "win_rate": 0.47368421052631576,
+                "profit_factor": 0.8908072859084506,
+                "expectancy": -51.979466689260384
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 5,
+                "long_window": 40,
+                "risk_per_trade_percent": 0.4,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_5_LW_40_Risk_1_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "NEE",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 872.9401168823242,
+                "total_return": -0.12705988311767577,
+                "win_rate": 0.47368421052631576,
+                "profit_factor": 0.8908072859084506,
+                "expectancy": -51.979466689260384
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 5,
+                "long_window": 40,
+                "risk_per_trade_percent": 0.8,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_5_LW_40_Risk_1_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "NEE",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 872.9401168823242,
+                "total_return": -0.12705988311767577,
+                "win_rate": 0.47368421052631576,
+                "profit_factor": 0.8908072859084506,
+                "expectancy": -51.979466689260384
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 5,
+                "long_window": 40,
+                "risk_per_trade_percent": 0.8,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_5_LW_40_Risk_1.5_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "NEE",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 872.9401168823242,
+                "total_return": -0.12705988311767577,
+                "win_rate": 0.47368421052631576,
+                "profit_factor": 0.8908072859084506,
+                "expectancy": -51.979466689260384
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 5,
+                "long_window": 40,
+                "risk_per_trade_percent": 1.2000000000000002,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_5_LW_40_Risk_1.5_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "NEE",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 872.9401168823242,
+                "total_return": -0.12705988311767577,
+                "win_rate": 0.47368421052631576,
+                "profit_factor": 0.8908072859084506,
+                "expectancy": -51.979466689260384
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 5,
+                "long_window": 40,
+                "risk_per_trade_percent": 1.2000000000000002,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_5_LW_50_Risk_0.5_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "NEE",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 796.9299926757812,
+                "total_return": -0.20307000732421876,
+                "win_rate": 0.5,
+                "profit_factor": 0.9648750454850074,
+                "expectancy": -14.505000523158483
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 5,
+                "long_window": 50,
+                "risk_per_trade_percent": 0.4,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_5_LW_50_Risk_0.5_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "NEE",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 796.9299926757812,
+                "total_return": -0.20307000732421876,
+                "win_rate": 0.5,
+                "profit_factor": 0.9648750454850074,
+                "expectancy": -14.505000523158483
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 5,
+                "long_window": 50,
+                "risk_per_trade_percent": 0.4,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_5_LW_50_Risk_1_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "NEE",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 796.9299926757812,
+                "total_return": -0.20307000732421876,
+                "win_rate": 0.5,
+                "profit_factor": 0.9648750454850074,
+                "expectancy": -14.505000523158483
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 5,
+                "long_window": 50,
+                "risk_per_trade_percent": 0.8,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_5_LW_50_Risk_1_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "NEE",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 796.9299926757812,
+                "total_return": -0.20307000732421876,
+                "win_rate": 0.5,
+                "profit_factor": 0.9648750454850074,
+                "expectancy": -14.505000523158483
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 5,
+                "long_window": 50,
+                "risk_per_trade_percent": 0.8,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_5_LW_50_Risk_1.5_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "NEE",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 796.9299926757812,
+                "total_return": -0.20307000732421876,
+                "win_rate": 0.5,
+                "profit_factor": 0.9648750454850074,
+                "expectancy": -14.505000523158483
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 5,
+                "long_window": 50,
+                "risk_per_trade_percent": 1.2000000000000002,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_5_LW_50_Risk_1.5_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "NEE",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 796.9299926757812,
+                "total_return": -0.20307000732421876,
+                "win_rate": 0.5,
+                "profit_factor": 0.9648750454850074,
+                "expectancy": -14.505000523158483
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 5,
+                "long_window": 50,
+                "risk_per_trade_percent": 1.2000000000000002,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_15_LW_40_Risk_0.5_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "NEE",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 1114.6999778747559,
+                "total_return": 0.11469997787475586,
+                "win_rate": 0.4444444444444444,
+                "profit_factor": 0.79698093210548,
+                "expectancy": -108.37000020345052
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 15,
+                "long_window": 40,
+                "risk_per_trade_percent": 0.4,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_15_LW_40_Risk_0.5_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "NEE",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 1114.6999778747559,
+                "total_return": 0.11469997787475586,
+                "win_rate": 0.4444444444444444,
+                "profit_factor": 0.79698093210548,
+                "expectancy": -108.37000020345052
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 15,
+                "long_window": 40,
+                "risk_per_trade_percent": 0.4,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_15_LW_40_Risk_1_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "NEE",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 1114.6999778747559,
+                "total_return": 0.11469997787475586,
+                "win_rate": 0.4444444444444444,
+                "profit_factor": 0.79698093210548,
+                "expectancy": -108.37000020345052
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 15,
+                "long_window": 40,
+                "risk_per_trade_percent": 0.8,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_15_LW_40_Risk_1_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "NEE",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 1114.6999778747559,
+                "total_return": 0.11469997787475586,
+                "win_rate": 0.4444444444444444,
+                "profit_factor": 0.79698093210548,
+                "expectancy": -108.37000020345052
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 15,
+                "long_window": 40,
+                "risk_per_trade_percent": 0.8,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_15_LW_40_Risk_1.5_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "NEE",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 1114.6999778747559,
+                "total_return": 0.11469997787475586,
+                "win_rate": 0.4444444444444444,
+                "profit_factor": 0.79698093210548,
+                "expectancy": -108.37000020345052
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 15,
+                "long_window": 40,
+                "risk_per_trade_percent": 1.2000000000000002,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_15_LW_40_Risk_1.5_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "NEE",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 1114.6999778747559,
+                "total_return": 0.11469997787475586,
+                "win_rate": 0.4444444444444444,
+                "profit_factor": 0.79698093210548,
+                "expectancy": -108.37000020345052
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 15,
+                "long_window": 40,
+                "risk_per_trade_percent": 1.2000000000000002,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_15_LW_50_Risk_0.5_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "NEE",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 1010.8999404907227,
+                "total_return": 0.010899940490722656,
+                "win_rate": 0.5,
+                "profit_factor": 1.0028316828804709,
+                "expectancy": 1.362492561340332
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 15,
+                "long_window": 50,
+                "risk_per_trade_percent": 0.4,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_15_LW_50_Risk_0.5_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "NEE",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 1010.8999404907227,
+                "total_return": 0.010899940490722656,
+                "win_rate": 0.5,
+                "profit_factor": 1.0028316828804709,
+                "expectancy": 1.362492561340332
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 15,
+                "long_window": 50,
+                "risk_per_trade_percent": 0.4,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_15_LW_50_Risk_1_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "NEE",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 1010.8999404907227,
+                "total_return": 0.010899940490722656,
+                "win_rate": 0.5,
+                "profit_factor": 1.0028316828804709,
+                "expectancy": 1.362492561340332
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 15,
+                "long_window": 50,
+                "risk_per_trade_percent": 0.8,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_15_LW_50_Risk_1_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "NEE",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 1010.8999404907227,
+                "total_return": 0.010899940490722656,
+                "win_rate": 0.5,
+                "profit_factor": 1.0028316828804709,
+                "expectancy": 1.362492561340332
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 15,
+                "long_window": 50,
+                "risk_per_trade_percent": 0.8,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_15_LW_50_Risk_1.5_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "NEE",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 1010.8999404907227,
+                "total_return": 0.010899940490722656,
+                "win_rate": 0.5,
+                "profit_factor": 1.0028316828804709,
+                "expectancy": 1.362492561340332
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 15,
+                "long_window": 50,
+                "risk_per_trade_percent": 1.2000000000000002,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_15_LW_50_Risk_1.5_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "NEE",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 1010.8999404907227,
+                "total_return": 0.010899940490722656,
+                "win_rate": 0.5,
+                "profit_factor": 1.0028316828804709,
+                "expectancy": 1.362492561340332
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 15,
+                "long_window": 50,
+                "risk_per_trade_percent": 1.2000000000000002,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_20_LW_40_Risk_0.5_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "NEE",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 1063.029899597168,
+                "total_return": 0.06302989959716797,
+                "win_rate": 0.4444444444444444,
+                "profit_factor": 0.8007299606021505,
+                "expectancy": -107.73667568630643
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 20,
+                "long_window": 40,
+                "risk_per_trade_percent": 0.4,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_20_LW_40_Risk_0.5_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "NEE",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 1063.029899597168,
+                "total_return": 0.06302989959716797,
+                "win_rate": 0.4444444444444444,
+                "profit_factor": 0.8007299606021505,
+                "expectancy": -107.73667568630643
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 20,
+                "long_window": 40,
+                "risk_per_trade_percent": 0.4,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_20_LW_40_Risk_1_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "NEE",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 1063.029899597168,
+                "total_return": 0.06302989959716797,
+                "win_rate": 0.4444444444444444,
+                "profit_factor": 0.8007299606021505,
+                "expectancy": -107.73667568630643
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 20,
+                "long_window": 40,
+                "risk_per_trade_percent": 0.8,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_20_LW_40_Risk_1_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "NEE",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 1063.029899597168,
+                "total_return": 0.06302989959716797,
+                "win_rate": 0.4444444444444444,
+                "profit_factor": 0.8007299606021505,
+                "expectancy": -107.73667568630643
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 20,
+                "long_window": 40,
+                "risk_per_trade_percent": 0.8,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_20_LW_40_Risk_1.5_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "NEE",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 1063.029899597168,
+                "total_return": 0.06302989959716797,
+                "win_rate": 0.4444444444444444,
+                "profit_factor": 0.8007299606021505,
+                "expectancy": -107.73667568630643
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 20,
+                "long_window": 40,
+                "risk_per_trade_percent": 1.2000000000000002,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_20_LW_40_Risk_1.5_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "NEE",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 1063.029899597168,
+                "total_return": 0.06302989959716797,
+                "win_rate": 0.4444444444444444,
+                "profit_factor": 0.8007299606021505,
+                "expectancy": -107.73667568630643
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 20,
+                "long_window": 40,
+                "risk_per_trade_percent": 1.2000000000000002,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_20_LW_50_Risk_0.5_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "NEE",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 903.4300003051758,
+                "total_return": -0.09656999969482422,
+                "win_rate": 0.5,
+                "profit_factor": 0.9733828360037907,
+                "expectancy": -12.071249961853027
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 20,
+                "long_window": 50,
+                "risk_per_trade_percent": 0.4,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_20_LW_50_Risk_0.5_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "NEE",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 903.4300003051758,
+                "total_return": -0.09656999969482422,
+                "win_rate": 0.5,
+                "profit_factor": 0.9733828360037907,
+                "expectancy": -12.071249961853027
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 20,
+                "long_window": 50,
+                "risk_per_trade_percent": 0.4,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_20_LW_50_Risk_1_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "NEE",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 903.4300003051758,
+                "total_return": -0.09656999969482422,
+                "win_rate": 0.5,
+                "profit_factor": 0.9733828360037907,
+                "expectancy": -12.071249961853027
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 20,
+                "long_window": 50,
+                "risk_per_trade_percent": 0.8,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_20_LW_50_Risk_1_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "NEE",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 903.4300003051758,
+                "total_return": -0.09656999969482422,
+                "win_rate": 0.5,
+                "profit_factor": 0.9733828360037907,
+                "expectancy": -12.071249961853027
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 20,
+                "long_window": 50,
+                "risk_per_trade_percent": 0.8,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_20_LW_50_Risk_1.5_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "NEE",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 903.4300003051758,
+                "total_return": -0.09656999969482422,
+                "win_rate": 0.5,
+                "profit_factor": 0.9733828360037907,
+                "expectancy": -12.071249961853027
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 20,
+                "long_window": 50,
+                "risk_per_trade_percent": 1.2000000000000002,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_20_LW_50_Risk_1.5_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "NEE",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 903.4300003051758,
+                "total_return": -0.09656999969482422,
+                "win_rate": 0.5,
+                "profit_factor": 0.9733828360037907,
+                "expectancy": -12.071249961853027
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 20,
+                "long_window": 50,
+                "risk_per_trade_percent": 1.2000000000000002,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ]
+}

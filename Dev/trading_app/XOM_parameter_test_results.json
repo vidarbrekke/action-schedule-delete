@@ -1,0 +1,938 @@
+{
+    "SW_5_LW_40_Risk_0.5_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "XOM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 1132.200080871582,
+                "total_return": 0.13220008087158203,
+                "win_rate": 0.5,
+                "profit_factor": 1.0150291411738166,
+                "expectancy": 8.262505054473877
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 5,
+                "long_window": 40,
+                "risk_per_trade_percent": 0.4,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_5_LW_40_Risk_0.5_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "XOM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 1132.200080871582,
+                "total_return": 0.13220008087158203,
+                "win_rate": 0.5,
+                "profit_factor": 1.0150291411738166,
+                "expectancy": 8.262505054473877
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 5,
+                "long_window": 40,
+                "risk_per_trade_percent": 0.4,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_5_LW_40_Risk_1_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "XOM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 1132.200080871582,
+                "total_return": 0.13220008087158203,
+                "win_rate": 0.5,
+                "profit_factor": 1.0150291411738166,
+                "expectancy": 8.262505054473877
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 5,
+                "long_window": 40,
+                "risk_per_trade_percent": 0.8,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_5_LW_40_Risk_1_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "XOM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 1132.200080871582,
+                "total_return": 0.13220008087158203,
+                "win_rate": 0.5,
+                "profit_factor": 1.0150291411738166,
+                "expectancy": 8.262505054473877
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 5,
+                "long_window": 40,
+                "risk_per_trade_percent": 0.8,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_5_LW_40_Risk_1.5_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "XOM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 1132.200080871582,
+                "total_return": 0.13220008087158203,
+                "win_rate": 0.5,
+                "profit_factor": 1.0150291411738166,
+                "expectancy": 8.262505054473877
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 5,
+                "long_window": 40,
+                "risk_per_trade_percent": 1.2000000000000002,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_5_LW_40_Risk_1.5_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "XOM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 1132.200080871582,
+                "total_return": 0.13220008087158203,
+                "win_rate": 0.5,
+                "profit_factor": 1.0150291411738166,
+                "expectancy": 8.262505054473877
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 5,
+                "long_window": 40,
+                "risk_per_trade_percent": 1.2000000000000002,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_5_LW_50_Risk_0.5_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "XOM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 1058.8699493408203,
+                "total_return": 0.058869949340820314,
+                "win_rate": 0.5,
+                "profit_factor": 1.0069614535112037,
+                "expectancy": 3.6793718338012695
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 5,
+                "long_window": 50,
+                "risk_per_trade_percent": 0.4,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_5_LW_50_Risk_0.5_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "XOM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 1058.8699493408203,
+                "total_return": 0.058869949340820314,
+                "win_rate": 0.5,
+                "profit_factor": 1.0069614535112037,
+                "expectancy": 3.6793718338012695
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 5,
+                "long_window": 50,
+                "risk_per_trade_percent": 0.4,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_5_LW_50_Risk_1_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "XOM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 1058.8699493408203,
+                "total_return": 0.058869949340820314,
+                "win_rate": 0.5,
+                "profit_factor": 1.0069614535112037,
+                "expectancy": 3.6793718338012695
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 5,
+                "long_window": 50,
+                "risk_per_trade_percent": 0.8,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_5_LW_50_Risk_1_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "XOM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 1058.8699493408203,
+                "total_return": 0.058869949340820314,
+                "win_rate": 0.5,
+                "profit_factor": 1.0069614535112037,
+                "expectancy": 3.6793718338012695
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 5,
+                "long_window": 50,
+                "risk_per_trade_percent": 0.8,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_5_LW_50_Risk_1.5_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "XOM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 1058.8699493408203,
+                "total_return": 0.058869949340820314,
+                "win_rate": 0.5,
+                "profit_factor": 1.0069614535112037,
+                "expectancy": 3.6793718338012695
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 5,
+                "long_window": 50,
+                "risk_per_trade_percent": 1.2000000000000002,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_5_LW_50_Risk_1.5_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "XOM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 1058.8699493408203,
+                "total_return": 0.058869949340820314,
+                "win_rate": 0.5,
+                "profit_factor": 1.0069614535112037,
+                "expectancy": 3.6793718338012695
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 5,
+                "long_window": 50,
+                "risk_per_trade_percent": 1.2000000000000002,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_15_LW_40_Risk_0.5_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "XOM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 1142.7199630737305,
+                "total_return": 0.14271996307373047,
+                "win_rate": 0.5,
+                "profit_factor": 1.0217161024167758,
+                "expectancy": 11.893330256144205
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 15,
+                "long_window": 40,
+                "risk_per_trade_percent": 0.4,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_15_LW_40_Risk_0.5_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "XOM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 1142.7199630737305,
+                "total_return": 0.14271996307373047,
+                "win_rate": 0.5,
+                "profit_factor": 1.0217161024167758,
+                "expectancy": 11.893330256144205
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 15,
+                "long_window": 40,
+                "risk_per_trade_percent": 0.4,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_15_LW_40_Risk_1_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "XOM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 1142.7199630737305,
+                "total_return": 0.14271996307373047,
+                "win_rate": 0.5,
+                "profit_factor": 1.0217161024167758,
+                "expectancy": 11.893330256144205
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 15,
+                "long_window": 40,
+                "risk_per_trade_percent": 0.8,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_15_LW_40_Risk_1_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "XOM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 1142.7199630737305,
+                "total_return": 0.14271996307373047,
+                "win_rate": 0.5,
+                "profit_factor": 1.0217161024167758,
+                "expectancy": 11.893330256144205
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 15,
+                "long_window": 40,
+                "risk_per_trade_percent": 0.8,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_15_LW_40_Risk_1.5_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "XOM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 1142.7199630737305,
+                "total_return": 0.14271996307373047,
+                "win_rate": 0.5,
+                "profit_factor": 1.0217161024167758,
+                "expectancy": 11.893330256144205
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 15,
+                "long_window": 40,
+                "risk_per_trade_percent": 1.2000000000000002,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_15_LW_40_Risk_1.5_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "XOM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 1142.7199630737305,
+                "total_return": 0.14271996307373047,
+                "win_rate": 0.5,
+                "profit_factor": 1.0217161024167758,
+                "expectancy": 11.893330256144205
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 15,
+                "long_window": 40,
+                "risk_per_trade_percent": 1.2000000000000002,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_15_LW_50_Risk_0.5_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "XOM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 1049.0700607299805,
+                "total_return": 0.04907006072998047,
+                "win_rate": 0.5,
+                "profit_factor": 1.0078886968001393,
+                "expectancy": 4.089171727498372
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 15,
+                "long_window": 50,
+                "risk_per_trade_percent": 0.4,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_15_LW_50_Risk_0.5_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "XOM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 1049.0700607299805,
+                "total_return": 0.04907006072998047,
+                "win_rate": 0.5,
+                "profit_factor": 1.0078886968001393,
+                "expectancy": 4.089171727498372
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 15,
+                "long_window": 50,
+                "risk_per_trade_percent": 0.4,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_15_LW_50_Risk_1_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "XOM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 1049.0700607299805,
+                "total_return": 0.04907006072998047,
+                "win_rate": 0.5,
+                "profit_factor": 1.0078886968001393,
+                "expectancy": 4.089171727498372
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 15,
+                "long_window": 50,
+                "risk_per_trade_percent": 0.8,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_15_LW_50_Risk_1_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "XOM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 1049.0700607299805,
+                "total_return": 0.04907006072998047,
+                "win_rate": 0.5,
+                "profit_factor": 1.0078886968001393,
+                "expectancy": 4.089171727498372
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 15,
+                "long_window": 50,
+                "risk_per_trade_percent": 0.8,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_15_LW_50_Risk_1.5_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "XOM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 1049.0700607299805,
+                "total_return": 0.04907006072998047,
+                "win_rate": 0.5,
+                "profit_factor": 1.0078886968001393,
+                "expectancy": 4.089171727498372
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 15,
+                "long_window": 50,
+                "risk_per_trade_percent": 1.2000000000000002,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_15_LW_50_Risk_1.5_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "XOM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 1049.0700607299805,
+                "total_return": 0.04907006072998047,
+                "win_rate": 0.5,
+                "profit_factor": 1.0078886968001393,
+                "expectancy": 4.089171727498372
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 15,
+                "long_window": 50,
+                "risk_per_trade_percent": 1.2000000000000002,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_20_LW_40_Risk_0.5_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "XOM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 860.7099380493164,
+                "total_return": -0.13929006195068358,
+                "win_rate": 0.5,
+                "profit_factor": 0.9780847813772318,
+                "expectancy": -9.949290139334542
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 20,
+                "long_window": 40,
+                "risk_per_trade_percent": 0.4,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_20_LW_40_Risk_0.5_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "XOM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 860.7099380493164,
+                "total_return": -0.13929006195068358,
+                "win_rate": 0.5,
+                "profit_factor": 0.9780847813772318,
+                "expectancy": -9.949290139334542
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 20,
+                "long_window": 40,
+                "risk_per_trade_percent": 0.4,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_20_LW_40_Risk_1_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "XOM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 860.7099380493164,
+                "total_return": -0.13929006195068358,
+                "win_rate": 0.5,
+                "profit_factor": 0.9780847813772318,
+                "expectancy": -9.949290139334542
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 20,
+                "long_window": 40,
+                "risk_per_trade_percent": 0.8,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_20_LW_40_Risk_1_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "XOM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 860.7099380493164,
+                "total_return": -0.13929006195068358,
+                "win_rate": 0.5,
+                "profit_factor": 0.9780847813772318,
+                "expectancy": -9.949290139334542
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 20,
+                "long_window": 40,
+                "risk_per_trade_percent": 0.8,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_20_LW_40_Risk_1.5_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "XOM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 860.7099380493164,
+                "total_return": -0.13929006195068358,
+                "win_rate": 0.5,
+                "profit_factor": 0.9780847813772318,
+                "expectancy": -9.949290139334542
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 20,
+                "long_window": 40,
+                "risk_per_trade_percent": 1.2000000000000002,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_20_LW_40_Risk_1.5_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "XOM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 860.7099380493164,
+                "total_return": -0.13929006195068358,
+                "win_rate": 0.5,
+                "profit_factor": 0.9780847813772318,
+                "expectancy": -9.949290139334542
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 20,
+                "long_window": 40,
+                "risk_per_trade_percent": 1.2000000000000002,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_20_LW_50_Risk_0.5_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "XOM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 897.2700042724609,
+                "total_return": -0.10272999572753906,
+                "win_rate": 0.5,
+                "profit_factor": 0.9821532195168647,
+                "expectancy": -8.560832977294922
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 20,
+                "long_window": 50,
+                "risk_per_trade_percent": 0.4,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_20_LW_50_Risk_0.5_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "XOM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 897.2700042724609,
+                "total_return": -0.10272999572753906,
+                "win_rate": 0.5,
+                "profit_factor": 0.9821532195168647,
+                "expectancy": -8.560832977294922
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 20,
+                "long_window": 50,
+                "risk_per_trade_percent": 0.4,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_20_LW_50_Risk_1_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "XOM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 897.2700042724609,
+                "total_return": -0.10272999572753906,
+                "win_rate": 0.5,
+                "profit_factor": 0.9821532195168647,
+                "expectancy": -8.560832977294922
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 20,
+                "long_window": 50,
+                "risk_per_trade_percent": 0.8,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_20_LW_50_Risk_1_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "XOM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 897.2700042724609,
+                "total_return": -0.10272999572753906,
+                "win_rate": 0.5,
+                "profit_factor": 0.9821532195168647,
+                "expectancy": -8.560832977294922
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 20,
+                "long_window": 50,
+                "risk_per_trade_percent": 0.8,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_20_LW_50_Risk_1.5_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "XOM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 897.2700042724609,
+                "total_return": -0.10272999572753906,
+                "win_rate": 0.5,
+                "profit_factor": 0.9821532195168647,
+                "expectancy": -8.560832977294922
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 20,
+                "long_window": 50,
+                "risk_per_trade_percent": 1.2000000000000002,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_20_LW_50_Risk_1.5_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "XOM",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 897.2700042724609,
+                "total_return": -0.10272999572753906,
+                "win_rate": 0.5,
+                "profit_factor": 0.9821532195168647,
+                "expectancy": -8.560832977294922
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 20,
+                "long_window": 50,
+                "risk_per_trade_percent": 1.2000000000000002,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.024,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ]
+}

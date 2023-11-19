@@ -1,0 +1,938 @@
+{
+    "SW_5_LW_40_Risk_0.5_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "KO",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 936.8300895690918,
+                "total_return": -0.06316991043090821,
+                "win_rate": 0.47058823529411764,
+                "profit_factor": 0.8810768202851834,
+                "expectancy": -57.50411381441004
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 5,
+                "long_window": 40,
+                "risk_per_trade_percent": 0.6,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_5_LW_40_Risk_0.5_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "KO",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 936.8300895690918,
+                "total_return": -0.06316991043090821,
+                "win_rate": 0.47058823529411764,
+                "profit_factor": 0.8810768202851834,
+                "expectancy": -57.50411381441004
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 5,
+                "long_window": 40,
+                "risk_per_trade_percent": 0.6,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_5_LW_40_Risk_1_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "KO",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 936.8300895690918,
+                "total_return": -0.06316991043090821,
+                "win_rate": 0.47058823529411764,
+                "profit_factor": 0.8810768202851834,
+                "expectancy": -57.50411381441004
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 5,
+                "long_window": 40,
+                "risk_per_trade_percent": 1.2,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_5_LW_40_Risk_1_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "KO",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 936.8300895690918,
+                "total_return": -0.06316991043090821,
+                "win_rate": 0.47058823529411764,
+                "profit_factor": 0.8810768202851834,
+                "expectancy": -57.50411381441004
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 5,
+                "long_window": 40,
+                "risk_per_trade_percent": 1.2,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_5_LW_40_Risk_1.5_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "KO",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 936.8300895690918,
+                "total_return": -0.06316991043090821,
+                "win_rate": 0.47058823529411764,
+                "profit_factor": 0.8810768202851834,
+                "expectancy": -57.50411381441004
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 5,
+                "long_window": 40,
+                "risk_per_trade_percent": 1.7999999999999998,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_5_LW_40_Risk_1.5_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "KO",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 936.8300895690918,
+                "total_return": -0.06316991043090821,
+                "win_rate": 0.47058823529411764,
+                "profit_factor": 0.8810768202851834,
+                "expectancy": -57.50411381441004
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 5,
+                "long_window": 40,
+                "risk_per_trade_percent": 1.7999999999999998,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_5_LW_50_Risk_0.5_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "KO",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 881.2201080322266,
+                "total_return": -0.11877989196777344,
+                "win_rate": 0.47619047619047616,
+                "profit_factor": 0.9007582283717522,
+                "expectancy": -46.47761499314081
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 5,
+                "long_window": 50,
+                "risk_per_trade_percent": 0.6,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_5_LW_50_Risk_0.5_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "KO",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 881.2201080322266,
+                "total_return": -0.11877989196777344,
+                "win_rate": 0.47619047619047616,
+                "profit_factor": 0.9007582283717522,
+                "expectancy": -46.47761499314081
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 5,
+                "long_window": 50,
+                "risk_per_trade_percent": 0.6,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_5_LW_50_Risk_1_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "KO",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 881.2201080322266,
+                "total_return": -0.11877989196777344,
+                "win_rate": 0.47619047619047616,
+                "profit_factor": 0.9007582283717522,
+                "expectancy": -46.47761499314081
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 5,
+                "long_window": 50,
+                "risk_per_trade_percent": 1.2,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_5_LW_50_Risk_1_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "KO",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 881.2201080322266,
+                "total_return": -0.11877989196777344,
+                "win_rate": 0.47619047619047616,
+                "profit_factor": 0.9007582283717522,
+                "expectancy": -46.47761499314081
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 5,
+                "long_window": 50,
+                "risk_per_trade_percent": 1.2,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_5_LW_50_Risk_1.5_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "KO",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 881.2201080322266,
+                "total_return": -0.11877989196777344,
+                "win_rate": 0.47619047619047616,
+                "profit_factor": 0.9007582283717522,
+                "expectancy": -46.47761499314081
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 5,
+                "long_window": 50,
+                "risk_per_trade_percent": 1.7999999999999998,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_5_LW_50_Risk_1.5_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "KO",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 881.2201080322266,
+                "total_return": -0.11877989196777344,
+                "win_rate": 0.47619047619047616,
+                "profit_factor": 0.9007582283717522,
+                "expectancy": -46.47761499314081
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 5,
+                "long_window": 50,
+                "risk_per_trade_percent": 1.7999999999999998,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_15_LW_40_Risk_0.5_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "KO",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 959.0200653076172,
+                "total_return": -0.04097993469238281,
+                "win_rate": 0.46153846153846156,
+                "profit_factor": 0.855287777608293,
+                "expectancy": -73.49076608511118
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 15,
+                "long_window": 40,
+                "risk_per_trade_percent": 0.6,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_15_LW_40_Risk_0.5_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "KO",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 959.0200653076172,
+                "total_return": -0.04097993469238281,
+                "win_rate": 0.46153846153846156,
+                "profit_factor": 0.855287777608293,
+                "expectancy": -73.49076608511118
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 15,
+                "long_window": 40,
+                "risk_per_trade_percent": 0.6,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_15_LW_40_Risk_1_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "KO",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 959.0200653076172,
+                "total_return": -0.04097993469238281,
+                "win_rate": 0.46153846153846156,
+                "profit_factor": 0.855287777608293,
+                "expectancy": -73.49076608511118
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 15,
+                "long_window": 40,
+                "risk_per_trade_percent": 1.2,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_15_LW_40_Risk_1_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "KO",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 959.0200653076172,
+                "total_return": -0.04097993469238281,
+                "win_rate": 0.46153846153846156,
+                "profit_factor": 0.855287777608293,
+                "expectancy": -73.49076608511118
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 15,
+                "long_window": 40,
+                "risk_per_trade_percent": 1.2,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_15_LW_40_Risk_1.5_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "KO",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 959.0200653076172,
+                "total_return": -0.04097993469238281,
+                "win_rate": 0.46153846153846156,
+                "profit_factor": 0.855287777608293,
+                "expectancy": -73.49076608511118
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 15,
+                "long_window": 40,
+                "risk_per_trade_percent": 1.7999999999999998,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_15_LW_40_Risk_1.5_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "KO",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 959.0200653076172,
+                "total_return": -0.04097993469238281,
+                "win_rate": 0.46153846153846156,
+                "profit_factor": 0.855287777608293,
+                "expectancy": -73.49076608511118
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 15,
+                "long_window": 40,
+                "risk_per_trade_percent": 1.7999999999999998,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_15_LW_50_Risk_0.5_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "KO",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 928.5100593566895,
+                "total_return": -0.07148994064331055,
+                "win_rate": 0.4666666666666667,
+                "profit_factor": 0.8697458208528906,
+                "expectancy": -65.72599767049154
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 15,
+                "long_window": 50,
+                "risk_per_trade_percent": 0.6,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_15_LW_50_Risk_0.5_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "KO",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 928.5100593566895,
+                "total_return": -0.07148994064331055,
+                "win_rate": 0.4666666666666667,
+                "profit_factor": 0.8697458208528906,
+                "expectancy": -65.72599767049154
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 15,
+                "long_window": 50,
+                "risk_per_trade_percent": 0.6,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_15_LW_50_Risk_1_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "KO",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 928.5100593566895,
+                "total_return": -0.07148994064331055,
+                "win_rate": 0.4666666666666667,
+                "profit_factor": 0.8697458208528906,
+                "expectancy": -65.72599767049154
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 15,
+                "long_window": 50,
+                "risk_per_trade_percent": 1.2,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_15_LW_50_Risk_1_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "KO",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 928.5100593566895,
+                "total_return": -0.07148994064331055,
+                "win_rate": 0.4666666666666667,
+                "profit_factor": 0.8697458208528906,
+                "expectancy": -65.72599767049154
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 15,
+                "long_window": 50,
+                "risk_per_trade_percent": 1.2,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_15_LW_50_Risk_1.5_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "KO",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 928.5100593566895,
+                "total_return": -0.07148994064331055,
+                "win_rate": 0.4666666666666667,
+                "profit_factor": 0.8697458208528906,
+                "expectancy": -65.72599767049154
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 15,
+                "long_window": 50,
+                "risk_per_trade_percent": 1.7999999999999998,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_15_LW_50_Risk_1.5_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "KO",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 928.5100593566895,
+                "total_return": -0.07148994064331055,
+                "win_rate": 0.4666666666666667,
+                "profit_factor": 0.8697458208528906,
+                "expectancy": -65.72599767049154
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 15,
+                "long_window": 50,
+                "risk_per_trade_percent": 1.7999999999999998,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_20_LW_40_Risk_0.5_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "KO",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 964.7599716186523,
+                "total_return": -0.035240028381347654,
+                "win_rate": 0.46153846153846156,
+                "profit_factor": 0.8581038403488856,
+                "expectancy": -73.04923483041617
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 20,
+                "long_window": 40,
+                "risk_per_trade_percent": 0.6,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_20_LW_40_Risk_0.5_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "KO",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 964.7599716186523,
+                "total_return": -0.035240028381347654,
+                "win_rate": 0.46153846153846156,
+                "profit_factor": 0.8581038403488856,
+                "expectancy": -73.04923483041617
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 20,
+                "long_window": 40,
+                "risk_per_trade_percent": 0.6,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_20_LW_40_Risk_1_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "KO",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 964.7599716186523,
+                "total_return": -0.035240028381347654,
+                "win_rate": 0.46153846153846156,
+                "profit_factor": 0.8581038403488856,
+                "expectancy": -73.04923483041617
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 20,
+                "long_window": 40,
+                "risk_per_trade_percent": 1.2,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_20_LW_40_Risk_1_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "KO",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 964.7599716186523,
+                "total_return": -0.035240028381347654,
+                "win_rate": 0.46153846153846156,
+                "profit_factor": 0.8581038403488856,
+                "expectancy": -73.04923483041617
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 20,
+                "long_window": 40,
+                "risk_per_trade_percent": 1.2,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_20_LW_40_Risk_1.5_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "KO",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 964.7599716186523,
+                "total_return": -0.035240028381347654,
+                "win_rate": 0.46153846153846156,
+                "profit_factor": 0.8581038403488856,
+                "expectancy": -73.04923483041617
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 20,
+                "long_window": 40,
+                "risk_per_trade_percent": 1.7999999999999998,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_20_LW_40_Risk_1.5_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "KO",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 964.7599716186523,
+                "total_return": -0.035240028381347654,
+                "win_rate": 0.46153846153846156,
+                "profit_factor": 0.8581038403488856,
+                "expectancy": -73.04923483041617
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 20,
+                "long_window": 40,
+                "risk_per_trade_percent": 1.7999999999999998,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_20_LW_50_Risk_0.5_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "KO",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 887.7599868774414,
+                "total_return": -0.11224001312255859,
+                "win_rate": 0.46153846153846156,
+                "profit_factor": 0.849162484632893,
+                "expectancy": -74.57615661621094
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 20,
+                "long_window": 50,
+                "risk_per_trade_percent": 0.6,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_20_LW_50_Risk_0.5_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "KO",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 887.7599868774414,
+                "total_return": -0.11224001312255859,
+                "win_rate": 0.46153846153846156,
+                "profit_factor": 0.849162484632893,
+                "expectancy": -74.57615661621094
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 20,
+                "long_window": 50,
+                "risk_per_trade_percent": 0.6,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_20_LW_50_Risk_1_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "KO",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 887.7599868774414,
+                "total_return": -0.11224001312255859,
+                "win_rate": 0.46153846153846156,
+                "profit_factor": 0.849162484632893,
+                "expectancy": -74.57615661621094
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 20,
+                "long_window": 50,
+                "risk_per_trade_percent": 1.2,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_20_LW_50_Risk_1_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "KO",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 887.7599868774414,
+                "total_return": -0.11224001312255859,
+                "win_rate": 0.46153846153846156,
+                "profit_factor": 0.849162484632893,
+                "expectancy": -74.57615661621094
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 20,
+                "long_window": 50,
+                "risk_per_trade_percent": 1.2,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_20_LW_50_Risk_1.5_RR_2": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "KO",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 887.7599868774414,
+                "total_return": -0.11224001312255859,
+                "win_rate": 0.46153846153846156,
+                "profit_factor": 0.849162484632893,
+                "expectancy": -74.57615661621094
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 20,
+                "long_window": 50,
+                "risk_per_trade_percent": 1.7999999999999998,
+                "risk_reward_ratio": 2,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ],
+    "SW_20_LW_50_Risk_1.5_RR_3": [
+        {
+            "strategy_name": "SMA_Strategy",
+            "ticker": "KO",
+            "metrics": {
+                "strategy": "SMA_Strategy",
+                "final_balance": 887.7599868774414,
+                "total_return": -0.11224001312255859,
+                "win_rate": 0.46153846153846156,
+                "profit_factor": 0.849162484632893,
+                "expectancy": -74.57615661621094
+            },
+            "strategy_params": {
+                "strategy_name": "SMA_Strategy",
+                "short_window": 20,
+                "long_window": 50,
+                "risk_per_trade_percent": 1.7999999999999998,
+                "risk_reward_ratio": 3,
+                "stop_loss_percent": 0.016,
+                "take_profit_percent": 0.04,
+                "max_drawdown_percent": 0.15,
+                "cooldown_period_minutes": 30,
+                "first_trade_limit_percent": 0.25
+            }
+        }
+    ]
+}
