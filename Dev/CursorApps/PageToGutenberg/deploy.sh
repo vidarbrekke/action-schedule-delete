@@ -13,7 +13,7 @@ REMOTE_PATH="/home/staging/public_html"
 REMOTE_WP_PATH="/home/staging/public_html"
 
 # Check if a command was provided
-COMMAND=${1:-"package"}
+COMMAND=${1:-"deploy"}
 
 # Files and directories to include in the package
 INCLUDE_FILES=(
@@ -24,6 +24,8 @@ INCLUDE_FILES=(
     "assets"
     "languages"
     "uninstall.php"
+    "composer.json"
+    "helpers.php"
 )
 
 # Files and directories to exclude
@@ -136,6 +138,42 @@ update_changelog() {
     echo "Updated CHANGELOG.md with new version $new_version"
 }
 
+# Function to deploy and install dependencies
+deploy_with_composer() {
+    echo "Deploying to staging server with Composer dependencies..."
+    
+    # Create exclude patterns for rsync
+    excludes=""
+    for pattern in "${EXCLUDE_FILES[@]}"; do
+        excludes+=" --exclude='$pattern'"
+    done
+    
+    # Use rsync to transfer files directly to the server (excluding vendor directory)
+    rsync -avzi --delete $excludes --exclude="vendor" ./ "${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_PATH}/wp-content/plugins/${PLUGIN_SLUG}/" || {
+        echo "Error: Failed to rsync files to staging server"
+        exit 1
+    }
+    
+    echo "Files transferred. Installing Composer dependencies on the server..."
+    
+    # Run composer install on the server and fix the helpers.php file
+    ssh "${REMOTE_USER}@${REMOTE_HOST}" "cd ${REMOTE_PATH}/wp-content/plugins/${PLUGIN_SLUG} && 
+        composer install --no-dev --optimize-autoloader &&
+        mkdir -p ./vendor/hstanleycrow/easyphparticleextractor/src/ &&
+        cp ./helpers.php ./vendor/hstanleycrow/easyphparticleextractor/src/" || {
+        echo "Error: Failed to run Composer on the remote server."
+        echo "Please check if Composer is installed on the server and try again."
+        exit 1
+    }
+    
+    # Activate the plugin remotely
+    ssh "${REMOTE_USER}@${REMOTE_HOST}" "cd ${REMOTE_WP_PATH} && wp plugin activate ${PLUGIN_SLUG}" || {
+        echo "Warning: Failed to activate plugin remotely. It may need to be activated manually."
+    }
+    
+    echo "Deployment with Composer dependencies complete!"
+}
+
 # Function to validate menu slug consistency
 validate_menu_slug() {
     echo "Validating menu slug consistency..."
@@ -163,113 +201,18 @@ validate_menu_slug() {
     echo "Menu slug validation complete."
 }
 
-# Function to create zip package
-create_package() {
-    local version=$1
-    local package_name="${PLUGIN_SLUG}-${version}.zip"
-    
-    echo "Creating package ${package_name}..."
-    
-    # Create a clean copy of the plugin
-    rm -rf "/tmp/${PLUGIN_SLUG}"
-    mkdir -p "/tmp/${PLUGIN_SLUG}"
-    
-    # Copy included files
-    for file in "${INCLUDE_FILES[@]}"; do
-        if [ -e "${file}" ]; then
-            cp -r "${file}" "/tmp/${PLUGIN_SLUG}/" || exit 1
-        else
-            echo "Warning: Included file/directory not found: ${file}"
-        fi
-    done
-    
-    # Create zip package
-    (cd "/tmp" && zip -r "$package_name" "${PLUGIN_SLUG}" -x "${EXCLUDE_FILES[@]/#/*/}") || exit 1
-    mv "/tmp/$package_name" "./$package_name" || exit 1
-    
-    echo "Package created: $package_name"
-    echo "$package_name"
-}
-
-# Function to deploy using rsync
-deploy_to_staging() {
-    echo "Deploying to staging server..."
-    
-    # First, validate menu slug consistency
-    validate_menu_slug
-    
-    # Create exclude patterns for rsync
-    excludes=""
-    for pattern in "${EXCLUDE_FILES[@]}"; do
-        excludes+=" --exclude='$pattern'"
-    done
-    
-    # Use rsync to transfer files directly to the server
-    rsync -avzi --delete $excludes ./ "${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_PATH}/wp-content/plugins/${PLUGIN_SLUG}/" || {
-        echo "Error: Failed to rsync files to staging server"
-        exit 1
-    }
-    
-    # Activate the plugin remotely
-    ssh "${REMOTE_USER}@${REMOTE_HOST}" "cd ${REMOTE_WP_PATH} && wp plugin activate ${PLUGIN_SLUG}" || {
-        echo "Warning: Failed to activate plugin remotely. It may need to be activated manually."
-    }
-    
-    echo "Deployment to staging server complete!"
-}
-
-# Main execution based on command
+# Main execution
 case "$COMMAND" in
-    "package")
-        current_version=$(get_current_version)
-        new_version=$(increment_version "$current_version")
-        
-        echo "Preparing package version $new_version..."
-        
-        # Update version numbers and changelog
-        update_version "$new_version"
-        update_changelog "$new_version"
-        
-        # Validate menu slug consistency
-        validate_menu_slug
-        
-        # Create package
-        create_package "$new_version"
-        
-        echo "Package creation complete! Version: $new_version"
-        ;;
-    
     "deploy")
-        echo "Deploying to staging server..."
-        deploy_to_staging
-        echo "Deployment complete!"
-        ;;
-    
-    "full")
-        current_version=$(get_current_version)
-        new_version=$(increment_version "$current_version")
-        
-        echo "Preparing full package and deployment for version $new_version..."
-        
-        # Update version numbers and changelog
-        update_version "$new_version"
-        update_changelog "$new_version"
-        
-        # Validate menu slug consistency
+        echo "Deploying with dependencies..."
         validate_menu_slug
-        
-        # Create package
-        package_name=$(create_package "$new_version")
-        
-        # Deploy
-        deploy_to_staging
-        
-        echo "Package creation and deployment complete! Version: $new_version"
+        deploy_with_composer
+        echo "Deployment complete!"
         ;;
     
     *)
         echo "Unknown command: $COMMAND"
-        echo "Available commands: package, deploy, full"
+        echo "Available commands: deploy"
         exit 1
         ;;
 esac
