@@ -140,9 +140,11 @@ class Content_Extractor {
             
             // Try creating a new extractor with the fetched HTML
             error_log('UTG: Attempting extraction with manually fetched HTML');
+            // Create a new extractor with the URL - we cannot directly set HTML as ArticleExtractor doesn't have a setHtml method
+            // Just fall back to manual extraction since we already have the HTML content
             $new_extractor = new ArticleExtractor($url, $user_agent);
             
-            // Try to extract content using the new HTML (we'll need to access private methods if possible)
+            // Try to extract content using the new HTML through manual extraction methods
             try {
                 // Extract using basic metadata extraction
                 preg_match('/<title[^>]*>(.*?)<\/title>/si', $html, $title_match);
@@ -665,7 +667,8 @@ class Content_Extractor {
     }
 
     /**
-     * Aggressive HTML cleaning for complex content.
+     * Aggressive HTML cleaning for content.
+     * Removes styling while maintaining basic structure.
      * 
      * @param string $html The HTML content to clean.
      * @return string The cleaned HTML content.
@@ -697,80 +700,80 @@ class Content_Extractor {
             }
         }
         
-        // Process all elements to remove unnecessary attributes
-        $this->clean_element_attributes($dom->documentElement);
+        // Process all elements to selectively remove attributes
+        $this->clean_element_attributes_aggressive($dom->documentElement);
         
-        // Special handling for table structures - preserve semantic structure but clean aggressively
+        // For tables - preserve the structure but clean attributes
         $tables = $dom->getElementsByTagName('table');
-        $table_elements = [];
         for ($i = 0; $i < $tables->length; $i++) {
-            $table_elements[] = $tables->item($i);
-        }
-        
-        foreach ($table_elements as $table) {
-            // Replace table with div but keep a class to indicate it was a table
-            $div = $dom->createElement('div');
-            $div->setAttribute('class', 'utg-table');
+            $table = $tables->item($i);
             
-            // Replace tbody, thead, tfoot with divs
-            $sections = ['tbody', 'thead', 'tfoot'];
-            foreach ($sections as $section) {
-                $elements = $table->getElementsByTagName($section);
-                $section_elements = [];
-                for ($i = 0; $i < $elements->length; $i++) {
-                    $section_elements[] = $elements->item($i);
+            // Keep the table tag but remove some attributes
+            $allowed_attrs = ['width', 'height', 'cellspacing', 'cellpadding', 'border'];
+            if ($table->hasAttributes()) {
+                $attributes = [];
+                foreach ($table->attributes as $attr) {
+                    $attributes[] = $attr->name;
                 }
                 
-                foreach ($section_elements as $element) {
-                    $section_div = $dom->createElement('div');
-                    $section_div->setAttribute('class', 'utg-' . $section);
-                    
-                    // Process rows within this section
-                    $rows = $element->getElementsByTagName('tr');
-                    $row_elements = [];
-                    for ($i = 0; $i < $rows->length; $i++) {
-                        $row_elements[] = $rows->item($i);
+                foreach ($attributes as $attr) {
+                    if (!in_array($attr, $allowed_attrs)) {
+                        $table->removeAttribute($attr);
                     }
-                    
-                    foreach ($row_elements as $row) {
-                        $row_div = $dom->createElement('div');
-                        $row_div->setAttribute('class', 'utg-tr');
-                        
-                        // Process cells
-                        $cells = $row->getElementsByTagName('td');
-                        $cell_elements = [];
-                        for ($i = 0; $i < $cells->length; $i++) {
-                            $cell_elements[] = $cells->item($i);
-                        }
-                        
-                        // Also process th cells
-                        $header_cells = $row->getElementsByTagName('th');
-                        for ($i = 0; $i < $header_cells->length; $i++) {
-                            $cell_elements[] = $header_cells->item($i);
-                        }
-                        
-                        foreach ($cell_elements as $cell) {
-                            $cell_div = $dom->createElement('div');
-                            $cell_div->setAttribute('class', 'utg-td');
-                            
-                            // Move all children to the new div
-                            while ($cell->childNodes->length > 0) {
-                                $cell_div->appendChild($cell->childNodes->item(0));
-                            }
-                            
-                            $row_div->appendChild($cell_div);
-                        }
-                        
-                        $section_div->appendChild($row_div);
-                    }
-                    
-                    $div->appendChild($section_div);
                 }
             }
             
-            // Replace the table with our cleaned div structure
-            if ($table->parentNode) {
-                $table->parentNode->replaceChild($div, $table);
+            // Process rows and cells similarly
+            $rows = $table->getElementsByTagName('tr');
+            for ($j = 0; $j < $rows->length; $j++) {
+                $row = $rows->item($j);
+                
+                // Keep alignment attributes but remove style
+                if ($row->hasAttribute('style')) {
+                    $row->removeAttribute('style');
+                }
+                if ($row->hasAttribute('class')) {
+                    $row->removeAttribute('class');
+                }
+                if ($row->hasAttribute('id')) {
+                    $row->removeAttribute('id');
+                }
+                
+                // Process cells
+                $cells = $row->getElementsByTagName('td');
+                for ($k = 0; $k < $cells->length; $k++) {
+                    $cell = $cells->item($k);
+                    
+                    // Keep some useful attributes
+                    $cell_allowed = ['width', 'height', 'rowspan', 'colspan', 'align', 'valign'];
+                    if ($cell->hasAttributes()) {
+                        $attributes = [];
+                        foreach ($cell->attributes as $attr) {
+                            $attributes[] = $attr->name;
+                        }
+                        
+                        foreach ($attributes as $attr) {
+                            if (!in_array($attr, $cell_allowed)) {
+                                $cell->removeAttribute($attr);
+                            }
+                        }
+                    }
+                }
+                
+                // Also process th cells
+                $headers = $row->getElementsByTagName('th');
+                for ($k = 0; $k < $headers->length; $k++) {
+                    $header = $headers->item($k);
+                    if ($header->hasAttribute('style')) {
+                        $header->removeAttribute('style');
+                    }
+                    if ($header->hasAttribute('class')) {
+                        $header->removeAttribute('class');
+                    }
+                    if ($header->hasAttribute('id')) {
+                        $header->removeAttribute('id');
+                    }
+                }
             }
         }
         
@@ -799,18 +802,20 @@ class Content_Extractor {
     }
     
     /**
-     * Clean attributes from an element and its children recursively.
+     * Clean attributes from an element and its children for aggressive cleaning.
+     * Removes most attributes except for essential ones.
      * 
      * @param \DOMNode $element The element to clean.
      */
-    private function clean_element_attributes($element) {
+    private function clean_element_attributes_aggressive($element) {
         if (!$element || $element->nodeType !== XML_ELEMENT_NODE) {
             return;
         }
         
-        // List of attributes to keep
+        // List of attributes to keep for aggressive cleaning
         $keep_attributes = [
-            'href', 'src', 'alt', 'title', 'colspan', 'rowspan'
+            'href', 'src', 'alt', 'title', 'colspan', 'rowspan', 'width', 'height',
+            'align', 'valign'
         ];
         
         // Remove all attributes except those in the keep list
@@ -835,14 +840,14 @@ class Content_Extractor {
             }
             
             foreach ($children as $child) {
-                $this->clean_element_attributes($child);
+                $this->clean_element_attributes_aggressive($child);
             }
         }
     }
 
     /**
      * Medium HTML cleaning for content.
-     * Preserves more structure than aggressive cleaning but removes most styling.
+     * More permissive than aggressive but cleaner than standard.
      * 
      * @param string $html The HTML content to clean.
      * @return string The cleaned HTML content.
@@ -874,70 +879,8 @@ class Content_Extractor {
             }
         }
         
-        // Process all elements to selectively remove attributes - medium level cleans less aggressively
+        // Process all elements to selectively remove attributes
         $this->clean_element_attributes_medium($dom->documentElement);
-        
-        // For tables - preserve the structure but clean some attributes
-        $tables = $dom->getElementsByTagName('table');
-        for ($i = 0; $i < $tables->length; $i++) {
-            $table = $tables->item($i);
-            
-            // Keep the table tag but remove some attributes
-            $allowed_attrs = ['width', 'height', 'cellspacing', 'cellpadding', 'border'];
-            if ($table->hasAttributes()) {
-                $attributes = [];
-                foreach ($table->attributes as $attr) {
-                    $attributes[] = $attr->name;
-                }
-                
-                foreach ($attributes as $attr) {
-                    if (!in_array($attr, $allowed_attrs) && $attr !== 'class' && $attr !== 'id') {
-                        $table->removeAttribute($attr);
-                    }
-                }
-            }
-            
-            // Process rows and cells similarly
-            $rows = $table->getElementsByTagName('tr');
-            for ($j = 0; $j < $rows->length; $j++) {
-                $row = $rows->item($j);
-                
-                // Keep alignment attributes but remove style
-                if ($row->hasAttribute('style')) {
-                    $row->removeAttribute('style');
-                }
-                
-                // Process cells
-                $cells = $row->getElementsByTagName('td');
-                for ($k = 0; $k < $cells->length; $k++) {
-                    $cell = $cells->item($k);
-                    
-                    // Keep some useful attributes
-                    $cell_allowed = ['width', 'height', 'rowspan', 'colspan', 'align', 'valign'];
-                    if ($cell->hasAttributes()) {
-                        $attributes = [];
-                        foreach ($cell->attributes as $attr) {
-                            $attributes[] = $attr->name;
-                        }
-                        
-                        foreach ($attributes as $attr) {
-                            if (!in_array($attr, $cell_allowed) && $attr !== 'class' && $attr !== 'id') {
-                                $cell->removeAttribute($attr);
-                            }
-                        }
-                    }
-                }
-                
-                // Also process th cells
-                $headers = $row->getElementsByTagName('th');
-                for ($k = 0; $k < $headers->length; $k++) {
-                    $header = $headers->item($k);
-                    if ($header->hasAttribute('style')) {
-                        $header->removeAttribute('style');
-                    }
-                }
-            }
-        }
         
         // Extract the body content
         $body = $dom->getElementsByTagName('body')->item(0);
@@ -957,15 +900,15 @@ class Content_Extractor {
         // Remove Unicode line and paragraph separators
         $result = str_replace(["\xE2\x80\xA8", "\xE2\x80\xA9"], '', $result);
         
-        // Clean up multiple spaces and line breaks but preserve more formatting than aggressive mode
-        $result = preg_replace('/\s{3,}/', ' ', $result);
+        // Clean up multiple spaces and line breaks
+        $result = preg_replace('/\s{2,}/', ' ', $result);
         
         return $result;
     }
     
     /**
      * Clean attributes from an element and its children for medium level cleaning.
-     * Less aggressive than the full cleaning, preserves more formatting attributes.
+     * More permissive than aggressive cleaning, preserves many formatting attributes.
      * 
      * @param \DOMNode $element The element to clean.
      */
@@ -977,18 +920,10 @@ class Content_Extractor {
         // List of attributes to keep for medium cleaning
         $keep_attributes = [
             'href', 'src', 'alt', 'title', 'colspan', 'rowspan', 'width', 'height',
-            'align', 'valign', 'target', 'name', 'id', 'class'
+            'align', 'valign', 'target', 'name', 'id', 'class', 'style'
         ];
         
-        // List of elements that should keep their class/style for better rendering
-        $style_elements = ['table', 'tr', 'td', 'th', 'img', 'a', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
-        
-        // Add 'style' to keep attributes if this is a style element
-        if (in_array($element->nodeName, $style_elements)) {
-            $keep_attributes[] = 'style';
-        }
-        
-        // Remove unwanted inline style properties but keep the attribute
+        // Remove potentially harmful inline style properties
         if ($element->hasAttribute('style')) {
             $style = $element->getAttribute('style');
             
@@ -1000,7 +935,7 @@ class Content_Extractor {
             $element->setAttribute('style', $style);
         }
         
-        // Remove all attributes except those in the keep list
+        // Remove attributes not in the keep list
         if ($element->hasAttributes()) {
             $attributes = [];
             foreach ($element->attributes as $attr) {

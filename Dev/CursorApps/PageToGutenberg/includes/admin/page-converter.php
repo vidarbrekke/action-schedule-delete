@@ -51,6 +51,16 @@ $ajax_nonce = wp_create_nonce('utg_ajax_nonce');
                         <p class="description"><?php _e('Check this to extract the HTML content only without converting to Gutenberg blocks.', 'url-to-gutenberg'); ?></p>
                     </div>
                     
+                    <div class="utg-form-field">
+                        <label for="utg-cleaning-level"><?php _e('HTML Cleaning Level', 'url-to-gutenberg'); ?></label>
+                        <select id="utg-cleaning-level" name="cleaning_level">
+                            <option value="standard"><?php _e('Standard - Keep most formatting', 'url-to-gutenberg'); ?></option>
+                            <option value="medium"><?php _e('Medium - Clean some styling while preserving structure', 'url-to-gutenberg'); ?></option>
+                            <option value="aggressive"><?php _e('Aggressive - Remove most styling but maintain basic structure', 'url-to-gutenberg'); ?></option>
+                        </select>
+                        <p class="description"><?php _e('Select how aggressively to clean the HTML structure. More aggressive cleaning removes more styling but maintains content structure.', 'url-to-gutenberg'); ?></p>
+                    </div>
+                    
                     <div class="utg-form-actions">
                         <input type="submit" id="utg-submit" class="button button-primary" value="<?php _e('Convert URL', 'url-to-gutenberg'); ?>">
                     </div>
