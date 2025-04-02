@@ -37,9 +37,10 @@ class Content_Extractor {
      * Extract content from a URL.
      *
      * @param string $url The URL to extract content from.
+     * @param string $cleaning_level The level of HTML cleaning to apply ('standard', 'medium', 'aggressive').
      * @return array|\WP_Error The extracted content or an error.
      */
-    public function extract( $url ) {
+    public function extract( $url, $cleaning_level = 'standard' ) {
         if (empty($url)) {
             error_log('UTG: Empty URL provided to Content_Extractor');
             return new \WP_Error('invalid_url', 'URL cannot be empty');
@@ -52,6 +53,10 @@ class Content_Extractor {
 
         error_log('UTG: Starting content extraction for URL: ' . $url);
         $debug_mode = $this->settings->get('debug_mode', false);
+
+        if ($cleaning_level !== 'standard') {
+            error_log('UTG: Using ' . $cleaning_level . ' cleaning mode');
+        }
 
         try {
             // Set a robust user agent string
@@ -72,6 +77,24 @@ class Content_Extractor {
                     if ($debug_mode) {
                         $this->save_debug_content('extracted_article', $url, $text);
                         $this->save_debug_content('extracted_title', $url, $title);
+                    }
+                    
+                    // Apply the appropriate level of cleaning
+                    if ($cleaning_level === 'aggressive') {
+                        $text = $this->aggressive_html_cleaning($text);
+                        if ($debug_mode) {
+                            $this->save_debug_content('aggressive_cleaned_article', $url, $text);
+                        }
+                    } else if ($cleaning_level === 'medium') {
+                        $text = $this->medium_html_cleaning($text);
+                        if ($debug_mode) {
+                            $this->save_debug_content('medium_cleaned_article', $url, $text);
+                        }
+                    } else {
+                        // Standard level uses the original text but we should still save for debugging
+                        if ($debug_mode) {
+                            $this->save_debug_content('standard_cleaned_article', $url, $text);
+                        }
                     }
                     
                     // Extract images 
@@ -592,7 +615,9 @@ class Content_Extractor {
             $filename = $debug_dir . '/' . $safe_url . '-' . $url_hash . '-' . $type . '-' . $timestamp;
             
             // Use appropriate extension based on content type
-            if ($type === 'raw_html' || $type === 'extracted_article' || $type === 'body_fallback') {
+            if ($type === 'raw_html' || $type === 'extracted_article' || $type === 'body_fallback' || 
+                $type === 'medium_cleaned_article' || $type === 'aggressive_cleaned_article' || 
+                $type === 'standard_cleaned_article') {
                 $filename .= '.html';
             } elseif ($type === 'extracted_title') {
                 $filename .= '.txt';
@@ -600,6 +625,9 @@ class Content_Extractor {
                 $filename .= '.json';
             } elseif ($type === 'extraction_error') {
                 $filename .= '.log';
+            } else {
+                // Default extension for any other type
+                $filename .= '.html';
             }
             
             // Save the content
@@ -614,6 +642,369 @@ class Content_Extractor {
         } catch (\Exception $e) {
             error_log('UTG: Exception while saving debug content: ' . $e->getMessage());
             return false;
+        }
+    }
+
+    /**
+     * Aggressive HTML cleaning for complex content.
+     * 
+     * @param string $html The HTML content to clean.
+     * @return string The cleaned HTML content.
+     */
+    private function aggressive_html_cleaning($html) {
+        // Create a DOM document
+        $dom = new \DOMDocument();
+        
+        // Suppress errors for malformed HTML
+        libxml_use_internal_errors(true);
+        
+        // Use UTF-8 encoding
+        $html = '<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body>' . $html . '</body></html>';
+        $dom->loadHTML($html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+        libxml_clear_errors();
+        
+        // Elements to completely remove
+        $remove_tags = ['script', 'style', 'meta', 'link', 'iframe', 'noscript', 'svg', 'canvas'];
+        foreach ($remove_tags as $tag) {
+            $elements = $dom->getElementsByTagName($tag);
+            $remove_elements = [];
+            for ($i = $elements->length - 1; $i >= 0; $i--) {
+                $remove_elements[] = $elements->item($i);
+            }
+            foreach ($remove_elements as $element) {
+                if ($element->parentNode) {
+                    $element->parentNode->removeChild($element);
+                }
+            }
+        }
+        
+        // Process all elements to remove unnecessary attributes
+        $this->clean_element_attributes($dom->documentElement);
+        
+        // Special handling for table structures - preserve semantic structure but clean aggressively
+        $tables = $dom->getElementsByTagName('table');
+        $table_elements = [];
+        for ($i = 0; $i < $tables->length; $i++) {
+            $table_elements[] = $tables->item($i);
+        }
+        
+        foreach ($table_elements as $table) {
+            // Replace table with div but keep a class to indicate it was a table
+            $div = $dom->createElement('div');
+            $div->setAttribute('class', 'utg-table');
+            
+            // Replace tbody, thead, tfoot with divs
+            $sections = ['tbody', 'thead', 'tfoot'];
+            foreach ($sections as $section) {
+                $elements = $table->getElementsByTagName($section);
+                $section_elements = [];
+                for ($i = 0; $i < $elements->length; $i++) {
+                    $section_elements[] = $elements->item($i);
+                }
+                
+                foreach ($section_elements as $element) {
+                    $section_div = $dom->createElement('div');
+                    $section_div->setAttribute('class', 'utg-' . $section);
+                    
+                    // Process rows within this section
+                    $rows = $element->getElementsByTagName('tr');
+                    $row_elements = [];
+                    for ($i = 0; $i < $rows->length; $i++) {
+                        $row_elements[] = $rows->item($i);
+                    }
+                    
+                    foreach ($row_elements as $row) {
+                        $row_div = $dom->createElement('div');
+                        $row_div->setAttribute('class', 'utg-tr');
+                        
+                        // Process cells
+                        $cells = $row->getElementsByTagName('td');
+                        $cell_elements = [];
+                        for ($i = 0; $i < $cells->length; $i++) {
+                            $cell_elements[] = $cells->item($i);
+                        }
+                        
+                        // Also process th cells
+                        $header_cells = $row->getElementsByTagName('th');
+                        for ($i = 0; $i < $header_cells->length; $i++) {
+                            $cell_elements[] = $header_cells->item($i);
+                        }
+                        
+                        foreach ($cell_elements as $cell) {
+                            $cell_div = $dom->createElement('div');
+                            $cell_div->setAttribute('class', 'utg-td');
+                            
+                            // Move all children to the new div
+                            while ($cell->childNodes->length > 0) {
+                                $cell_div->appendChild($cell->childNodes->item(0));
+                            }
+                            
+                            $row_div->appendChild($cell_div);
+                        }
+                        
+                        $section_div->appendChild($row_div);
+                    }
+                    
+                    $div->appendChild($section_div);
+                }
+            }
+            
+            // Replace the table with our cleaned div structure
+            if ($table->parentNode) {
+                $table->parentNode->replaceChild($div, $table);
+            }
+        }
+        
+        // Extract the body content
+        $body = $dom->getElementsByTagName('body')->item(0);
+        $result = '';
+        if ($body) {
+            $children = $body->childNodes;
+            foreach ($children as $child) {
+                $result .= $dom->saveHTML($child);
+            }
+        } else {
+            $result = $dom->saveHTML();
+        }
+        
+        // Remove control characters that might break JSON
+        $result = preg_replace('/[\x00-\x1F\x7F]/u', '', $result);
+        
+        // Remove Unicode line and paragraph separators
+        $result = str_replace(["\xE2\x80\xA8", "\xE2\x80\xA9"], '', $result);
+        
+        // Clean up multiple spaces and line breaks
+        $result = preg_replace('/\s{2,}/', ' ', $result);
+        
+        return $result;
+    }
+    
+    /**
+     * Clean attributes from an element and its children recursively.
+     * 
+     * @param \DOMNode $element The element to clean.
+     */
+    private function clean_element_attributes($element) {
+        if (!$element || $element->nodeType !== XML_ELEMENT_NODE) {
+            return;
+        }
+        
+        // List of attributes to keep
+        $keep_attributes = [
+            'href', 'src', 'alt', 'title', 'colspan', 'rowspan'
+        ];
+        
+        // Remove all attributes except those in the keep list
+        if ($element->hasAttributes()) {
+            $attributes = [];
+            foreach ($element->attributes as $attr) {
+                $attributes[] = $attr->name;
+            }
+            
+            foreach ($attributes as $attr) {
+                if (!in_array($attr, $keep_attributes)) {
+                    $element->removeAttribute($attr);
+                }
+            }
+        }
+        
+        // Process children recursively
+        if ($element->hasChildNodes()) {
+            $children = [];
+            foreach ($element->childNodes as $child) {
+                $children[] = $child;
+            }
+            
+            foreach ($children as $child) {
+                $this->clean_element_attributes($child);
+            }
+        }
+    }
+
+    /**
+     * Medium HTML cleaning for content.
+     * Preserves more structure than aggressive cleaning but removes most styling.
+     * 
+     * @param string $html The HTML content to clean.
+     * @return string The cleaned HTML content.
+     */
+    private function medium_html_cleaning($html) {
+        // Create a DOM document
+        $dom = new \DOMDocument();
+        
+        // Suppress errors for malformed HTML
+        libxml_use_internal_errors(true);
+        
+        // Use UTF-8 encoding
+        $html = '<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body>' . $html . '</body></html>';
+        $dom->loadHTML($html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+        libxml_clear_errors();
+        
+        // Elements to completely remove
+        $remove_tags = ['script', 'style', 'meta', 'link', 'iframe', 'noscript'];
+        foreach ($remove_tags as $tag) {
+            $elements = $dom->getElementsByTagName($tag);
+            $remove_elements = [];
+            for ($i = $elements->length - 1; $i >= 0; $i--) {
+                $remove_elements[] = $elements->item($i);
+            }
+            foreach ($remove_elements as $element) {
+                if ($element->parentNode) {
+                    $element->parentNode->removeChild($element);
+                }
+            }
+        }
+        
+        // Process all elements to selectively remove attributes - medium level cleans less aggressively
+        $this->clean_element_attributes_medium($dom->documentElement);
+        
+        // For tables - preserve the structure but clean some attributes
+        $tables = $dom->getElementsByTagName('table');
+        for ($i = 0; $i < $tables->length; $i++) {
+            $table = $tables->item($i);
+            
+            // Keep the table tag but remove some attributes
+            $allowed_attrs = ['width', 'height', 'cellspacing', 'cellpadding', 'border'];
+            if ($table->hasAttributes()) {
+                $attributes = [];
+                foreach ($table->attributes as $attr) {
+                    $attributes[] = $attr->name;
+                }
+                
+                foreach ($attributes as $attr) {
+                    if (!in_array($attr, $allowed_attrs) && $attr !== 'class' && $attr !== 'id') {
+                        $table->removeAttribute($attr);
+                    }
+                }
+            }
+            
+            // Process rows and cells similarly
+            $rows = $table->getElementsByTagName('tr');
+            for ($j = 0; $j < $rows->length; $j++) {
+                $row = $rows->item($j);
+                
+                // Keep alignment attributes but remove style
+                if ($row->hasAttribute('style')) {
+                    $row->removeAttribute('style');
+                }
+                
+                // Process cells
+                $cells = $row->getElementsByTagName('td');
+                for ($k = 0; $k < $cells->length; $k++) {
+                    $cell = $cells->item($k);
+                    
+                    // Keep some useful attributes
+                    $cell_allowed = ['width', 'height', 'rowspan', 'colspan', 'align', 'valign'];
+                    if ($cell->hasAttributes()) {
+                        $attributes = [];
+                        foreach ($cell->attributes as $attr) {
+                            $attributes[] = $attr->name;
+                        }
+                        
+                        foreach ($attributes as $attr) {
+                            if (!in_array($attr, $cell_allowed) && $attr !== 'class' && $attr !== 'id') {
+                                $cell->removeAttribute($attr);
+                            }
+                        }
+                    }
+                }
+                
+                // Also process th cells
+                $headers = $row->getElementsByTagName('th');
+                for ($k = 0; $k < $headers->length; $k++) {
+                    $header = $headers->item($k);
+                    if ($header->hasAttribute('style')) {
+                        $header->removeAttribute('style');
+                    }
+                }
+            }
+        }
+        
+        // Extract the body content
+        $body = $dom->getElementsByTagName('body')->item(0);
+        $result = '';
+        if ($body) {
+            $children = $body->childNodes;
+            foreach ($children as $child) {
+                $result .= $dom->saveHTML($child);
+            }
+        } else {
+            $result = $dom->saveHTML();
+        }
+        
+        // Remove control characters that might break JSON
+        $result = preg_replace('/[\x00-\x1F\x7F]/u', '', $result);
+        
+        // Remove Unicode line and paragraph separators
+        $result = str_replace(["\xE2\x80\xA8", "\xE2\x80\xA9"], '', $result);
+        
+        // Clean up multiple spaces and line breaks but preserve more formatting than aggressive mode
+        $result = preg_replace('/\s{3,}/', ' ', $result);
+        
+        return $result;
+    }
+    
+    /**
+     * Clean attributes from an element and its children for medium level cleaning.
+     * Less aggressive than the full cleaning, preserves more formatting attributes.
+     * 
+     * @param \DOMNode $element The element to clean.
+     */
+    private function clean_element_attributes_medium($element) {
+        if (!$element || $element->nodeType !== XML_ELEMENT_NODE) {
+            return;
+        }
+        
+        // List of attributes to keep for medium cleaning
+        $keep_attributes = [
+            'href', 'src', 'alt', 'title', 'colspan', 'rowspan', 'width', 'height',
+            'align', 'valign', 'target', 'name', 'id', 'class'
+        ];
+        
+        // List of elements that should keep their class/style for better rendering
+        $style_elements = ['table', 'tr', 'td', 'th', 'img', 'a', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
+        
+        // Add 'style' to keep attributes if this is a style element
+        if (in_array($element->nodeName, $style_elements)) {
+            $keep_attributes[] = 'style';
+        }
+        
+        // Remove unwanted inline style properties but keep the attribute
+        if ($element->hasAttribute('style')) {
+            $style = $element->getAttribute('style');
+            
+            // Remove potentially harmful or layout-breaking styles
+            $style = preg_replace('/position\s*:\s*[^;]+;?/i', '', $style);
+            $style = preg_replace('/z-index\s*:\s*[^;]+;?/i', '', $style);
+            $style = preg_replace('/float\s*:\s*[^;]+;?/i', '', $style);
+            
+            $element->setAttribute('style', $style);
+        }
+        
+        // Remove all attributes except those in the keep list
+        if ($element->hasAttributes()) {
+            $attributes = [];
+            foreach ($element->attributes as $attr) {
+                $attributes[] = $attr->name;
+            }
+            
+            foreach ($attributes as $attr) {
+                if (!in_array($attr, $keep_attributes)) {
+                    $element->removeAttribute($attr);
+                }
+            }
+        }
+        
+        // Process children recursively
+        if ($element->hasChildNodes()) {
+            $children = [];
+            foreach ($element->childNodes as $child) {
+                $children[] = $child;
+            }
+            
+            foreach ($children as $child) {
+                $this->clean_element_attributes_medium($child);
+            }
         }
     }
 } 

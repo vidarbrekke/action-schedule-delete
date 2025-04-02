@@ -438,6 +438,14 @@ class UTG_Admin {
         // Get URL and parse_only flag
         $url = isset($_POST['url']) ? sanitize_text_field($_POST['url']) : '';
         $parse_only = isset($_POST['parse_only']) && $_POST['parse_only'] === 'true';
+        $cleaning_level = isset($_POST['cleaning_level']) ? sanitize_text_field($_POST['cleaning_level']) : 'standard';
+        
+        // Validate cleaning level (only accept valid values)
+        if (!in_array($cleaning_level, ['standard', 'medium', 'aggressive'])) {
+            $cleaning_level = 'standard'; // Default to standard if invalid value provided
+        }
+        
+        error_log('UTG AJAX: Request params - URL: ' . $url . ', Parse only: ' . ($parse_only ? 'true' : 'false') . ', Cleaning level: ' . $cleaning_level);
         
         // Validate URL
         if (empty($url) || !filter_var($url, FILTER_VALIDATE_URL)) {
@@ -484,21 +492,46 @@ class UTG_Admin {
                 
                 error_log('UTG AJAX: Retrieved content, length: ' . strlen($content) . ' bytes');
                 
-                // Try to use DOMDocument for basic extraction
-                error_log('UTG AJAX: Beginning DOMDocument extraction process');
-                $extracted_content = $this->extract_content_with_dom($content);
+                // Create a Content_Extractor instance with settings
+                $extractor = new \UTG\Content_Extractor($this->settings);
                 
-                if (!$extracted_content || empty($extracted_content)) {
-                    error_log('UTG AJAX: No content could be extracted with DOMDocument');
-                    \wp_send_json_error(__('No content could be extracted from this URL.', 'url-to-gutenberg'));
+                // Extract content with the appropriate cleaning level
+                error_log('UTG AJAX: Beginning content extraction' . ($cleaning_level !== 'standard' ? ' with cleaning level: ' . $cleaning_level : ''));
+                $extracted = $extractor->extract($url, $cleaning_level);
+                
+                if (is_wp_error($extracted)) {
+                    error_log('UTG AJAX: Content extraction failed: ' . $extracted->get_error_message());
+                    \wp_send_json_error(__('Content extraction failed: ', 'url-to-gutenberg') . $extracted->get_error_message());
                     $this->settings->update(['debug_mode' => $debug_setting]);
                     return;
+                }
+                
+                $extracted_content = $extracted['content'];
+                
+                if (!$extracted_content || empty($extracted_content)) {
+                    error_log('UTG AJAX: No content could be extracted with Content_Extractor');
+                    
+                    // Try our fallback DOM extraction method
+                    error_log('UTG AJAX: Trying fallback DOMDocument extraction');
+                    $extracted_content = $this->extract_content_with_dom($content);
+                    
+                    if (!$extracted_content || empty($extracted_content)) {
+                        error_log('UTG AJAX: No content could be extracted with either method');
+                        \wp_send_json_error(__('No content could be extracted from this URL.', 'url-to-gutenberg'));
+                        $this->settings->update(['debug_mode' => $debug_setting]);
+                        return;
+                    }
                 }
                 
                 // Save the extracted content for debugging with proper UTF-8 encoding
                 $debug_file = $debug_dir . '/extracted_content_' . uniqid() . '.html';
                 @file_put_contents($debug_file, $utf8_bom . $extracted_content);
                 error_log('UTG AJAX: Extracted content saved to: ' . $debug_file);
+                
+                // Also save a properly labeled version based on cleaning level
+                $labeled_debug_file = $debug_dir . '/' . $cleaning_level . '_cleaned_content_' . uniqid() . '.html';
+                @file_put_contents($labeled_debug_file, $utf8_bom . $extracted_content);
+                error_log('UTG AJAX: ' . ucfirst($cleaning_level) . ' cleaned content saved to: ' . $labeled_debug_file);
                 
                 error_log('UTG AJAX: Content extraction successful, content length: ' . strlen($extracted_content) . ' bytes');
                 
@@ -550,11 +583,11 @@ class UTG_Admin {
             error_log('UTG AJAX: Retrieved content, length: ' . strlen($content) . ' bytes');
             
             // Use the content extractor to get the relevant part of the page
-            $extractor = new \UTG\Content_Extractor();
-            $extracted_content = $extractor->extract($content);
+            $extractor = new \UTG\Content_Extractor($this->settings);
+            $extracted = $extractor->extract($url, $cleaning_level);
             
-            if (!$extracted_content || empty($extracted_content)) {
-                error_log('UTG AJAX: No content could be extracted');
+            if (is_wp_error($extracted)) {
+                error_log('UTG AJAX: Content extraction failed: ' . $extracted->get_error_message());
                 
                 // Try our fallback extraction method
                 error_log('UTG AJAX: Trying fallback DOMDocument extraction');
@@ -566,12 +599,19 @@ class UTG_Admin {
                     $this->settings->update(['debug_mode' => $debug_setting]);
                     return;
                 }
+            } else {
+                $extracted_content = $extracted['content'];
             }
             
             // Save the extracted content for debugging
             $debug_file = $debug_dir . '/extracted_content_' . uniqid() . '.html';
             @file_put_contents($debug_file, $utf8_bom . $extracted_content);
             error_log('UTG AJAX: Extracted content saved to: ' . $debug_file);
+            
+            // Also save a properly labeled version based on cleaning level
+            $labeled_debug_file = $debug_dir . '/' . $cleaning_level . '_cleaned_content_' . uniqid() . '.html';
+            @file_put_contents($labeled_debug_file, $utf8_bom . $extracted_content);
+            error_log('UTG AJAX: ' . ucfirst($cleaning_level) . ' cleaned content saved to: ' . $labeled_debug_file);
             
             error_log('UTG AJAX: Content extraction successful, content length: ' . strlen($extracted_content) . ' bytes');
             
