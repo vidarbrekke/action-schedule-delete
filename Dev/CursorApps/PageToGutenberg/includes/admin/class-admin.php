@@ -358,8 +358,13 @@ class UTG_Admin {
         $content = '';
         $error = '';
         
-        if (isset($_POST['url']) && \check_admin_referer('utg_url_test')) {
+        if (isset($_POST['url']) && \check_admin_referer('utg_ajax_nonce')) {
             $url = \esc_url_raw($_POST['url']);
+            
+            // Check for alternate URL field name (from url-converter.php form)
+            if (empty($url) && isset($_POST['utg-url'])) {
+                $url = \esc_url_raw($_POST['utg-url']);
+            }
             
             if (empty($url)) {
                 $error = __('Please enter a valid URL', 'url-to-gutenberg');
@@ -390,7 +395,7 @@ class UTG_Admin {
                 <?php endif; ?>
                 
                 <form method="post">
-                    <?php \wp_nonce_field('utg_url_test'); ?>
+                    <?php \wp_nonce_field('utg_ajax_nonce'); ?>
                     
                     <div class="utg-form-field">
                         <label for="utg-url"><?php \_e('Enter URL', 'url-to-gutenberg'); ?></label>
@@ -458,7 +463,7 @@ class UTG_Admin {
                         </p>
                         <form method="post" action="<?php echo \admin_url('admin.php?page=url-to-gutenberg'); ?>">
                             <input type="hidden" name="utg-url" value="<?php echo \esc_attr($url); ?>">
-                            <?php \wp_nonce_field('utg_convert_url'); ?>
+                            <?php \wp_nonce_field('utg_ajax_nonce'); ?>
                             <button type="submit" class="button button-primary">
                                 <?php \_e('Process URL', 'url-to-gutenberg'); ?>
                             </button>
@@ -488,73 +493,134 @@ class UTG_Admin {
     }
     
     /**
-     * Convert URL to Gutenberg blocks.
+     * AJAX handler for URL conversion
+     *
+     * @return void
      */
-    public function convert_url() {
+    public function convert_url()
+    {
+        if (!isset($_POST['_wpnonce']) || !\wp_verify_nonce($_POST['_wpnonce'], 'utg_ajax_nonce')) {
+            \error_log('UTG: Security check failed. Nonce: ' . (isset($_POST['_wpnonce']) ? $_POST['_wpnonce'] : 'not set'));
+            \wp_send_json_error(\__('Security check failed', 'url-to-gutenberg'));
+        }
+
+        // Get URL with sanitization
+        $url = isset($_POST['url']) ? \esc_url_raw($_POST['url']) : '';
+        if (empty($url)) {
+            $url = isset($_POST['utg-url']) ? \esc_url_raw($_POST['utg-url']) : '';
+        }
+
+        if (empty($url)) {
+            \wp_send_json_error(\__('Please enter a valid URL', 'url-to-gutenberg'));
+        }
+
+        // Save original debug setting
+        $debug_setting = $this->settings->get_option('debug_mode');
+        
+        // Check if we should only parse HTML
+        $parse_only = isset($_POST['parse_only']) && ($_POST['parse_only'] === 'true' || $_POST['parse_only'] === true || $_POST['parse_only'] === '1' || $_POST['parse_only'] === 1);
+        \error_log('UTG: Parse only: ' . ($parse_only ? 'yes' : 'no') . ' (raw value: ' . print_r($_POST['parse_only'], true) . ')');
+        
+        // Always enable debug mode for content extraction
+        $this->settings->update(['debug_mode' => '1']);
+        
+        if ($parse_only) {
+            try {
+                // Only parse HTML content without sending to LLM
+                $content_extractor = new \UTG\Content_Extractor($this->settings);
+                $content = $content_extractor->extract($url);
+                
+                if (\is_wp_error($content)) {
+                    \error_log('UTG: Content extraction error: ' . $content->get_error_message());
+                    \wp_send_json_error($content->get_error_message());
+                    
+                    // Restore original debug setting
+                    $this->settings->update(['debug_mode' => $debug_setting]);
+                    return;
+                }
+                
+                \error_log('UTG: Content successfully extracted and saved to debug directory');
+                \wp_send_json_success([
+                    'message' => \__('Content successfully extracted and saved to debug directory', 'url-to-gutenberg')
+                ]);
+                
+                // Restore original debug setting
+                $this->settings->update(['debug_mode' => $debug_setting]);
+                return;
+            } catch (\Exception $e) {
+                \error_log('UTG: Exception in parse-only mode: ' . $e->getMessage());
+                \wp_send_json_error('Error extracting content: ' . $e->getMessage());
+                
+                // Restore original debug setting
+                $this->settings->update(['debug_mode' => $debug_setting]);
+                return;
+            }
+        }
+
         try {
-            error_log('UTG: Starting URL conversion process');
-
-            // Verify nonce
-            if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'utg_convert_url')) {
-                error_log('UTG: Nonce verification failed');
-                wp_send_json_error('Invalid nonce');
+            // Process URL with extended error handling
+            $response = $this->api->process_url($url);
+             
+            // Restore original debug setting
+            $this->settings->update(['debug_mode' => $debug_setting]);
+              
+            // Detailed error logging
+            \error_log('UTG: API Response type: ' . gettype($response));
+            
+            if (\is_wp_error($response)) {
+                \error_log('UTG: API Error: ' . $response->get_error_message());
+                \error_log('UTG: API Error code: ' . $response->get_error_code());
+                \wp_send_json_error($response->get_error_message());
                 return;
             }
-
-            // Check user permissions
-            if (!current_user_can('edit_posts')) {
-                error_log('UTG: User does not have required permissions');
-                wp_send_json_error('Insufficient permissions');
+            
+            if (!is_array($response) || empty($response)) {
+                \error_log('UTG: Invalid response format: ' . print_r($response, true));
+                \wp_send_json_error('Invalid response format from API');
                 return;
             }
-
-            // Get URL from POST data
-            $url = isset($_POST['url']) ? esc_url_raw($_POST['url']) : '';
-            if (empty($url)) {
-                error_log('UTG: Empty URL provided');
-                wp_send_json_error('URL cannot be empty');
+            
+            if (!isset($response['content']) || empty($response['content'])) {
+                \error_log('UTG: Missing content in API response');
+                \wp_send_json_error('API response is missing content');
                 return;
             }
-
-            error_log('UTG: Processing URL: ' . $url);
-
-            // Process URL
-            $api = new \UTG\API\LLM_API($this->settings);
-            $response = $api->process_url($url);
-
-            error_log('UTG: API Response: ' . print_r($response, true));
-
-            if (is_wp_error($response)) {
-                error_log('UTG: API Error: ' . $response->get_error_message());
-                wp_send_json_error($response->get_error_message());
-                return;
+            
+            if (!isset($response['title']) || empty($response['title'])) {
+                \error_log('UTG: Missing title in API response, using fallback');
+                $response['title'] = 'Converted from ' . $url;
             }
 
-            // Create post
-            $post_id = wp_insert_post([
+            // Create post with better error handling
+            $post_data = [
                 'post_title' => $response['title'],
                 'post_content' => $response['content'],
-                'post_status' => 'draft',
+                'post_status' => $this->settings->get('default_post_status', 'draft'),
                 'post_type' => 'post'
-            ]);
+            ];
+            
+            \error_log('UTG: Creating post with data: ' . json_encode($post_data));
+            $post_id = \wp_insert_post($post_data);
 
-            if (is_wp_error($post_id)) {
-                error_log('UTG: Post creation error: ' . $post_id->get_error_message());
-                wp_send_json_error('Failed to create post: ' . $post_id->get_error_message());
+            if (\is_wp_error($post_id)) {
+                \error_log('UTG: Post creation error: ' . $post_id->get_error_message());
+                \wp_send_json_error('Failed to create post: ' . $post_id->get_error_message());
                 return;
             }
 
-            error_log('UTG: Post created successfully with ID: ' . $post_id);
+            \error_log('UTG: Post created successfully with ID: ' . $post_id);
 
-            wp_send_json_success([
+            \wp_send_json_success([
                 'post_id' => $post_id,
-                'edit_url' => get_edit_post_link($post_id, 'raw')
+                'edit_url' => \get_edit_post_link($post_id, 'raw'),
+                'view_url' => \get_permalink($post_id),
+                'message' => \__('Post created successfully!', 'url-to-gutenberg')
             ]);
 
         } catch (\Exception $e) {
-            error_log('UTG: Exception in convert_url: ' . $e->getMessage());
-            error_log('UTG: Exception trace: ' . $e->getTraceAsString());
-            wp_send_json_error('An error occurred: ' . $e->getMessage());
+            \error_log('UTG: Exception in convert_url: ' . $e->getMessage());
+            \error_log('UTG: Exception trace: ' . $e->getTraceAsString());
+            \wp_send_json_error('An error occurred: ' . $e->getMessage());
         }
     }
     
@@ -562,7 +628,7 @@ class UTG_Admin {
      * Verify AJAX nonce
      */
     private function verify_ajax_nonce() {
-        if (!isset($_POST['nonce']) || !\wp_verify_nonce($_POST['nonce'], 'utg_ajax_nonce')) {
+        if (!isset($_POST['_wpnonce']) || !\wp_verify_nonce($_POST['_wpnonce'], 'utg_ajax_nonce')) {
             \wp_send_json_error(array('message' => __('Security check failed', 'url-to-gutenberg')));
             exit;
         }

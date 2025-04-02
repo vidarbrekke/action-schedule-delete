@@ -9,20 +9,24 @@ namespace UTG;
 
 use UTG\API\LLM_API;
 use UTG\Content\Content_Optimizer;
-use UTG\Templates\UTG_Template_Manager as Template_Manager;
+use UTG\Templates\UTG_Template_Manager;
 use UTG\Admin\UTG_Admin;
 use UTG\Generator\Post_Generator;
 use UTG\Generator\Media_Handler;
 use UTG\Generator\UTG_Content_Optimizer;
-use function \register_activation_hook;
-use function \register_deactivation_hook;
-use function \add_action;
-use function \add_filter;
-use function \plugin_basename;
-use function \error_log;
-use function \esc_html_e;
-use function \esc_html;
-use const \WP_DEBUG;
+
+// WordPress functions
+use function register_activation_hook;
+use function register_deactivation_hook;
+use function add_action;
+use function add_filter;
+use function plugin_basename;
+use function error_log;
+use function esc_html_e;
+use function esc_html;
+
+// WordPress constants
+use const WP_DEBUG;
 
 /**
  * Class URL_To_Gutenberg
@@ -149,8 +153,8 @@ class URL_To_Gutenberg {
         // Initialize post generator
         $this->post_generator = new Generator\Post_Generator($this->media_handler);
         
-        // Initialize admin interface
-        $this->admin = new UTG_Admin($this->llm_api, $this->post_generator, $this->settings);
+        // Initialize admin interface - use the fully qualified class name with proper namespace
+        $this->admin = new Admin\UTG_Admin($this->llm_api, $this->post_generator, $this->settings);
     }
 
     /**
@@ -158,32 +162,26 @@ class URL_To_Gutenberg {
      */
     private function register_hooks() {
         // Activation hook
-        global $register_activation_hook;
-        $register_activation_hook(UTG_PLUGIN_FILE, [$this, 'activate']);
+        \register_activation_hook(UTG_PLUGIN_FILE, [$this, 'activate']);
         
         // Deactivation hook
-        global $register_deactivation_hook;
-        $register_deactivation_hook(UTG_PLUGIN_FILE, [$this, 'deactivate']);
+        \register_deactivation_hook(UTG_PLUGIN_FILE, [$this, 'deactivate']);
         
         // IMPORTANT: Admin menu is now handled by UTG_Admin class
         // Commenting out this menu registration to prevent duplicates
-        // global $add_action;
-        // $add_action('admin_menu', [$this, 'add_admin_menu']);
+        // \add_action('admin_menu', [$this, 'add_admin_menu']);
         
         // Admin scripts and styles
-        global $add_action;
-        $add_action('admin_enqueue_scripts', [$this, 'enqueue_admin_assets']);
+        \add_action('admin_enqueue_scripts', [$this, 'enqueue_admin_assets']);
         
         // AJAX actions are handled by UTG_Admin class
         
         // Add settings link to plugin page
-        global $add_filter, $plugin_basename;
-        $add_filter('plugin_action_links_' . $plugin_basename(UTG_PLUGIN_FILE), [$this, 'add_settings_link']);
+        \add_filter('plugin_action_links_' . \plugin_basename(UTG_PLUGIN_FILE), [$this, 'add_settings_link']);
         
         // Add debug logging for initialization
         if (defined('WP_DEBUG') && WP_DEBUG) {
-            global $error_log;
-            $error_log('UTG: URL_To_Gutenberg class initialized. Hooks registered.');
+            \error_log('UTG: URL_To_Gutenberg class initialized. Hooks registered.');
         }
     }
 
@@ -388,9 +386,9 @@ class URL_To_Gutenberg {
     }
 
     /**
-     * Get plugin settings instance.
+     * Get the settings object.
      *
-     * @return Settings Settings instance.
+     * @return Settings
      */
     public function get_settings() {
         return $this->settings;

@@ -1,5 +1,190 @@
 # URL to Gutenberg Development Progress
 
+## 2024-04-03: Implemented "Only Parse HTML" Feature and Fixed AJAX Nonce Issues
+
+### Current Status
+- Implemented a direct HTML parsing option that completely bypasses the LLM API
+- Fixed nonce verification issues that were causing "Security check failed" errors
+- Standardized AJAX security approach across all forms
+
+### Completed Tasks
+- Added a "Only parse HTML" checkbox to the URL converter form
+- Modified the `convert_url` method to check for `parse_only` parameter and bypass LLM API when enabled
+- Standardized nonce context to use 'utg_ajax_nonce' consistently across all AJAX calls
+- Fixed JavaScript to correctly pass nonce values in AJAX requests
+- Added detailed error logging for debugging security verification issues
+- Updated all nonce fields in forms to use the same context
+
+### Challenges & Solutions
+- **Challenge**: Security check failures when processing form submissions
+  **Solution**: Implemented consistent nonce context and verification across all AJAX handlers
+  
+- **Challenge**: Need for content extraction without LLM processing
+  **Solution**: Created bypass path in `convert_url` method that uses Content_Extractor directly
+
+### Next Steps
+- Monitor error logs to ensure nonce verification is working properly in all cases
+- Add additional error handling for edge cases in content extraction
+- Consider implementing a preview feature for extracted content before conversion
+
+## 2024-04-02: Added Enhanced Debugging for Campaign Monitor URLs
+
+### Current Status
+- Implemented comprehensive debugging system to track content extraction and API processing
+- Added special handling for Campaign Monitor email newsletter URLs
+- Improved error handling and reporting across all components
+- Fixed issues with JSON handling and content sanitization
+
+### Completed Tasks
+- Added debug content saving system to store content at each stage of extraction
+- Created safe storage in WordPress uploads directory for debugging information
+- Implemented domain-specific instructions for different URL types
+- Enhanced error handling in API communication with detailed logging
+- Added content sanitization to prevent JSON encoding/decoding issues
+- Created fallback mechanisms for handling long content
+
+### Challenges & Solutions
+- **Challenge**: 500 Internal Server Error when processing Campaign Monitor URLs
+  **Solution**: Added extensive debugging to track exactly where the process fails
+  
+- **Challenge**: JSON encoding/decoding errors with special characters in content
+  **Solution**: Implemented content sanitization to strip problematic characters
+  
+- **Challenge**: Missing insights into content extraction pipeline
+  **Solution**: Created a complete debugging system that captures data at each processing step
+
+### Next Steps
+- Analyze debug output to identify specific issues with Campaign Monitor URLs
+- Implement additional domain-specific extractors for popular email systems
+- Further optimize content processing for large pages
+- Create a diagnostic dashboard for administrators to view debug info
+
+## 2024-04-02: Fixed URL Conversion Issues and Improved Error Handling
+
+### Current Status
+- Fixed issues with URL conversion that was resulting in "Invalid or empty response from API" errors
+- Implemented robust fallback mechanisms for content extraction
+- Added detailed error logging throughout the conversion process
+- Enhanced debug mode to provide better visibility into API interactions
+
+### Completed Tasks
+- Enhanced the Content_Extractor class with multiple fallback strategies for retrieving content
+- Added cURL-based fallback for when file_get_contents fails to retrieve content
+- Improved the AJAX handling in the convert_url method with detailed error reporting
+- Enhanced validation of API responses to catch and handle specific error cases
+- Implemented better handling of empty/invalid content with appropriate user feedback
+- Added the ability to temporarily enable debug mode for specific conversions
+
+### Challenges & Solutions
+- **Challenge**: URL content extraction failing for certain URLs
+  **Solution**: Implemented multiple content extraction strategies with fallbacks
+  
+- **Challenge**: Missing information about what was failing in the API pipeline
+  **Solution**: Added detailed error logging at each step in the processing pipeline
+  
+- **Challenge**: ArticleExtractor failing on certain URL formats
+  **Solution**: Added HTML body fallback extraction when the specialized extractor fails
+
+### Next Steps
+- Monitor error logs to identify any remaining URL types that may need specialized handling
+- Consider implementing additional specialized extractors for popular websites
+- Improve error message display to be more user-friendly
+- Add a system to report common extraction failures to administrators
+
+## 2024-04-02: Implemented Standard WordPress Approach
+
+### Current Status
+- Reverted custom fixes in favor of standard WordPress best practices
+- Fixed plugin architecture to use proper namespace handling and class instantiation
+- Implemented proper class access and scope handling in view templates
+
+### Completed Tasks
+- Removed custom direct-fix.php approach by disabling it
+- Disabled admin-fix.php to prevent any duplicate menu registration
+- Updated class-url-to-gutenberg.php to properly instantiate admin class using proper namespace
+- Fixed Admin class instantiation to use Admin\UTG_Admin with proper namespace
+- Added settings fallback handling in templates to handle variable scope
+- Improved AJAX nonce verification to match WordPress standards
+- Added get_settings() method to main plugin class for proper access to settings object
+
+### Challenges & Solutions
+- **Challenge**: Non-standard approaches were causing plugin menu inconsistencies
+  **Solution**: Replaced custom fixes with proper WordPress namespace and class handling
+  
+- **Challenge**: View templates were accessing $this->settings directly
+  **Solution**: Added proper variable passing to ensure settings are available in the right scope
+  
+- **Challenge**: AJAX nonce verification wasn't following WordPress standards
+  **Solution**: Updated AJAX handler to use check_ajax_referer() with correct parameters
+
+### Next Steps
+- Refactor the plugin code to better follow PSR-4 autoloading standards
+- Improve namespacing and class naming to be more consistent
+- Create comprehensive unit tests for plugin components
+- Implement a more standard WordPress approach to settings management
+
+## 2024-04-02: Fixed Duplicate Menus and AJAX Nonce Issues
+
+### Current Status
+- Resolved issues with duplicate admin menus appearing in WordPress admin
+- Fixed AJAX nonce verification error when submitting URLs for conversion
+- Ensured proper communication between frontend and backend components
+
+### Completed Tasks
+- Fixed admin-fix.php to be completely disabled, preventing menu duplication
+- Enhanced direct-fix.php with proper AJAX handler registration
+- Added WordPress nonce generation and verification for AJAX requests
+- Implemented a fallback conversion form with proper nonce handling
+- Registered 'wp_ajax_utg_convert_url' action to handle AJAX conversion requests
+- Created more robust error handling for the URL conversion process
+
+### Challenges & Solutions
+- **Challenge**: Two identical menus appearing in WordPress admin
+  **Solution**: Completely disabled admin-fix.php and ensured only one menu registration method is active
+  
+- **Challenge**: AJAX requests failing with "Invalid nonce" error
+  **Solution**: Added proper nonce generation in the form and verification in the AJAX handler
+  
+- **Challenge**: URL conversion not working properly
+  **Solution**: Implemented a comprehensive AJAX handler that correctly uses the existing API classes
+
+### Next Steps
+- Further optimize the direct-fix.php approach for better integration with core plugin
+- Add more comprehensive error logging for debugging
+- Implement user-friendly error messages for common issues
+- Consider refactoring the plugin to eliminate the need for the direct-fix approach
+
+## 2024-04-02: Admin Menu Visibility Fix Implementation
+
+### Current Status
+- Implemented comprehensive solution for admin menu visibility issues
+- Created a direct fix solution that ensures admin menus appear regardless of namespace issues
+- Fixed WordPress function registration in the main plugin class
+
+### Completed Tasks
+- Fixed namespace conflict in global WordPress function handling
+- Created a direct-fix.php file that bypasses plugin architecture to directly register menu items
+- Fixed the way WordPress functions were loaded in class-url-to-gutenberg.php
+- Ensured settings object is correctly passed to views to prevent critical errors
+- Added fallback settings object creation for extra resilience
+- Implemented multiple fail-safe mechanisms to ensure menu visibility
+
+### Challenges & Solutions
+- **Challenge**: WordPress hooks not executing properly due to incorrect global variable usage
+  **Solution**: Replaced global variable references with proper namespace prefixed function calls
+  
+- **Challenge**: Menu not appearing despite correct class instantiation
+  **Solution**: Implemented a parallel direct menu registration system in direct-fix.php
+  
+- **Challenge**: Settings view depending on incorrect scope variable
+  **Solution**: Explicitly set local $settings variable in all rendering functions
+
+### Next Steps
+- Add more detailed diagnostic tools to prevent similar issues
+- Create a more robust autoloading system that doesn't depend on function imports
+- Consider refactoring the plugin architecture to use WordPress standards more closely
+- Implement additional error reporting to make debugging easier
+
 ## 2024-04-02: Continuation of Admin Menu Bug Fix
 
 ### Current Status
@@ -153,3 +338,28 @@
 - Consider adding support for custom post types
 - Research options for handling page authentication for protected content
 - Plan for future Phase 2 (credit-based system) by tracking usage metrics
+
+## 2024-04-02: Improved HTML Content Extraction
+
+### Status
+- Content extractor now uses multiple extraction approaches when dealing with complex HTML structures, especially for Campaign Monitor emails.
+
+### Completed Tasks
+- Completely refactored the `Content_Extractor` class to implement a more robust extraction approach
+- Added multiple fallback mechanisms to handle extraction failures:
+  - Direct extraction using ArticleExtractor methods
+  - Manual HTML fetching with robust user agent settings
+  - Basic HTML cleaning for when all other methods fail
+- Added specific handling for HTML tables, which are commonly used in email templates
+- Improved error handling and debugging capabilities
+- Enhanced the image extraction logic with better support for relative URLs
+
+### Challenges
+- The ArticleExtractor library has some limitations when dealing with email HTML
+- Complex nested table structures in Campaign Monitor emails needed specific handling
+- HTML extraction requires multiple fallback approaches to ensure content is properly cleaned
+
+### Next Steps
+- Continue testing with different types of content sources
+- Consider implementing domain-specific adjustments for common sources
+- Expand the basic HTML cleaning functionality for better results with edge cases

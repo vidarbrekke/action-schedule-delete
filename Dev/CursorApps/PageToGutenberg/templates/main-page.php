@@ -28,6 +28,14 @@ if ( ! defined( 'ABSPATH' ) ) {
                     <input type="url" id="utg-url" name="url" class="regular-text" placeholder="https://example.com/article" required>
                 </div>
                 
+                <div class="utg-form-field">
+                    <label for="utg-parse-only">
+                        <input type="checkbox" id="utg-parse-only" name="parse_only">
+                        <?php esc_html_e( 'Only parse HTML', 'url-to-gutenberg' ); ?>
+                    </label>
+                    <p class="description"><?php esc_html_e( 'If checked, content will only be extracted and saved to debug directory without sending to LLM.', 'url-to-gutenberg' ); ?></p>
+                </div>
+                
                 <div class="utg-form-submit">
                     <button type="submit" class="button button-primary">
                         <?php esc_html_e( 'Convert', 'url-to-gutenberg' ); ?>

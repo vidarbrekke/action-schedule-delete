@@ -28,7 +28,7 @@ jQuery(document).ready(function($) {
             type: 'POST',
             data: {
                 action: 'utg_test_api_connection',
-                nonce: utgParams.nonce
+                _wpnonce: utgParams.nonce
             },
             success: function(response) {
                 if (utgParams.debugMode) {
@@ -92,11 +92,13 @@ jQuery(document).ready(function($) {
             data: {
                 action: 'utg_convert_url',
                 url: $url.val(),
-                nonce: utgParams.nonce
+                parse_only: $form.find('#utg-parse-only').is(':checked'),
+                _wpnonce: $form.find('input[name="_wpnonce"]').val()
             },
             success: function(response) {
                 if (utgParams.debugMode) {
                     console.log('URL convert response:', response);
+                    console.log('Nonce used:', $form.find('input[name="_wpnonce"]').val());
                 }
                 
                 if (response.success) {

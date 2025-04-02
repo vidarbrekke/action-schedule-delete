@@ -32,6 +32,11 @@ if (!isset($settings) || !is_object($settings) || !method_exists($settings, 'get
     
     $settings = new UTG_Fallback_Settings();
 }
+
+// Directly get settings from the $this->settings object if needed
+if (!isset($settings) && isset($this->settings)) {
+    $settings = $this->settings;
+}
 ?>
 <div class="wrap">
     <h1><?php echo esc_html(get_admin_page_title()); ?></h1>

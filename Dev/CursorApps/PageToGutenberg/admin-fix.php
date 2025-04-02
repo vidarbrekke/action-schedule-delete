@@ -3,15 +3,13 @@
  * DISABLED: This file is completely disabled and should not be loaded.
  * 
  * This file previously contained admin menu fixes for the URL to Gutenberg plugin.
- * These fixes have been properly implemented in the core plugin files.
+ * These fixes have been replaced with standard WordPress menu registration.
  * 
  * This file is kept only for reference and is not used by the plugin.
  */
 
-// Exit immediately to prevent any code from executing
-if (true) {
-    return;
-}
+// Exit immediately
+return;
 
 // None of the code below will ever execute
 // =====================================================================
@@ -112,14 +110,13 @@ function utg_render_settings_page_fixed() {
 */
 
 // Fix settings page issues by creating a direct handler
-// DISABLED: This was causing conflicts with the core plugin
-// add_action('admin_menu', 'utg_fix_settings_page', 999);
+// Uncomment this if you continue to have settings page issues
+add_action('admin_menu', 'utg_fix_settings_page', 999);
 
 /**
  * Fix settings page by providing direct access
- * DISABLED: Function left for reference only
+ * Function was left for reference and is now being reactivated to fix menu issues
  */
-/*
 function utg_fix_settings_page() {
     // Remove the original settings page
     remove_submenu_page('url-to-gutenberg', 'url-to-gutenberg-settings');
@@ -133,8 +130,36 @@ function utg_fix_settings_page() {
         'url-to-gutenberg-settings',
         'utg_render_settings_page'
     );
-} 
-*/
+}
+
+/**
+ * Render the settings page with proper variable setup
+ * This function ensures that the settings object is available to the view
+ */
+function utg_render_settings_page() {
+    // Create a clean scope for the settings variable
+    $settings = null;
+    
+    // Try to get the settings from the global UTG instance
+    $utg_instance = \UTG\URL_To_Gutenberg::get_instance();
+    if (method_exists($utg_instance, 'get_settings')) {
+        $settings = $utg_instance->get_settings();
+    }
+    
+    // If we still don't have a settings object, create a fallback
+    if (!$settings) {
+        $settings = new \stdClass();
+        $settings->get = function($key, $default = '') {
+            return $default;
+        };
+        
+        // Show an admin notice about the issue
+        echo '<div class="notice notice-warning"><p>Warning: Using fallback settings. Some features may not work correctly.</p></div>';
+    }
+    
+    // Include the settings view file with settings variable in scope
+    include_once dirname(__FILE__) . '/includes/admin/views/settings.php';
+}
 
 // Add submenu page
 add_submenu_page(

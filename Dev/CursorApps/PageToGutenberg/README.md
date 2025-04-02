@@ -7,7 +7,7 @@ A WordPress plugin that converts web content from any URL into Gutenberg blocks 
 URL to Gutenberg provides a powerful solution for importing content from external websites into WordPress as Gutenberg blocks. It utilizes a hybrid extraction system that combines:
 
 1. **EasyPHPArticleExtractor** for standard HTML pages
-2. **Symfony Panther** for JavaScript-heavy sites
+2. **Symfony Panther** for JavaScript-heavy sites (but this will only be implemented at a later stage when we have a working solution with EasyPHPArticleExtractor for standard HTML pages)
 
 This dual approach ensures maximum compatibility with different types of websites while maintaining performance.
 
@@ -59,7 +59,7 @@ This dual approach ensures maximum compatibility with different types of website
 
 1. Go to 'URL to Gutenberg' in the WordPress admin menu
 2. Enter the URL you want to convert
-3. Click 'Convert'
+3. Click 'Convert to post'
 4. The plugin will extract the content, process it with the LLM, and create a draft post
 5. Edit the draft post as needed and publish when ready
 
@@ -69,12 +69,11 @@ If you encounter issues with content extraction:
 
 1. Enable debug mode in settings to get more detailed error information
 2. Check if the URL is accessible from your server
-3. For JavaScript-heavy sites, ensure Chrome/Chromium is properly installed
-4. Verify that your API key is valid and has sufficient credits
+3. Verify that your API key is valid and has sufficient credits
 
 ## Dependencies
 
-The plugin relies on the following libraries:
+The plugin relies on the following libraries (some are only requered once we are ready to implement Panther):
 
 - [EasyPHPArticleExtractor](https://github.com/HStanleyCrow/EasyPHPArticleExtractor)
 - [Symfony Panther](https://github.com/symfony/panther)
