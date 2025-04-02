@@ -103,16 +103,17 @@ class Content_Extractor {
                     // Extract images 
                     $images = $this->extract_images_from_html($text, $url);
                     
+                    // Create content object without the duplicate raw content
                     $content = [
                         'title' => $title ? $title : basename($url),
                         'content' => $text,
-                        'raw_extracted_content' => $raw_extracted_content,
+                        // Remove raw_extracted_content as it's already saved in a separate file
                         'images' => $images,
                         'author' => '',
                         'published_date' => ''
                     ];
                     
-                    // Save final content for debugging if enabled
+                    // Save final content for debugging if enabled - without the duplicate content
                     if ($debug_mode) {
                         $this->save_debug_content('final_content', $url, json_encode($content, JSON_PRETTY_PRINT));
                     }

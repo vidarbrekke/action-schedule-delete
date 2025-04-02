@@ -17,7 +17,7 @@
     console.log('UTG: Admin script initialized');
     
     // Global variables
-    var $form, $url, $parseOnly, $submitButton, $preview, $result, $resultMessage;
+    var $form, $url, $parseOnly, $cleaningLevel, $submitButton, $preview, $result, $resultMessage;
     var isSubmitting = false;
     
     /**
@@ -36,6 +36,7 @@
         // Cache DOM elements
         $url = $('#utg-url');
         $parseOnly = $('#utg-parse-only');
+        $cleaningLevel = $('#utg-cleaning-level');
         $submitButton = $('#utg-submit');
         $preview = $('#utg-preview');
         $result = $('#utg-result');
@@ -83,6 +84,7 @@
         console.log('UTG: Starting URL conversion request', {
             url: url,
             parseOnly: $parseOnly.is(':checked'),
+            cleaningLevel: $cleaningLevel.val(),
             model: utgVars.defaultModel || 'default'
         });
         
@@ -91,6 +93,7 @@
             action: 'utg_convert_url',
             url: url,
             parse_only: $parseOnly.is(':checked'),
+            cleaning_level: $cleaningLevel.val(),
             security: utgVars.nonce
         };
         

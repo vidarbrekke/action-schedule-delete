@@ -344,7 +344,7 @@ class UTG_Admin {
         if (!current_user_can('manage_options')) {
             return;
         }
-
+        
         $content = '';
         $error = '';
         
@@ -362,16 +362,16 @@ class UTG_Admin {
                 if (!$html_content) {
                     error_log('UTG: Failed to retrieve content from URL in test page');
                     $error = __('Failed to retrieve content from the URL. The site may be blocking access or unavailable.', 'url-to-gutenberg');
-                } else {
+            } else {
                     // Use our direct DOM extraction method which doesn't require the Content_Extractor class
                     $content = $this->extract_content_with_dom($html_content);
-                    
+                
                     if (empty($content)) {
                         error_log('UTG: No content could be extracted from the URL in test page');
                         $error = __('No content could be extracted from this URL.', 'url-to-gutenberg');
-                    } else {
+                } else {
                         error_log('UTG: Successfully extracted content in test page, length: ' . strlen($content));
-                    }
+                }
                 }
             } catch (\Exception $e) {
                 error_log('UTG: Exception in URL test page: ' . $e->getMessage());
@@ -399,14 +399,14 @@ class UTG_Admin {
             
             <?php if ($error): ?>
             <div class="error"><p><?php echo \esc_html($error); ?></p></div>
-            <?php endif; ?>
-            
+                <?php endif; ?>
+                
             <?php if ($content): ?>
             <h2><?php \_e('Extracted Content', 'url-to-gutenberg'); ?></h2>
-            <div class="utg-content-preview">
+                    <div class="utg-content-preview">
                 <?php echo \wp_kses_post($content); ?>
-            </div>
-            <?php endif; ?>
+                    </div>
+                <?php endif; ?>
         </div>
         <?php
     }
@@ -480,8 +480,11 @@ class UTG_Admin {
                     error_log('UTG AJAX: Failed to retrieve content from URL');
                     \wp_send_json_error(__('Failed to retrieve content from the URL. The site may be blocking access or unavailable.', 'url-to-gutenberg'));
                     $this->settings->update(['debug_mode' => $debug_setting]);
-                    return;
-                }
+                return;
+            }
+
+                // Create a Content_Extractor instance with settings
+                $extractor = new \UTG\Content_Extractor($this->settings);
                 
                 // Save the raw content to debug directory with proper UTF-8 encoding
                 $debug_file = $debug_dir . '/' . $extractor->get_debug_filename($url, 'raw_html');
@@ -492,9 +495,6 @@ class UTG_Admin {
                 
                 error_log('UTG AJAX: Retrieved content, length: ' . strlen($content) . ' bytes');
                 
-                // Create a Content_Extractor instance with settings
-                $extractor = new \UTG\Content_Extractor($this->settings);
-                
                 // Extract content with the appropriate cleaning level
                 error_log('UTG AJAX: Beginning content extraction' . ($cleaning_level !== 'standard' ? ' with cleaning level: ' . $cleaning_level : ''));
                 $extracted = $extractor->extract($url, $cleaning_level);
@@ -503,9 +503,9 @@ class UTG_Admin {
                     error_log('UTG AJAX: Content extraction failed: ' . $extracted->get_error_message());
                     \wp_send_json_error(__('Content extraction failed: ', 'url-to-gutenberg') . $extracted->get_error_message());
                     $this->settings->update(['debug_mode' => $debug_setting]);
-                    return;
-                }
-                
+                return;
+            }
+
                 // First, save the raw extracted content (before any cleaning was applied)
                 if (!empty($extracted['raw_extracted_content'])) {
                     $raw_extracted_content = $extracted['raw_extracted_content'];
@@ -528,14 +528,21 @@ class UTG_Admin {
                         error_log('UTG AJAX: No content could be extracted with either method');
                         \wp_send_json_error(__('No content could be extracted from this URL.', 'url-to-gutenberg'));
                         $this->settings->update(['debug_mode' => $debug_setting]);
-                        return;
+                return;
                     }
                 }
                 
                 // Save the final content with proper UTF-8 encoding using the standardized naming convention
-                $debug_file = $debug_dir . '/' . $extractor->get_debug_filename($url, $cleaning_level . '_cleaned_content');
-                @file_put_contents($debug_file, $utf8_bom . $extracted_content);
-                error_log('UTG AJAX: ' . ucfirst($cleaning_level) . ' cleaned content saved to: ' . $debug_file);
+                // Only save this file if we're using the fallback extraction method, not the main Content_Extractor
+                // since the Content_Extractor already saves its own debug file with '_cleaned_article' suffix
+                if (!isset($extracted) || is_wp_error($extracted)) {
+                    $debug_file = $debug_dir . '/' . $extractor->get_debug_filename($url, $cleaning_level . '_cleaned_content');
+                    @file_put_contents($debug_file, $utf8_bom . $extracted_content);
+                    error_log('UTG AJAX: Fallback ' . ucfirst($cleaning_level) . ' cleaned content saved to: ' . $debug_file);
+                } else {
+                    // Use the existing debug file that was already created by Content_Extractor
+                    $debug_file = $debug_dir . '/' . $extractor->get_debug_filename($url, $cleaning_level . '_cleaned_article');
+                }
                 
                 error_log('UTG AJAX: Content extraction successful, content length: ' . strlen($extracted_content) . ' bytes');
                 
@@ -562,9 +569,9 @@ class UTG_Admin {
                 // Restore original debug setting
                 $this->settings->update(['debug_mode' => $debug_setting]);
             }
-            return;
-        }
-        
+                return;
+            }
+
         // Original LLM conversion logic for non-parse-only mode
         try {
             error_log('UTG AJAX: Starting URL conversion for: ' . $url);
@@ -577,6 +584,9 @@ class UTG_Admin {
                 $this->settings->update(['debug_mode' => $debug_setting]);
                 return;
             }
+
+            // Use the content extractor to get the relevant part of the page
+            $extractor = new \UTG\Content_Extractor($this->settings);
             
             // Save the raw content to debug directory
             $debug_file = $debug_dir . '/' . $extractor->get_debug_filename($url, 'raw_html');
@@ -586,8 +596,6 @@ class UTG_Admin {
             
             error_log('UTG AJAX: Retrieved content, length: ' . strlen($content) . ' bytes');
             
-            // Use the content extractor to get the relevant part of the page
-            $extractor = new \UTG\Content_Extractor($this->settings);
             $extracted = $extractor->extract($url, $cleaning_level);
             
             if (is_wp_error($extracted)) {
@@ -617,9 +625,16 @@ class UTG_Admin {
             }
             
             // Save the final content with proper UTF-8 encoding using the standardized naming convention
-            $debug_file = $debug_dir . '/' . $extractor->get_debug_filename($url, $cleaning_level . '_cleaned_content');
-            @file_put_contents($debug_file, $utf8_bom . $extracted_content);
-            error_log('UTG AJAX: ' . ucfirst($cleaning_level) . ' cleaned content saved to: ' . $debug_file);
+            // Only save this file if we're using the fallback extraction method, not the main Content_Extractor
+            // since the Content_Extractor already saves its own debug file with '_cleaned_article' suffix
+            if (!isset($extracted) || is_wp_error($extracted)) {
+                $debug_file = $debug_dir . '/' . $extractor->get_debug_filename($url, $cleaning_level . '_cleaned_content');
+                @file_put_contents($debug_file, $utf8_bom . $extracted_content);
+                error_log('UTG AJAX: Fallback ' . ucfirst($cleaning_level) . ' cleaned content saved to: ' . $debug_file);
+            } else {
+                // Use the existing debug file that was already created by Content_Extractor
+                $debug_file = $debug_dir . '/' . $extractor->get_debug_filename($url, $cleaning_level . '_cleaned_article');
+            }
             
             error_log('UTG AJAX: Content extraction successful, content length: ' . strlen($extracted_content) . ' bytes');
             
@@ -662,7 +677,7 @@ class UTG_Admin {
                 'debug_file' => basename($debug_file),
                 'model_used' => $model
             ]);
-            
+
         } catch (\Exception $e) {
             error_log('UTG AJAX: Exception during conversion process: ' . $e->getMessage());
             error_log('UTG AJAX: Exception trace: ' . $e->getTraceAsString());
