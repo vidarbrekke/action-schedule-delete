@@ -129,4 +129,13 @@ class Settings {
     public function get_all() {
         return $this->options;
     }
+
+    /**
+     * Check if the API settings are properly configured
+     *
+     * @return bool True if configured, false otherwise
+     */
+    public function is_configured() {
+        return !empty($this->get('api_key'));
+    }
 } 

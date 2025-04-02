@@ -21,6 +21,13 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
+// Track plugin loading globally to prevent multiple initializations
+global $utg_plugin_loaded;
+if (isset($utg_plugin_loaded) && $utg_plugin_loaded === true) {
+    return;
+}
+$utg_plugin_loaded = true;
+
 // Define plugin constants.
 define( 'UTG_PLUGIN_FILE', __FILE__ );
 define( 'UTG_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
@@ -72,6 +79,51 @@ function utg_init() {
     \UTG\URL_To_Gutenberg::get_instance();
 }
 add_action( 'plugins_loaded', 'utg_init', 15 );
+
+/**
+ * Add a hook to cleanup duplicate menu items
+ * This runs after all menu registration has completed
+ */
+function utg_cleanup_duplicate_menus() {
+    global $submenu;
+    
+    // Check for both old and new menu slugs
+    $menu_slugs = array('url-to-gutenberg', 'utg');
+    
+    foreach ($menu_slugs as $menu_slug) {
+        // If no submenus exist for this slug, continue to next
+        if (!isset($submenu[$menu_slug]) || !is_array($submenu[$menu_slug])) {
+            continue;
+        }
+        
+        // Create a map to track which menu slugs we've seen
+        $seen_slugs = array();
+        $cleaned_submenu = array();
+        
+        foreach ($submenu[$menu_slug] as $index => $menu_item) {
+            // Skip if not a valid menu item
+            if (!isset($menu_item[2]) || empty($menu_item[2])) {
+                continue;
+            }
+            
+            $slug = $menu_item[2];
+            
+            // If we haven't seen this slug before, keep it
+            if (!isset($seen_slugs[$slug])) {
+                $seen_slugs[$slug] = true;
+                $cleaned_submenu[] = $menu_item;
+            }
+            // Otherwise, this is a duplicate - skip it
+        }
+        
+        // Replace the submenu with our cleaned version
+        if (!empty($cleaned_submenu)) {
+            $submenu[$menu_slug] = $cleaned_submenu;
+        }
+    }
+}
+// Run this after all admin_menu hooks have been processed
+add_action('admin_menu', 'utg_cleanup_duplicate_menus', 999);
 
 /**
  * Create required directories on plugin activation.
@@ -270,4 +322,14 @@ function utg_create_composer_file() {
         file_put_contents( $composer_file, $composer_content );
     }
 }
-register_activation_hook( __FILE__, 'utg_create_composer_file' ); 
+register_activation_hook( __FILE__, 'utg_create_composer_file' );
+
+// Add a filter hook for the settings page rendering
+add_filter('utg_admin_render_settings', function($result) {
+    // If not on the settings page, return early
+    if (!is_admin() || !isset($_GET['page']) || $_GET['page'] !== 'url-to-gutenberg-settings') {
+        return $result;
+    }
+    
+    return null; // Let the default rendering handle it
+}, 10, 1); 

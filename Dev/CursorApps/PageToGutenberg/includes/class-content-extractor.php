@@ -7,16 +7,13 @@
 
 namespace UTG;
 
-use \WP_Error;
-use \HStanleyCrow\EasyPHPArticleExtractor\ArticleExtractor;
-use Symfony\Component\Panther\Client;
-use Symfony\Component\Panther\PantherTestCase;
+use WP_Error;
+use hstanleycrow\EasyPHPArticleExtractor\ArticleExtractor;
 
 /**
  * Class Content_Extractor
  * 
- * Handles content extraction from URLs using a hybrid approach with 
- * EasyPHPArticleExtractor for standard HTML and Symfony Panther for JavaScript-heavy sites.
+ * Handles content extraction from URLs using EasyPHPArticleExtractor
  */
 class Content_Extractor {
 
@@ -43,144 +40,62 @@ class Content_Extractor {
      * @return array|\WP_Error The extracted content or an error.
      */
     public function extract( $url ) {
-        // Validate URL
-        if ( ! filter_var( $url, FILTER_VALIDATE_URL ) ) {
-            return new \WP_Error( 'invalid_url', \__( 'Invalid URL provided.', 'url-to-gutenberg' ) );
+        if (empty($url)) {
+            error_log('UTG: Empty URL provided to Content_Extractor');
+            return new \WP_Error('invalid_url', 'URL cannot be empty');
         }
 
-        // Debug logging
-        if ( $this->settings->get( 'debug_mode' ) ) {
-            \error_log( "[URL to Gutenberg] Extracting content from URL: $url" );
+        if (!filter_var($url, FILTER_VALIDATE_URL)) {
+            error_log('UTG: Invalid URL format: ' . $url);
+            return new \WP_Error('invalid_url', 'Invalid URL format');
         }
+
+        error_log('UTG: Starting content extraction for URL: ' . $url);
 
         try {
-            // Try standard extraction first
-            $content = $this->standard_extraction( $url );
-            
-            // Check if content meets minimum requirements
-            if ( $this->is_content_valid( $content ) ) {
-                return $content;
+            $user_agent = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36';
+            $context = stream_context_create([
+                'http' => [
+                    'user_agent' => $user_agent
+                ]
+            ]);
+
+            error_log('UTG: Attempting to fetch content with user agent: ' . $user_agent);
+            $html = @file_get_contents($url, false, $context);
+
+            if ($html === false) {
+                $error = error_get_last();
+                error_log('UTG: Failed to fetch content: ' . ($error ? $error['message'] : 'Unknown error'));
+                return new \WP_Error('fetch_failed', 'Failed to fetch content from URL');
             }
-            
-            // If standard extraction fails or content is insufficient, try Panther
-            if ( $this->settings->get( 'debug_mode' ) ) {
-                \error_log( "[URL to Gutenberg] Standard extraction insufficient, trying Panther extraction." );
+
+            error_log('UTG: Content fetched successfully, length: ' . strlen($html));
+
+            $extractor = new ArticleExtractor($url);
+            $article = $extractor->article();
+
+            error_log('UTG: Attempting to extract article content');
+            $content = [
+                'title' => $extractor->title(),
+                'content' => $article,
+                'images' => $this->extract_images($html, $url),
+                'author' => '',  // Not supported by ArticleExtractor
+                'published_date' => ''  // Not supported by ArticleExtractor
+            ];
+
+            error_log('UTG: Content extraction completed. Title length: ' . strlen($content['title']) . ', Content length: ' . strlen($content['content']) . ', Image count: ' . count($content['images']));
+
+            if (empty($content['content']) || strlen($content['content']) < 100) {
+                error_log('UTG: Insufficient content extracted. Content length: ' . strlen($content['content']));
+                return new \WP_Error('insufficient_content', 'Could not extract sufficient content from the URL');
             }
-            
-            $content = $this->panther_extraction( $url );
-            
-            // Check again if content meets minimum requirements
-            if ( ! $this->is_content_valid( $content ) ) {
-                return new \WP_Error( 
-                    'extraction_failed', 
-                    \__( 'Could not extract sufficient content from the URL.', 'url-to-gutenberg' ) 
-                );
-            }
-            
+
             return $content;
-            
-        } catch ( \Exception $e ) {
-            if ( $this->settings->get( 'debug_mode' ) ) {
-                \error_log( "[URL to Gutenberg] Extraction error: " . $e->getMessage() );
-            }
-            
-            return new \WP_Error( 'extraction_error', $e->getMessage() );
-        }
-    }
 
-    /**
-     * Standard extraction using EasyPHPArticleExtractor.
-     *
-     * @param string $url The URL to extract from.
-     * @return array The extracted content.
-     */
-    private function standard_extraction( $url ) {
-        // Use EasyPHPArticleExtractor
-        $extractor = new ArticleExtractor();
-        $article = $extractor->extractFrom($url);
-        
-        if (!$article || empty($article->getContent())) {
-            throw new \Exception( \__( 'Failed to extract content with EasyPHPArticleExtractor.', 'url-to-gutenberg' ) );
+        } catch (\Exception $e) {
+            error_log('UTG: Exception during content extraction: ' . $e->getMessage());
+            return new \WP_Error('extraction_failed', 'Content extraction failed: ' . $e->getMessage());
         }
-        
-        // Get the HTML content
-        $html = $article->getContent();
-        $title = $article->getTitle();
-        $text = $article->getText();
-        
-        // Extract images
-        $images = $this->extract_images( $html, $url );
-        
-        return [
-            'title' => $title,
-            'html' => $html,
-            'text' => $text,
-            'images' => $images,
-            'url' => $url,
-            'extraction_method' => 'standard',
-        ];
-    }
-
-    /**
-     * Extract content using Symfony Panther (headless browser).
-     *
-     * @param string $url The URL to extract from.
-     * @return array The extracted content.
-     */
-    private function panther_extraction( $url ) {
-        // Initialize Chrome client
-        $client = Client::createChromeClient();
-        
-        // Navigate to the URL
-        $crawler = $client->request('GET', $url);
-        
-        // Wait for JavaScript to load content
-        $client->waitFor('.article, article, .content, .post, main, #content', 10);
-        
-        // Get page title
-        $title = $crawler->filter('title')->text();
-        
-        // Try to find the main content
-        $content_selectors = [
-            'article', '.article', '.post-content', '.entry-content',
-            'main', '#content', '.content', '[role="main"]'
-        ];
-        
-        $html = '';
-        foreach ( $content_selectors as $selector ) {
-            try {
-                $content = $crawler->filter( $selector )->first();
-                if ( $content->count() > 0 ) {
-                    $html = $client->getHtml( $content );
-                    break;
-                }
-            } catch ( \Exception $e ) {
-                continue;
-            }
-        }
-        
-        // If no content found, use the body
-        if ( empty( $html ) ) {
-            $html = $client->getHtml( $crawler->filter( 'body' ) );
-        }
-        
-        // Extract text from HTML
-        $text = strip_tags( $html );
-        
-        // Extract images
-        $images = $this->extract_images( $html, $url );
-        
-        // Close the client
-        $client->quit();
-        
-        return [
-            'title' => $title,
-            'html' => $html,
-            'text' => $text,
-            'images' => $images,
-            'url' => $url,
-            'extraction_method' => 'panther',
-        ];
     }
 
     /**
@@ -190,39 +105,39 @@ class Content_Extractor {
      * @param string $url The base URL.
      * @return array Array of image information.
      */
-    private function extract_images( $html, $url ) {
+    private function extract_images($html, $url) {
         $images = [];
         
         // Create a DOM document
         $dom = new \DOMDocument();
         
         // Suppress errors for malformed HTML
-        libxml_use_internal_errors( true );
-        $dom->loadHTML( $html );
+        libxml_use_internal_errors(true);
+        $dom->loadHTML($html);
         libxml_clear_errors();
         
         // Find all img tags
-        $img_tags = $dom->getElementsByTagName( 'img' );
+        $img_tags = $dom->getElementsByTagName('img');
         
-        foreach ( $img_tags as $img ) {
-            $src = $img->getAttribute( 'src' );
+        foreach ($img_tags as $img) {
+            $src = $img->getAttribute('src');
             
             // Skip if no src attribute
-            if ( empty( $src ) ) {
+            if (empty($src)) {
                 continue;
             }
             
             // Make src absolute if it's relative
-            if ( strpos( $src, 'http' ) !== 0 ) {
-                $src = $this->make_absolute_url( $src, $url );
+            if (strpos($src, 'http') !== 0) {
+                $src = $this->make_absolute_url($src, $url);
             }
             
             // Get alt text
-            $alt = $img->getAttribute( 'alt' );
+            $alt = $img->getAttribute('alt');
             
             // Get image dimensions
-            $width = $img->getAttribute( 'width' );
-            $height = $img->getAttribute( 'height' );
+            $width = $img->getAttribute('width');
+            $height = $img->getAttribute('height');
             
             $images[] = [
                 'src' => $src,
@@ -242,23 +157,23 @@ class Content_Extractor {
      * @param string $base_url The base URL.
      * @return string The absolute URL.
      */
-    private function make_absolute_url( $rel_url, $base_url ) {
+    private function make_absolute_url($rel_url, $base_url) {
         // Parse the base URL
-        $parsed_url = parse_url( $base_url );
+        $parsed_url = parse_url($base_url);
         
         // If the relative URL starts with //, it's a protocol-relative URL
-        if ( strpos( $rel_url, '//' ) === 0 ) {
+        if (strpos($rel_url, '//') === 0) {
             return $parsed_url['scheme'] . ':' . $rel_url;
         }
         
         // If the relative URL starts with /, it's relative to the root
-        if ( strpos( $rel_url, '/' ) === 0 ) {
+        if (strpos($rel_url, '/') === 0) {
             return $parsed_url['scheme'] . '://' . $parsed_url['host'] . $rel_url;
         }
         
         // Otherwise, it's relative to the current path
-        $path = isset( $parsed_url['path'] ) ? $parsed_url['path'] : '/';
-        $path = rtrim( dirname( $path ), '/' ) . '/';
+        $path = isset($parsed_url['path']) ? $parsed_url['path'] : '/';
+        $path = rtrim(dirname($path), '/') . '/';
         
         return $parsed_url['scheme'] . '://' . $parsed_url['host'] . $path . $rel_url;
     }
@@ -269,21 +184,21 @@ class Content_Extractor {
      * @param array $content The extracted content.
      * @return bool Whether the content is valid.
      */
-    private function is_content_valid( $content ) {
+    private function is_content_valid($content) {
         // Check if content is an array with required keys
-        if ( ! is_array( $content ) || empty( $content['html'] ) || empty( $content['title'] ) ) {
+        if (!is_array($content) || empty($content['html']) || empty($content['title'])) {
             return false;
         }
         
         // Check minimum content length
-        $min_length = $this->settings->get( 'min_content_length', 200 );
-        if ( strlen( $content['text'] ) < $min_length ) {
+        $min_length = $this->settings->get('min_content_length', 200);
+        if (strlen($content['text']) < $min_length) {
             return false;
         }
         
         // Check minimum image count if required
-        $min_images = $this->settings->get( 'min_image_count', 0 );
-        if ( $min_images > 0 && count( $content['images'] ) < $min_images ) {
+        $min_images = $this->settings->get('min_image_count', 0);
+        if ($min_images > 0 && count($content['images']) < $min_images) {
             return false;
         }
         

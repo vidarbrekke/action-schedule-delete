@@ -62,6 +62,9 @@ class UTG_Admin {
         // Register settings
         \add_action('admin_init', array($this, 'register_settings'));
         
+        // Add scripts and styles
+        \add_action('admin_enqueue_scripts', array($this, 'enqueue_scripts'));
+        
         // Add AJAX handlers
         \add_action('wp_ajax_utg_test_api_connection', array($this, 'test_api_connection'));
         \add_action('wp_ajax_utg_convert_url', array($this, 'convert_url'));
@@ -152,7 +155,7 @@ class UTG_Admin {
             __('Settings', 'url-to-gutenberg'),
             __('Settings', 'url-to-gutenberg'),
             'manage_options',
-            'utg-settings',
+            'url-to-gutenberg-settings',
             array($this, 'render_settings_page')
         );
         
@@ -162,7 +165,7 @@ class UTG_Admin {
             __('URL Test', 'url-to-gutenberg'),
             __('URL Test', 'url-to-gutenberg'),
             'manage_options',
-            'utg-url-test',
+            'url-to-gutenberg-test',
             array($this, 'render_url_test_page')
         );
         
@@ -238,13 +241,13 @@ class UTG_Admin {
     public function admin_notices() {
         // Check if we're on our plugin's page
         $screen = \get_current_screen();
-        if (!$screen || !\in_array($screen->id, array('toplevel_page_url-to-gutenberg', 'url-to-gutenberg_page_utg-settings'))) {
+        if (!$screen || !\in_array($screen->id, array('toplevel_page_url-to-gutenberg', 'url-to-gutenberg_page_url-to-gutenberg-settings'))) {
             return;
         }
         
         // Check if API is configured
         if (!$this->settings->is_configured() && $screen->id === 'toplevel_page_url-to-gutenberg') {
-            $settings_url = \admin_url('admin.php?page=utg-settings');
+            $settings_url = \admin_url('admin.php?page=url-to-gutenberg-settings');
             echo '<div class="notice notice-warning is-dismissible"><p>';
             printf(
                 __('URL to Gutenberg Converter requires API credentials. Please <a href="%s">configure your settings</a> first.', 'url-to-gutenberg'),
@@ -267,7 +270,7 @@ class UTG_Admin {
             echo '<div class="notice notice-error"><p>';
             printf(
                 __('API key not configured. Please <a href="%s">configure your API settings</a> first.', 'url-to-gutenberg'),
-                \admin_url('admin.php?page=utg-settings')
+                \admin_url('admin.php?page=url-to-gutenberg-settings')
             );
             echo '</p></div></div>';
             return;
@@ -281,7 +284,57 @@ class UTG_Admin {
      * Render settings page
      */
     public function render_settings_page() {
-        require_once UTG_PLUGIN_DIR . 'includes/admin/views/settings.php';
+        // Allow filtering of the settings page rendering
+        if (apply_filters('utg_admin_render_settings', null) === false) {
+            return;
+        }
+        
+        // Create a try/catch block to handle potential errors
+        try {
+            // Ensure we have a settings object
+            if (!isset($this->settings) || !is_object($this->settings)) {
+                // Try to create a new settings object
+                $this->settings = new \UTG\Settings();
+            }
+            
+            // Explicitly extract settings to a local variable to avoid scope issues
+            $settings = $this->settings;
+            
+            // Make sure we have a valid settings object
+            if (!is_object($settings) || !method_exists($settings, 'get')) {
+                throw new \Exception(__('Settings object not found or invalid', 'url-to-gutenberg'));
+            }
+            
+            // Include the view file with settings in scope
+            require_once UTG_PLUGIN_DIR . 'includes/admin/views/settings.php';
+            
+        } catch (\Exception $e) {
+            // Display a user-friendly error message
+            echo '<div class="wrap">';
+            echo '<h1>' . \esc_html(\get_admin_page_title()) . '</h1>';
+            echo '<div class="notice notice-error"><p>';
+            printf(
+                __('Error loading settings page: %s. Please contact plugin support.', 'url-to-gutenberg'),
+                \esc_html($e->getMessage())
+            );
+            echo '</p></div>';
+            
+            // Add debug information in debug mode
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                echo '<h3>' . __('Debug Information', 'url-to-gutenberg') . '</h3>';
+                echo '<pre>';
+                echo \esc_html($e->getTraceAsString());
+                echo '</pre>';
+                
+                // Dump the state of the Admin object
+                echo '<h3>' . __('Admin Object State', 'url-to-gutenberg') . '</h3>';
+                echo '<pre>';
+                echo \esc_html(print_r($this, true));
+                echo '</pre>';
+            }
+            
+            echo '</div>';
+        }
     }
     
     /**
@@ -294,7 +347,7 @@ class UTG_Admin {
             echo '<div class="notice notice-error"><p>';
             printf(
                 __('API key not configured. Please <a href="%s">configure your API settings</a> first.', 'url-to-gutenberg'),
-                \admin_url('admin.php?page=utg-settings')
+                \admin_url('admin.php?page=url-to-gutenberg-settings')
             );
             echo '</p></div></div>';
             return;
@@ -435,107 +488,73 @@ class UTG_Admin {
     }
     
     /**
-     * Convert URL to Gutenberg post (AJAX handler)
+     * Convert URL to Gutenberg blocks.
      */
     public function convert_url() {
-        // Check if this is an AJAX request
-        $is_ajax = \defined('DOING_AJAX') && DOING_AJAX;
-        
-        // Verify nonce
-        if ($is_ajax) {
-            $this->verify_ajax_nonce();
-            $url = isset($_POST['url']) ? \esc_url_raw($_POST['url']) : '';
-        } else {
-            // Non-AJAX form submission (from test page)
-            if (!isset($_POST['_wpnonce']) || !\wp_verify_nonce($_POST['_wpnonce'], 'utg_convert_url')) {
-                \wp_die(__('Security check failed', 'url-to-gutenberg'));
+        try {
+            error_log('UTG: Starting URL conversion process');
+
+            // Verify nonce
+            if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'utg_convert_url')) {
+                error_log('UTG: Nonce verification failed');
+                wp_send_json_error('Invalid nonce');
+                return;
             }
-            
-            if (!\current_user_can('manage_options')) {
-                \wp_die(__('You do not have permission to perform this action', 'url-to-gutenberg'));
+
+            // Check user permissions
+            if (!current_user_can('edit_posts')) {
+                error_log('UTG: User does not have required permissions');
+                wp_send_json_error('Insufficient permissions');
+                return;
             }
-            
-            $url = isset($_POST['utg-url']) ? \esc_url_raw($_POST['utg-url']) : '';
-        }
-        
-        if (empty($url)) {
-            $message = __('Please enter a valid URL', 'url-to-gutenberg');
-            
-            if ($is_ajax) {
-                \wp_send_json_error(array('message' => $message));
-            } else {
-                \wp_redirect(\add_query_arg(
-                    array('page' => 'url-to-gutenberg', 'error' => \urlencode($message)),
-                    \admin_url('admin.php')
-                ));
-                exit;
+
+            // Get URL from POST data
+            $url = isset($_POST['url']) ? esc_url_raw($_POST['url']) : '';
+            if (empty($url)) {
+                error_log('UTG: Empty URL provided');
+                wp_send_json_error('URL cannot be empty');
+                return;
             }
-        }
-        
-        // Allow pre-processing of the URL
-        $url = \apply_filters('utg_convert_url', $url);
-        
-        // Process the URL
-        $response = $this->api->process_url($url);
-        
-        if (is_wp_error($response)) {
-            $error_message = $response->get_error_message();
-            $error_data = $response->get_error_data();
-            
-            // Add debug information if debug mode is enabled
-            if ($this->settings->get('debug_mode') && !empty($error_data)) {
-                $error_message .= "\n\nDebug information:\n";
-                $error_message .= \is_array($error_data) ? \wp_json_encode($error_data, \JSON_PRETTY_PRINT) : $error_data;
+
+            error_log('UTG: Processing URL: ' . $url);
+
+            // Process URL
+            $api = new \UTG\API\LLM_API($this->settings);
+            $response = $api->process_url($url);
+
+            error_log('UTG: API Response: ' . print_r($response, true));
+
+            if (is_wp_error($response)) {
+                error_log('UTG: API Error: ' . $response->get_error_message());
+                wp_send_json_error($response->get_error_message());
+                return;
             }
-            
-            if ($is_ajax) {
-                \wp_send_json_error(array('message' => $error_message));
-            } else {
-                \wp_redirect(\add_query_arg(
-                    array('page' => 'url-to-gutenberg', 'error' => \urlencode($error_message)),
-                    \admin_url('admin.php')
-                ));
-                exit;
+
+            // Create post
+            $post_id = wp_insert_post([
+                'post_title' => $response['title'],
+                'post_content' => $response['content'],
+                'post_status' => 'draft',
+                'post_type' => 'post'
+            ]);
+
+            if (is_wp_error($post_id)) {
+                error_log('UTG: Post creation error: ' . $post_id->get_error_message());
+                wp_send_json_error('Failed to create post: ' . $post_id->get_error_message());
+                return;
             }
-        }
-        
-        // Generate the post
-        $post_id = $this->post_generator->create_post_from_api_response($response, $url);
-        
-        if (is_wp_error($post_id)) {
-            $error_message = $post_id->get_error_message();
-            $error_data = $post_id->get_error_data();
-            
-            // Add debug information if debug mode is enabled
-            if ($this->settings->get('debug_mode') && !empty($error_data)) {
-                $error_message .= "\n\nDebug information:\n";
-                $error_message .= \is_array($error_data) ? \wp_json_encode($error_data, \JSON_PRETTY_PRINT) : $error_data;
-            }
-            
-            if ($is_ajax) {
-                \wp_send_json_error(array('message' => $error_message));
-            } else {
-                \wp_redirect(\add_query_arg(
-                    array('page' => 'url-to-gutenberg', 'error' => \urlencode($error_message)),
-                    \admin_url('admin.php')
-                ));
-                exit;
-            }
-        }
-        
-        $success_data = array(
-            'message' => __('Post created successfully!', 'url-to-gutenberg'),
-            'post_id' => $post_id,
-            'edit_url' => \get_edit_post_link($post_id, 'raw'),
-            'view_url' => \get_permalink($post_id),
-        );
-        
-        if ($is_ajax) {
-            \wp_send_json_success($success_data);
-        } else {
-            // Redirect to the edit post page
-            \wp_redirect(\get_edit_post_link($post_id, 'raw'));
-            exit;
+
+            error_log('UTG: Post created successfully with ID: ' . $post_id);
+
+            wp_send_json_success([
+                'post_id' => $post_id,
+                'edit_url' => get_edit_post_link($post_id, 'raw')
+            ]);
+
+        } catch (\Exception $e) {
+            error_log('UTG: Exception in convert_url: ' . $e->getMessage());
+            error_log('UTG: Exception trace: ' . $e->getTraceAsString());
+            wp_send_json_error('An error occurred: ' . $e->getMessage());
         }
     }
     
@@ -543,7 +562,7 @@ class UTG_Admin {
      * Verify AJAX nonce
      */
     private function verify_ajax_nonce() {
-        if (!isset($_POST['nonce']) || !\wp_verify_nonce($_POST['nonce'], 'utg_nonce')) {
+        if (!isset($_POST['nonce']) || !\wp_verify_nonce($_POST['nonce'], 'utg_ajax_nonce')) {
             \wp_send_json_error(array('message' => __('Security check failed', 'url-to-gutenberg')));
             exit;
         }
@@ -564,13 +583,61 @@ class UTG_Admin {
     public function is_plugin_page($hook) {
         $plugin_pages = array(
             'toplevel_page_url-to-gutenberg',
-            'url-to-gutenberg_page_utg-settings',
-            'url-to-gutenberg_page_utg-url-test',
+            'url-to-gutenberg_page_url-to-gutenberg-settings',
+            'url-to-gutenberg_page_url-to-gutenberg-test',
         );
         
         // Allow filtering of plugin pages
         $plugin_pages = \apply_filters('utg_plugin_pages', $plugin_pages);
         
         return \in_array($hook, $plugin_pages);
+    }
+    
+    /**
+     * Enqueue admin scripts and styles
+     *
+     * @param string $hook The current admin page.
+     */
+    public function enqueue_scripts($hook) {
+        // Only load on our plugin pages
+        if (!$this->is_plugin_page($hook)) {
+            return;
+        }
+        
+        // Enqueue CSS
+        \wp_enqueue_style(
+            'utg-admin-css',
+            UTG_PLUGIN_URL . 'assets/css/admin.css',
+            array(),
+            UTG_VERSION
+        );
+        
+        // Enqueue JavaScript
+        \wp_enqueue_script(
+            'utg-admin-js',
+            UTG_PLUGIN_URL . 'assets/js/admin.js',
+            array('jquery'),
+            UTG_VERSION,
+            true
+        );
+        
+        // Get debug mode setting
+        $debug_mode = (bool) $this->settings->get('debug_mode', false);
+        
+        // Add script parameters
+        \wp_localize_script('utg-admin-js', 'utgParams', array(
+            'ajaxUrl' => \admin_url('admin-ajax.php'),
+            'nonce' => \wp_create_nonce('utg_ajax_nonce'),
+            'testingText' => \__('Testing connection...', 'url-to-gutenberg'),
+            'successText' => \__('Connection successful!', 'url-to-gutenberg'),
+            'errorText' => \__('Error: ', 'url-to-gutenberg'),
+            'debugMode' => $debug_mode,
+            'i18n' => array(
+                'processingUrl' => \__('Processing URL...', 'url-to-gutenberg'),
+                'enterValidUrl' => \__('Please enter a valid URL', 'url-to-gutenberg'),
+                'securityError' => \__('Security check failed', 'url-to-gutenberg'),
+                'serverError' => \__('Could not connect to the server. Please try again.', 'url-to-gutenberg')
+            )
+        ));
     }
 } 

@@ -14,6 +14,15 @@ use UTG\Admin\UTG_Admin;
 use UTG\Generator\Post_Generator;
 use UTG\Generator\Media_Handler;
 use UTG\Generator\UTG_Content_Optimizer;
+use function \register_activation_hook;
+use function \register_deactivation_hook;
+use function \add_action;
+use function \add_filter;
+use function \plugin_basename;
+use function \error_log;
+use function \esc_html_e;
+use function \esc_html;
+use const \WP_DEBUG;
 
 /**
  * Class URL_To_Gutenberg
@@ -149,22 +158,33 @@ class URL_To_Gutenberg {
      */
     private function register_hooks() {
         // Activation hook
-        \register_activation_hook( UTG_PLUGIN_FILE, [ $this, 'activate' ] );
+        global $register_activation_hook;
+        $register_activation_hook(UTG_PLUGIN_FILE, [$this, 'activate']);
         
         // Deactivation hook
-        \register_deactivation_hook( UTG_PLUGIN_FILE, [ $this, 'deactivate' ] );
+        global $register_deactivation_hook;
+        $register_deactivation_hook(UTG_PLUGIN_FILE, [$this, 'deactivate']);
         
-        // Admin menu
-        \add_action( 'admin_menu', [ $this, 'add_admin_menu' ] );
+        // IMPORTANT: Admin menu is now handled by UTG_Admin class
+        // Commenting out this menu registration to prevent duplicates
+        // global $add_action;
+        // $add_action('admin_menu', [$this, 'add_admin_menu']);
         
         // Admin scripts and styles
-        \add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
+        global $add_action;
+        $add_action('admin_enqueue_scripts', [$this, 'enqueue_admin_assets']);
         
-        // AJAX actions
-        \add_action( 'wp_ajax_utg_process_url', [ $this, 'ajax_process_url' ] );
+        // AJAX actions are handled by UTG_Admin class
         
         // Add settings link to plugin page
-        \add_filter( 'plugin_action_links_' . \plugin_basename( UTG_PLUGIN_FILE ), [ $this, 'add_settings_link' ] );
+        global $add_filter, $plugin_basename;
+        $add_filter('plugin_action_links_' . $plugin_basename(UTG_PLUGIN_FILE), [$this, 'add_settings_link']);
+        
+        // Add debug logging for initialization
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            global $error_log;
+            $error_log('UTG: URL_To_Gutenberg class initialized. Hooks registered.');
+        }
     }
 
     /**
@@ -221,9 +241,23 @@ class URL_To_Gutenberg {
     }
 
     /**
-     * Add admin menu items.
+     * Add admin menu.
+     * 
+     * DISABLED: This method is no longer used to prevent duplicate menus.
+     * Menu registration is now handled by the Admin class.
      */
     public function add_admin_menu() {
+        // This method is intentionally disabled to prevent duplicate menus
+        // Do not remove - kept for backward compatibility
+        
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('UTG: add_admin_menu in URL_To_Gutenberg class was called but is disabled.');
+        }
+        
+        return;
+        
+        // The code below is commented out to avoid duplicate menus
+        /*
         \add_menu_page(
             \__( 'URL to Gutenberg', 'url-to-gutenberg' ),
             \__( 'URL to Gutenberg', 'url-to-gutenberg' ),
@@ -241,6 +275,7 @@ class URL_To_Gutenberg {
             'url-to-gutenberg-settings',
             [ $this, 'render_settings_page' ]
         );
+        */
     }
 
     /**
@@ -332,86 +367,6 @@ class URL_To_Gutenberg {
         }
         
         include plugin_dir_path( UTG_PLUGIN_FILE ) . 'templates/settings-page.php';
-    }
-
-    /**
-     * AJAX handler for processing a URL.
-     */
-    public function ajax_process_url() {
-        // Verify nonce
-        if ( ! \wp_verify_nonce( $_POST['nonce'], 'utg_nonce' ) ) {
-            \wp_send_json_error( [ 'message' => \__( 'Security check failed.', 'url-to-gutenberg' ) ] );
-            return;
-        }
-        
-        // Check URL
-        if ( empty( $_POST['url'] ) ) {
-            \wp_send_json_error( [ 'message' => \__( 'URL is required.', 'url-to-gutenberg' ) ] );
-            return;
-        }
-        
-        $url = sanitize_text_field( $_POST['url'] );
-        
-        // Extract content
-        $content = $this->extractor->extract( $url );
-        
-        // Check for extraction errors
-        if ( \is_wp_error( $content ) ) {
-            \wp_send_json_error( [ 'message' => $content->get_error_message() ] );
-            return;
-        }
-        
-        // Process with LLM
-        $processed = $this->llm_api->process_content( $url, $content );
-        
-        // Check for LLM errors
-        if ( \is_wp_error( $processed ) ) {
-            \wp_send_json_error( [ 'message' => $processed->get_error_message() ] );
-            return;
-        }
-        
-        // Create draft post with the blocks
-        $post_id = $this->create_draft_post( $content['title'], $processed['blocks'] );
-        
-        if ( \is_wp_error( $post_id ) ) {
-            \wp_send_json_error( [ 'message' => $post_id->get_error_message() ] );
-            return;
-        }
-        
-        \wp_send_json_success( [
-            'post_id' => $post_id,
-            'edit_url' => \get_edit_post_link( $post_id, 'raw' ),
-            'message' => \__( 'Content converted and draft created successfully.', 'url-to-gutenberg' ),
-        ] );
-    }
-
-    /**
-     * Create a draft post with Gutenberg blocks.
-     *
-     * @param string $title  Post title.
-     * @param array  $blocks Gutenberg blocks.
-     * @return int|\WP_Error Post ID or error.
-     */
-    private function create_draft_post( $title, $blocks ) {
-        // Convert blocks to post content
-        $post_content = '';
-        
-        if ( ! empty( $blocks ) ) {
-            $post_content = \serialize_blocks( $blocks );
-        }
-        
-        // Create post
-        $post_data = [
-            'post_title'    => $title,
-            'post_content'  => $post_content,
-            'post_status'   => 'draft',
-            'post_type'     => 'post',
-            'post_author'   => \get_current_user_id(),
-        ];
-        
-        $post_id = \wp_insert_post( $post_data, true );
-        
-        return $post_id;
     }
 
     /**

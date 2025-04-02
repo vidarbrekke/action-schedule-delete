@@ -1,0 +1,116 @@
+/**
+ * URL to Gutenberg Admin Styles
+ */
+.utg-container {
+    margin-top: 20px;
+}
+
+.utg-settings-container {
+    margin-bottom: 30px;
+}
+
+.utg-api-test {
+    background: #fff;
+    padding: 20px;
+    border: 1px solid #ccd0d4;
+    box-shadow: 0 1px 1px rgba(0,0,0,.04);
+    margin-bottom: 20px;
+}
+
+.utg-api-test .spinner {
+    float: none;
+    margin-left: 10px;
+    vertical-align: middle;
+}
+
+#utg-test-result {
+    margin-top: 10px;
+    padding: 10px;
+    border-left: 4px solid transparent;
+}
+
+#utg-test-result.hidden {
+    display: none;
+}
+
+#utg-test-result.notice-success {
+    border-left-color: #46b450;
+    background-color: #ecf7ed;
+}
+
+#utg-test-result.notice-error {
+    border-left-color: #dc3232;
+    background-color: #fbeaea;
+}
+
+.utg-openrouter-guide {
+    background: #f8f9fa;
+    padding: 20px;
+    border: 1px solid #ccd0d4;
+    margin-bottom: 20px;
+}
+
+.utg-openrouter-guide ol {
+    margin-left: 20px;
+}
+
+.utg-form-field {
+    margin-bottom: 15px;
+}
+
+.utg-form-field label {
+    font-weight: 600;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.utg-loading {
+    display: none;
+    margin-top: 15px;
+    align-items: center;
+}
+
+.utg-loading .spinner {
+    visibility: visible;
+    float: none;
+    margin: 0 10px 0 0;
+}
+
+.utg-result {
+    display: none;
+    margin-top: 15px;
+    padding: 15px;
+    border-left: 4px solid #46b450;
+    background: #ecf7ed;
+}
+
+.utg-result.utg-error {
+    border-left-color: #dc3232;
+    background: #fbeaea;
+}
+
+.utg-result-actions {
+    margin-top: 10px;
+}
+
+.utg-content-preview {
+    margin-top: 20px;
+    padding: 15px;
+    border: 1px solid #ccd0d4;
+    background: #f9f9f9;
+}
+
+.utg-content-sample {
+    margin-top: 10px;
+    overflow: auto;
+    max-height: 300px;
+    background: #fff;
+    padding: 10px;
+    border: 1px solid #e5e5e5;
+}
+
+.utg-content-sample pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    margin: 0;
+} 

@@ -76,52 +76,6 @@ if ( ! defined( 'ABSPATH' ) ) {
     </div>
 </div>
 
-<script>
-jQuery(document).ready(function($) {
-    $('#utg-url-form').on('submit', function(e) {
-        e.preventDefault();
-        
-        // Show loading
-        $('#utg-result').hide();
-        $('#utg-error').hide();
-        $('#utg-loading').show();
-        
-        // Get URL
-        var url = $('#utg-url').val();
-        
-        // Send AJAX request
-        $.ajax({
-            url: utg_vars.ajax_url,
-            type: 'POST',
-            data: {
-                action: 'utg_process_url',
-                url: url,
-                nonce: utg_vars.nonce
-            },
-            success: function(response) {
-                $('#utg-loading').hide();
-                
-                if (response.success) {
-                    // Show result
-                    $('#utg-result .utg-result-content').html('<p>' + response.data.message + '</p>');
-                    $('#utg-edit-post').attr('href', response.data.edit_url);
-                    $('#utg-result').show();
-                } else {
-                    // Show error
-                    $('#utg-error').html('<p>' + utg_vars.error_text + ' ' + response.data.message + '</p>');
-                    $('#utg-error').show();
-                }
-            },
-            error: function() {
-                $('#utg-loading').hide();
-                $('#utg-error').html('<p>' + utg_vars.error_text + ' ' + '<?php esc_html_e( 'An unknown error occurred.', 'url-to-gutenberg' ); ?>' + '</p>');
-                $('#utg-error').show();
-            }
-        });
-    });
-});
-</script>
-
 <style>
 .utg-container {
     display: flex;

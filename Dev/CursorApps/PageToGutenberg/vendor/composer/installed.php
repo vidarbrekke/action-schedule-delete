@@ -7,7 +7,7 @@
         'aliases' => array(),
         'reference' => NULL,
         'name' => 'wordpress/url-to-gutenberg',
-        'dev' => true,
+        'dev' => false,
     ),
     'versions' => array(
         'facebook/webdriver' => array(

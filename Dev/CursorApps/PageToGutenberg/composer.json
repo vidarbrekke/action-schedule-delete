@@ -14,7 +14,10 @@
     "autoload": {
         "psr-4": {
             "UTG\\": "includes/"
-        }
+        },
+        "files": [
+            "vendor/hstanleycrow/easyphparticleextractor/src/simple_html_dom.php"
+        ]
     },
     "config": {
         "platform": {

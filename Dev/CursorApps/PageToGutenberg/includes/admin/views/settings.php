@@ -1,9 +1,45 @@
+<?php
+/**
+ * Settings view for URL to Gutenberg
+ * 
+ * @package UTG
+ */
+
+// Exit if accessed directly
+if (!defined('ABSPATH')) {
+    exit;
+}
+
+// Create the settings object if it's not available
+if (!isset($settings) || !is_object($settings) || !method_exists($settings, 'get')) {
+    echo '<div class="notice notice-error"><p>';
+    _e('Error: Settings object not available. Creating a fallback for basic functionality.', 'url-to-gutenberg');
+    echo '</p></div>';
+    
+    // Create a fallback settings object
+    class UTG_Fallback_Settings {
+        /**
+         * Get a setting value
+         *
+         * @param string $key Setting key
+         * @param mixed $default Default value
+         * @return mixed Setting value or default
+         */
+        public function get($key, $default = '') {
+            return $default;
+        }
+    }
+    
+    $settings = new UTG_Fallback_Settings();
+}
+?>
 <div class="wrap">
     <h1><?php echo esc_html(get_admin_page_title()); ?></h1>
     
     <form method="post" action="options.php">
         <?php
         settings_fields('utg_settings');
+        do_settings_sections('utg_settings');
         ?>
         
         <div class="utg-settings-container">
@@ -20,7 +56,7 @@
                             <input type="password" 
                                 id="utg_api_key" 
                                 name="utg_settings[api_key]" 
-                                value="<?php echo esc_attr($this->settings->get('api_key')); ?>" 
+                                value="<?php echo esc_attr($settings->get('api_key')); ?>" 
                                 class="regular-text">
                             <p class="description"><?php _e('Enter your OpenRouter API key. This is required for the plugin to function.', 'url-to-gutenberg'); ?></p>
                         </td>
@@ -33,7 +69,7 @@
                             <input type="text" 
                                 id="utg_api_endpoint" 
                                 name="utg_settings[api_endpoint]" 
-                                value="<?php echo esc_attr($this->settings->get('api_endpoint')); ?>" 
+                                value="<?php echo esc_attr($settings->get('api_endpoint')); ?>" 
                                 class="regular-text">
                             <p class="description"><?php _e('The LLM API endpoint. Default is OpenRouter\'s endpoint.', 'url-to-gutenberg'); ?></p>
                         </td>
@@ -46,7 +82,7 @@
                             <input type="text" 
                                 id="utg_default_model" 
                                 name="utg_settings[default_model]" 
-                                value="<?php echo esc_attr($this->settings->get('default_model')); ?>" 
+                                value="<?php echo esc_attr($settings->get('default_model')); ?>" 
                                 class="regular-text">
                             <p class="description"><?php _e('The default model to use for processing URLs. Must support multi-modal capabilities.', 'url-to-gutenberg'); ?></p>
                         </td>
@@ -63,10 +99,10 @@
                         </th>
                         <td>
                             <select id="utg_default_post_status" name="utg_settings[default_post_status]">
-                                <option value="draft" <?php selected($this->settings->get('default_post_status'), 'draft'); ?>><?php _e('Draft', 'url-to-gutenberg'); ?></option>
-                                <option value="publish" <?php selected($this->settings->get('default_post_status'), 'publish'); ?>><?php _e('Published', 'url-to-gutenberg'); ?></option>
-                                <option value="pending" <?php selected($this->settings->get('default_post_status'), 'pending'); ?>><?php _e('Pending Review', 'url-to-gutenberg'); ?></option>
-                                <option value="private" <?php selected($this->settings->get('default_post_status'), 'private'); ?>><?php _e('Private', 'url-to-gutenberg'); ?></option>
+                                <option value="draft" <?php selected($settings->get('default_post_status'), 'draft'); ?>><?php _e('Draft', 'url-to-gutenberg'); ?></option>
+                                <option value="publish" <?php selected($settings->get('default_post_status'), 'publish'); ?>><?php _e('Published', 'url-to-gutenberg'); ?></option>
+                                <option value="pending" <?php selected($settings->get('default_post_status'), 'pending'); ?>><?php _e('Pending Review', 'url-to-gutenberg'); ?></option>
+                                <option value="private" <?php selected($settings->get('default_post_status'), 'private'); ?>><?php _e('Private', 'url-to-gutenberg'); ?></option>
                             </select>
                             <p class="description"><?php _e('The default status for new posts.', 'url-to-gutenberg'); ?></p>
                         </td>
@@ -91,7 +127,7 @@
                                         id="utg_cache_enabled" 
                                         name="utg_settings[cache_enabled]" 
                                         value="1" 
-                                        <?php checked($this->settings->get('cache_enabled')); ?>>
+                                        <?php checked($settings->get('cache_enabled')); ?>>
                                     <?php _e('Enable caching of API responses', 'url-to-gutenberg'); ?>
                                 </label>
                                 <p class="description"><?php _e('Cache API responses to improve performance and reduce API calls.', 'url-to-gutenberg'); ?></p>
@@ -106,7 +142,7 @@
                             <input type="number" 
                                 id="utg_cache_expiration" 
                                 name="utg_settings[cache_expiration]" 
-                                value="<?php echo esc_attr($this->settings->get('cache_expiration')); ?>" 
+                                value="<?php echo esc_attr($settings->get('cache_expiration')); ?>" 
                                 class="small-text">
                             <?php _e('seconds', 'url-to-gutenberg'); ?>
                             <p class="description"><?php _e('How long to cache API responses. Default is 3600 seconds (1 hour).', 'url-to-gutenberg'); ?></p>
@@ -126,7 +162,7 @@
                                         id="utg_debug_mode" 
                                         name="utg_settings[debug_mode]" 
                                         value="1" 
-                                        <?php checked($this->settings->get('debug_mode')); ?>>
+                                        <?php checked($settings->get('debug_mode')); ?>>
                                     <?php _e('Enable debug mode', 'url-to-gutenberg'); ?>
                                 </label>
                                 <p class="description"><?php _e('Log detailed information to the server error log. Only enable for troubleshooting.', 'url-to-gutenberg'); ?></p>
@@ -138,7 +174,7 @@
             
             <?php
             // Allow other plugins to add their own settings sections
-            do_action('utg_settings_sections', $this->settings);
+            do_action('utg_settings_sections', $settings);
             
             submit_button();
             ?>
