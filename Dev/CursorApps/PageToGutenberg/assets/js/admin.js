@@ -147,7 +147,7 @@
         
         // Display preview if available
         if (data.preview) {
-            $preview.html('<h3>Content Preview:</h3><div class="utg-preview-content">' + data.preview + '</div>');
+            $preview.html('<div class="utg-preview-content">' + data.preview + '</div>');
             $preview.show();
         }
         
