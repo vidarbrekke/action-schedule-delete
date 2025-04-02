@@ -7,6 +7,7 @@ This document contains instructions for fixing issues with the URL to Gutenberg 
 The plugin is experiencing issues with the settings page:
 1. The settings page is not loading correctly and showing a critical error
 2. There may be duplicate menu items in the WordPress admin
+3. The admin menu link may be completely missing from the WordPress admin sidebar
 
 ## Root Causes
 
@@ -16,6 +17,31 @@ After diagnosing the issues, we've identified the following causes:
 2. The settings view file (`includes/admin/views/settings.php`) is incorrectly using `$this->settings` instead of using a local variable.
 3. The `Settings` class may be missing the `is_configured()` method which is required by the admin class.
 4. WordPress core functions may not be properly loaded when the settings page is rendered.
+5. There are namespace conflicts in how the UTG_Admin class is imported and instantiated in the main plugin file.
+
+## Namespace Conflicts
+
+The main plugin file has namespace-related issues that can prevent the admin menu from appearing at all:
+
+1. In `includes/class-url-to-gutenberg.php`, the `UTG_Admin` class is imported with:
+   ```php
+   use UTG\Admin\UTG_Admin;
+   ```
+
+2. But it might be incorrectly instantiated with:
+   ```php
+   $this->admin = new Admin\UTG_Admin($this->llm_api, $this->post_generator, $this->settings);
+   ```
+
+3. This namespace conflict can cause the admin menu to not register at all.
+
+To fix this issue:
+1. Edit `includes/class-url-to-gutenberg.php`
+2. Change the instantiation to match the import statement:
+   ```php
+   $this->admin = new UTG_Admin($this->llm_api, $this->post_generator, $this->settings);
+   ```
+3. Save the file and reactivate the plugin
 
 ## Fix Instructions
 
@@ -136,9 +162,12 @@ if (function_exists('submit_button')) {
 After making these changes:
 
 1. Clear any WordPress caches if you're using a caching plugin
-2. Navigate to the Settings page through the WordPress admin
-3. Verify that the page loads correctly without errors
-4. Confirm that only one URL to Gutenberg menu entry exists in the WordPress admin
+2. Navigate to the WordPress admin dashboard
+3. Verify that the "URL to Gutenberg" menu link appears in the admin sidebar
+4. Click on the menu link and verify that the main page loads correctly without errors
+5. Navigate to the Settings page through the WordPress admin menu
+6. Verify that the settings page loads correctly without errors
+7. Confirm that only one URL to Gutenberg menu entry exists in the WordPress admin
 
 ## Additional Troubleshooting
 
@@ -150,6 +179,8 @@ If you're still experiencing issues after applying these fixes:
 4. Verify that all required WordPress functions are available 
 5. Ensure that the plugin's classes are being loaded properly
 6. Try deactivating and reactivating the plugin
+7. Check hook priorities - if multiple plugins are registering admin menu items with the same slug, the hooks with higher priorities (lower numbers) will be executed first. The plugin uses priority 10 (default) for menu registration, and priority 999 for cleanup, which might need adjustment if conflicts persist.
+8. Use a WordPress hook debugging plugin to see which hooks are firing and in what order
 
 ## Support
 
