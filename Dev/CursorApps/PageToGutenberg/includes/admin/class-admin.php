@@ -506,6 +506,15 @@ class UTG_Admin {
                     return;
                 }
                 
+                // First, save the raw extracted content (before any cleaning was applied)
+                if (!empty($extracted['raw_extracted_content'])) {
+                    $raw_extracted_content = $extracted['raw_extracted_content'];
+                    $extracted_file = $debug_dir . '/extracted_article_' . uniqid() . '.html';
+                    @file_put_contents($extracted_file, $utf8_bom . $raw_extracted_content);
+                    error_log('UTG AJAX: Raw extracted article saved to: ' . $extracted_file);
+                }
+                
+                // Get the final cleaned content
                 $extracted_content = $extracted['content'];
                 
                 if (!$extracted_content || empty($extracted_content)) {
@@ -600,6 +609,15 @@ class UTG_Admin {
                     return;
                 }
             } else {
+                // First, save the raw extracted content (before any cleaning was applied)
+                if (!empty($extracted['raw_extracted_content'])) {
+                    $raw_extracted_content = $extracted['raw_extracted_content'];
+                    $extracted_file = $debug_dir . '/extracted_article_' . uniqid() . '.html';
+                    @file_put_contents($extracted_file, $utf8_bom . $raw_extracted_content);
+                    error_log('UTG AJAX: Raw extracted article saved to: ' . $extracted_file);
+                }
+                
+                // Get the final cleaned content
                 $extracted_content = $extracted['content'];
             }
             

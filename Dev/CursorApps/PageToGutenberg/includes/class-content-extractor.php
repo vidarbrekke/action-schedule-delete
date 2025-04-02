@@ -79,6 +79,9 @@ class Content_Extractor {
                         $this->save_debug_content('extracted_title', $url, $title);
                     }
                     
+                    // Store the raw extracted content before cleaning
+                    $raw_extracted_content = $text;
+                    
                     // Apply the appropriate level of cleaning
                     if ($cleaning_level === 'aggressive') {
                         $text = $this->aggressive_html_cleaning($text);
@@ -103,6 +106,7 @@ class Content_Extractor {
                     $content = [
                         'title' => $title ? $title : basename($url),
                         'content' => $text,
+                        'raw_extracted_content' => $raw_extracted_content,
                         'images' => $images,
                         'author' => '',
                         'published_date' => ''
