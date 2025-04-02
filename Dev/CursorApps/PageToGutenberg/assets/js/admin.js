@@ -1,145 +1,236 @@
 /**
  * URL to Gutenberg Admin JavaScript
  */
-jQuery(document).ready(function($) {
-    if (utgParams.debugMode) {
-        console.log('UTG Admin JS loaded');
+(function($) {
+    'use strict';
+    
+    // Prevent multiple initializations
+    if (window.utgInitialized) {
+        console.warn('UTG: Admin script already initialized, skipping duplicate execution');
+        return;
     }
     
-    // Test API Connection
-    $(document).on('click', '#utg-test-api', function(e) {
-        e.preventDefault();
-        if (utgParams.debugMode) {
-            console.log('Test API button clicked');
-        }
-        
-        var $button = $(this);
-        var $spinner = $button.next('.spinner');
-        var $result = $('#utg-test-result');
-        
-        // Disable button and show spinner
-        $button.prop('disabled', true);
-        $spinner.css('visibility', 'visible');
-        $result.removeClass('hidden').html(utgParams.testingText);
-        
-        // Make AJAX request
-        $.ajax({
-            url: utgParams.ajaxUrl,
-            type: 'POST',
-            data: {
-                action: 'utg_test_api_connection',
-                _wpnonce: utgParams.nonce
-            },
-            success: function(response) {
-                if (utgParams.debugMode) {
-                    console.log('API test response:', response);
-                }
-                
-                if (response.success) {
-                    $result.removeClass('notice-error').addClass('notice-success').html('<p>' + response.data.message + '</p>');
-                } else {
-                    $result.removeClass('notice-success').addClass('notice-error').html('<p>' + utgParams.errorText + response.data.message + '</p>');
-                }
-            },
-            error: function(xhr, status, error) {
-                if (utgParams.debugMode) {
-                    console.error('AJAX error:', status, error);
-                }
-                $result.removeClass('notice-success').addClass('notice-error').html('<p>' + utgParams.i18n.serverError + '</p>');
-            },
-            complete: function() {
-                // Re-enable button and hide spinner
-                $button.prop('disabled', false);
-                $spinner.css('visibility', 'hidden');
-            }
-        });
-    });
+    // Set the initialization flag
+    window.utgInitialized = true;
     
-    // URL Converter Form
-    $('#utg-url-form').on('submit', function(e) {
-        e.preventDefault();
-        
-        if (utgParams.debugMode) {
-            console.log('URL conversion form submitted');
-        }
-        
-        var $form = $(this);
-        var $submitButton = $form.find('button[type="submit"]');
-        var $url = $form.find('#utg-url');
-        var $loading = $('.utg-loading');
-        var $result = $('.utg-result');
-        
-        // Validate URL
-        if (!$url.val()) {
-            alert(utgParams.i18n.enterValidUrl);
-            $url.focus();
+    // Log script initialization
+    console.log('UTG: Admin script initialized');
+    
+    // Global variables
+    var $form, $url, $parseOnly, $submitButton, $preview, $result, $resultMessage;
+    var isSubmitting = false;
+    
+    /**
+     * Initialize the script
+     */
+    function init() {
+        // Check if we're on the right page by looking for our form
+        $form = $('#utg-form');
+        if (!$form.length) {
+            console.log('UTG: Form not found, possibly not on URL converter page');
             return;
         }
         
-        if (utgParams.debugMode) {
-            console.log('Making AJAX request to convert URL:', $url.val());
+        console.log('UTG: Initializing admin panel functionality');
+        
+        // Cache DOM elements
+        $url = $('#utg-url');
+        $parseOnly = $('#utg-parse-only');
+        $submitButton = $('#utg-submit');
+        $preview = $('#utg-preview');
+        $result = $('#utg-result');
+        $resultMessage = $('#utg-result-message');
+        
+        // Add event listeners
+        console.log('UTG: Form found, adding event listeners');
+        $form.on('submit', handleFormSubmit);
+        $parseOnly.on('change', handleParseOnlyChange);
+        
+        // Initialize UI state
+        handleParseOnlyChange();
+        
+        // Show the textarea container if it already has content
+        if ($result.val()) {
+            $('.utg-textarea-container').show();
+        }
+    }
+    
+    /**
+     * Handle form submission
+     * @param {Event} e - The submit event
+     */
+    function handleFormSubmit(e) {
+        e.preventDefault();
+        
+        if (isSubmitting) {
+            console.log('UTG: Already processing, ignoring duplicate submission');
+            return;
         }
         
-        // Disable button and show loading indicator
-        $submitButton.prop('disabled', true);
-        $loading.removeClass('hidden');
-        $result.addClass('hidden');
+        // Get the URL value
+        var url = $url.val().trim();
         
-        // Make AJAX request
+        // Validate URL
+        if (!url) {
+            showError('Please enter a URL');
+            return;
+        }
+        
+        // Set form state to loading
+        setFormSubmitting(true);
+        
+        // Log the request details
+        console.log('UTG: Starting URL conversion request', {
+            url: url,
+            parseOnly: $parseOnly.is(':checked'),
+            model: utgVars.defaultModel || 'default'
+        });
+        
+        // Prepare AJAX data
+        var data = {
+            action: 'utg_convert_url',
+            url: url,
+            parse_only: $parseOnly.is(':checked'),
+            security: utgVars.nonce
+        };
+        
+        // Send the AJAX request
         $.ajax({
-            url: utgParams.ajaxUrl,
+            url: utgVars.ajaxUrl,
             type: 'POST',
-            data: {
-                action: 'utg_convert_url',
-                url: $url.val(),
-                parse_only: $form.find('#utg-parse-only').is(':checked'),
-                _wpnonce: $form.find('input[name="_wpnonce"]').val()
-            },
+            data: data,
+            dataType: 'json',
             success: function(response) {
-                if (utgParams.debugMode) {
-                    console.log('URL convert response:', response);
-                    console.log('Nonce used:', $form.find('input[name="_wpnonce"]').val());
-                }
+                console.log('UTG: Received successful AJAX response', response);
                 
                 if (response.success) {
-                    // Show success message and edit link
-                    $result.removeClass('utg-error').addClass('utg-success').html(
-                        '<div class="utg-result-message">' +
-                        '<p>' + response.data.message + '</p>' +
-                        '</div>' +
-                        '<div class="utg-result-actions">' +
-                        '<a href="' + response.data.edit_url + '" class="button button-primary">Edit Post</a> ' +
-                        '<a href="' + response.data.view_url + '" class="button" target="_blank">View Post</a>' +
-                        '</div>'
-                    ).removeClass('hidden');
-                    
-                    // Clear the URL field
-                    $url.val('');
+                    handleSuccess(response.data);
                 } else {
-                    // Show error message
-                    $result.removeClass('utg-success').addClass('utg-error').html(
-                        '<div class="utg-result-message">' +
-                        '<p>' + utgParams.errorText + response.data.message + '</p>' +
-                        '</div>'
-                    ).removeClass('hidden');
+                    handleError(response.data);
                 }
             },
             error: function(xhr, status, error) {
-                if (utgParams.debugMode) {
-                    console.error('AJAX error:', status, error);
+                console.error('UTG: AJAX error', {xhr: xhr, status: status, error: error});
+                
+                // Extract error details
+                var errorMessage = 'AJAX error: ' + status;
+                if (xhr.responseJSON && xhr.responseJSON.data) {
+                    errorMessage = xhr.responseJSON.data;
+                } else if (xhr.responseText) {
+                    try {
+                        var jsonResponse = JSON.parse(xhr.responseText);
+                        if (jsonResponse.data) {
+                            errorMessage = jsonResponse.data;
+                        }
+                    } catch (e) {
+                        errorMessage = 'Server error: ' + error;
+                    }
                 }
-                // Show generic error message
-                $result.removeClass('utg-success').addClass('utg-error').html(
-                    '<div class="utg-result-message">' +
-                    '<p>' + utgParams.i18n.serverError + '</p>' +
-                    '</div>'
-                ).removeClass('hidden');
+                
+                handleError(errorMessage);
             },
             complete: function() {
-                // Re-enable button and hide loading indicator
-                $submitButton.prop('disabled', false);
-                $loading.addClass('hidden');
+                setFormSubmitting(false);
             }
         });
-    });
-}); 
+    }
+    
+    /**
+     * Handle successful response
+     * @param {Object} data - The response data
+     */
+    function handleSuccess(data) {
+        console.log('UTG: Processing successful response');
+        
+        // Show success message
+        showSuccess(data.message || 'URL successfully converted');
+        
+        // Display preview if available
+        if (data.preview) {
+            $preview.html('<h3>Content Preview:</h3><div class="utg-preview-content">' + data.preview + '</div>');
+            $preview.show();
+        }
+        
+        // Display result content if available
+        if (data.content) {
+            const preformattedContent = $parseOnly.is(':checked') ? 
+                data.content : 
+                '<!-- wp:html -->\n' + data.content + '\n<!-- /wp:html -->';
+            
+            $result.val(preformattedContent);
+            $result.show();
+            
+            // Add debug file info if available
+            if (data.debug_file) {
+                $resultMessage.append(' <span class="utg-debug-info">(Debug file: ' + data.debug_file + ')</span>');
+            }
+        }
+        
+        // Scroll to results
+        scrollToResults();
+    }
+    
+    /**
+     * Handle error response
+     * @param {string} message - The error message
+     */
+    function handleError(message) {
+        console.error('UTG: Error processing URL', message);
+        showError(message || 'An unknown error occurred');
+        $preview.hide();
+        $result.hide();
+    }
+    
+    /**
+     * Show success message
+     * @param {string} message - The success message
+     */
+    function showSuccess(message) {
+        $resultMessage.removeClass('utg-error').addClass('utg-success').html(message).show();
+    }
+    
+    /**
+     * Show error message
+     * @param {string} message - The error message
+     */
+    function showError(message) {
+        $resultMessage.removeClass('utg-success').addClass('utg-error').html(message).show();
+    }
+    
+    /**
+     * Set form to submitting or not submitting state
+     * @param {boolean} submitting - Whether the form is submitting
+     */
+    function setFormSubmitting(submitting) {
+        isSubmitting = submitting;
+        
+        if (submitting) {
+            $submitButton.prop('disabled', true).addClass('utg-loading').val('Processing...');
+            $resultMessage.hide();
+        } else {
+            $submitButton.prop('disabled', false).removeClass('utg-loading').val('Convert URL');
+        }
+    }
+    
+    /**
+     * Handle parse only checkbox change
+     */
+    function handleParseOnlyChange() {
+        var isParseOnly = $parseOnly.is(':checked');
+        console.log('UTG: Parse only changed to', isParseOnly);
+        // No UI changes needed anymore since we removed the model dropdown
+    }
+    
+    /**
+     * Scroll to results section
+     */
+    function scrollToResults() {
+        $('html, body').animate({
+            scrollTop: $resultMessage.offset().top - 100
+        }, 500);
+    }
+    
+    // Initialize on document ready
+    $(document).ready(init);
+    
+})(jQuery); 

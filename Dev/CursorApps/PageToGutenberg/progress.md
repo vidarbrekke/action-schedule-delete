@@ -1,3 +1,30 @@
+## 2024-04-03: Fixed Character Encoding Issues and Streamlined UI
+
+### Current Status
+- Fixed special character encoding issues in extracted HTML content
+- Removed redundant LLM model dropdown from the URL converter page
+- Improved character handling throughout the HTML processing pipeline
+
+### Completed Tasks
+- Added proper UTF-8 encoding support with BOM (Byte Order Mark) for debug HTML files
+- Enhanced DOMDocument handling with explicit UTF-8 encoding declarations
+- Implemented character replacement map for problematic UTF-8 sequences
+- Used `mb_convert_encoding` and `html_entity_decode` to properly handle special characters
+- Removed redundant GPT model selection from the URL converter page (using settings page default instead)
+- Added proper detection and replacement of common special characters (em dashes, quotes, apostrophes)
+
+### Challenges & Solutions
+- **Challenge**: Special characters displaying as HTML entities (â€™ instead of ')
+  **Solution**: Added multiple layers of encoding fixes including UTF-8 BOM, entity decoding, and direct replacement maps
+
+- **Challenge**: Duplicate UI controls for model selection causing confusion
+  **Solution**: Removed the model dropdown from URL converter page, using the default from settings
+
+### Next Steps
+- Continue monitoring character encoding for any edge cases
+- Consider additional improvements for language-specific characters
+- Implement better feedback for the model being used during conversion
+
 # URL to Gutenberg Development Progress
 
 ## 2024-04-03: Implemented "Only Parse HTML" Feature and Fixed AJAX Nonce Issues

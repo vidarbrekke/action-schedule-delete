@@ -276,8 +276,8 @@ class UTG_Admin {
             return;
         }
         
-        // Render the URL converter form
-        require_once UTG_PLUGIN_DIR . 'includes/admin/views/url-converter.php';
+        // Render the URL converter form using the new template
+        require_once UTG_PLUGIN_DIR . 'includes/admin/page-converter.php';
     }
     
     /**
@@ -341,136 +341,51 @@ class UTG_Admin {
      * Render URL test page
      */
     public function render_url_test_page() {
-        // Check if API key is configured
-        if (!$this->settings->is_configured()) {
-            echo '<div class="wrap"><h1>' . \esc_html(\get_admin_page_title()) . '</h1>';
-            echo '<div class="notice notice-error"><p>';
-            printf(
-                __('API key not configured. Please <a href="%s">configure your API settings</a> first.', 'url-to-gutenberg'),
-                \admin_url('admin.php?page=url-to-gutenberg-settings')
-            );
-            echo '</p></div></div>';
+        if (!current_user_can('manage_options')) {
             return;
         }
-        
-        // Process form submission
-        $url = '';
+
         $content = '';
         $error = '';
         
         if (isset($_POST['url']) && \check_admin_referer('utg_ajax_nonce')) {
-            $url = \esc_url_raw($_POST['url']);
+            $url = sanitize_text_field($_POST['url']);
+            $content_extractor = new \UTG\Content_Extractor($this->settings);
+            $content = $content_extractor->extract($url);
             
-            // Check for alternate URL field name (from url-converter.php form)
-            if (empty($url) && isset($_POST['utg-url'])) {
-                $url = \esc_url_raw($_POST['utg-url']);
-            }
-            
-            if (empty($url)) {
-                $error = __('Please enter a valid URL', 'url-to-gutenberg');
-            } else {
-                // Fetch the URL content
-                $result = $this->api->fetch_url_content($url);
-                
-                if (is_wp_error($result)) {
-                    $error = $result->get_error_message();
-                } else {
-                    $content = $result;
-                }
+            if (\is_wp_error($content)) {
+                $error = $content->get_error_message();
             }
         }
         
-        // Render the test form
+        $settings = $this->settings->get_all();
+        
         ?>
         <div class="wrap">
             <h1><?php echo \esc_html(\get_admin_page_title()); ?></h1>
+            <form method="post" action="">
+                <?php \wp_nonce_field('utg_ajax_nonce'); ?>
+                <table class="form-table">
+                    <tr>
+                        <th scope="row"><label for="url"><?php \_e('URL to Test', 'url-to-gutenberg'); ?></label></th>
+                        <td>
+                            <input name="url" type="text" id="url" value="" class="regular-text">
+                        </td>
+                    </tr>
+                </table>
+                <?php submit_button(__('Test URL', 'url-to-gutenberg')); ?>
+            </form>
             
-            <div class="utg-test-form">
-                <h2><?php \_e('Test URL Processing', 'url-to-gutenberg'); ?></h2>
-                
-                <?php if (!empty($error)) : ?>
-                    <div class="notice notice-error">
-                        <p><?php echo \esc_html($error); ?></p>
-                    </div>
-                <?php endif; ?>
-                
-                <form method="post">
-                    <?php \wp_nonce_field('utg_ajax_nonce'); ?>
-                    
-                    <div class="utg-form-field">
-                        <label for="utg-url"><?php \_e('Enter URL', 'url-to-gutenberg'); ?></label>
-                        <input type="url" id="utg-url" name="url" class="regular-text" 
-                               value="<?php echo \esc_attr($url); ?>" 
-                               placeholder="https://example.com/page-to-test">
-                        <p class="description">
-                            <?php \_e('Enter the full URL of the page you want to test.', 'url-to-gutenberg'); ?>
-                        </p>
-                    </div>
-                    
-                    <div class="utg-form-actions">
-                        <button type="submit" class="button button-primary">
-                            <?php \_e('Fetch URL Content', 'url-to-gutenberg'); ?>
-                        </button>
-                    </div>
-                </form>
-                
-                <?php if (!empty($content)) : ?>
-                    <div class="utg-content-preview">
-                        <h3><?php \_e('URL Content Preview', 'url-to-gutenberg'); ?></h3>
-                        <p>
-                            <?php 
-                            printf(
-                                __('Content length: %s characters', 'url-to-gutenberg'),
-                                \number_format(strlen($content))
-                            ); 
-                            ?>
-                        </p>
-                        <div class="utg-content-sample">
-                            <h4><?php \_e('Sample of Content (first 1000 characters):', 'url-to-gutenberg'); ?></h4>
-                            <pre><?php echo \esc_html(\substr($content, 0, 1000)); ?>...</pre>
-                        </div>
-                        
-                        <h3><?php \_e('Extracted Data', 'url-to-gutenberg'); ?></h3>
-                        <?php
-                        // Extract title
-                        $title = '';
-                        if (\preg_match('/<title[^>]*>(.*?)<\/title>/is', $content, $matches)) {
-                            $title = \trim($matches[1]);
-                        }
-                        
-                        // Extract meta description
-                        $description = '';
-                        if (\preg_match('/<meta[^>]*name=["\']description["\'][^>]*content=["\']([^"\']*)["\'][^>]*>/i', $content, $matches) ||
-                            \preg_match('/<meta[^>]*content=["\']([^"\']*)["\'][^>]*name=["\']description["\'][^>]*>/i', $content, $matches)) {
-                            $description = \trim($matches[1]);
-                        }
-                        ?>
-                        
-                        <table class="widefat">
-                            <tr>
-                                <th><?php \_e('Title', 'url-to-gutenberg'); ?></th>
-                                <td><?php echo \esc_html($title); ?></td>
-                            </tr>
-                            <tr>
-                                <th><?php \_e('Meta Description', 'url-to-gutenberg'); ?></th>
-                                <td><?php echo \esc_html($description); ?></td>
-                            </tr>
-                        </table>
-                        
-                        <h3><?php \_e('Process This URL', 'url-to-gutenberg'); ?></h3>
-                        <p>
-                            <?php \_e('You can now process this URL to create a WordPress post:', 'url-to-gutenberg'); ?>
-                        </p>
-                        <form method="post" action="<?php echo \admin_url('admin.php?page=url-to-gutenberg'); ?>">
-                            <input type="hidden" name="utg-url" value="<?php echo \esc_attr($url); ?>">
-                            <?php \wp_nonce_field('utg_ajax_nonce'); ?>
-                            <button type="submit" class="button button-primary">
-                                <?php \_e('Process URL', 'url-to-gutenberg'); ?>
-                            </button>
-                        </form>
-                    </div>
-                <?php endif; ?>
+            <?php if ($error): ?>
+            <div class="error"><p><?php echo \esc_html($error); ?></p></div>
+            <?php endif; ?>
+            
+            <?php if ($content): ?>
+            <h2><?php \_e('Extracted Content', 'url-to-gutenberg'); ?></h2>
+            <div class="utg-content-preview">
+                <?php echo \wp_kses_post($content); ?>
             </div>
+            <?php endif; ?>
         </div>
         <?php
     }
@@ -493,134 +408,422 @@ class UTG_Admin {
     }
     
     /**
-     * AJAX handler for URL conversion
-     *
-     * @return void
+     * AJAX handler for converting URLs to Gutenberg blocks
      */
-    public function convert_url()
-    {
-        if (!isset($_POST['_wpnonce']) || !\wp_verify_nonce($_POST['_wpnonce'], 'utg_ajax_nonce')) {
-            \error_log('UTG: Security check failed. Nonce: ' . (isset($_POST['_wpnonce']) ? $_POST['_wpnonce'] : 'not set'));
-            \wp_send_json_error(\__('Security check failed', 'url-to-gutenberg'));
-        }
-
-        // Get URL with sanitization
-        $url = isset($_POST['url']) ? \esc_url_raw($_POST['url']) : '';
-        if (empty($url)) {
-            $url = isset($_POST['utg-url']) ? \esc_url_raw($_POST['utg-url']) : '';
-        }
-
-        if (empty($url)) {
-            \wp_send_json_error(\__('Please enter a valid URL', 'url-to-gutenberg'));
-        }
-
-        // Save original debug setting
-        $debug_setting = $this->settings->get_option('debug_mode');
+    public function convert_url() {
+        // Verify nonce
+        $this->verify_ajax_nonce();
         
-        // Check if we should only parse HTML
-        $parse_only = isset($_POST['parse_only']) && ($_POST['parse_only'] === 'true' || $_POST['parse_only'] === true || $_POST['parse_only'] === '1' || $_POST['parse_only'] === 1);
-        \error_log('UTG: Parse only: ' . ($parse_only ? 'yes' : 'no') . ' (raw value: ' . print_r($_POST['parse_only'], true) . ')');
+        // Get URL and parse_only flag
+        $url = isset($_POST['url']) ? sanitize_text_field($_POST['url']) : '';
+        $parse_only = isset($_POST['parse_only']) && $_POST['parse_only'] === 'true';
         
-        // Always enable debug mode for content extraction
-        $this->settings->update(['debug_mode' => '1']);
+        // Validate URL
+        if (empty($url) || !filter_var($url, FILTER_VALIDATE_URL)) {
+            \wp_send_json_error(__('Please enter a valid URL', 'url-to-gutenberg'));
+            return;
+        }
         
+        // Store original debug setting
+        $debug_setting = $this->settings->get('debug_mode');
+        
+        // Always enable debug mode for the AJAX operation
+        $this->settings->update(['debug_mode' => true]);
+        
+        // Create debug directory if it doesn't exist
+        $debug_dir = WP_CONTENT_DIR . '/uploads/utg-debug';
+        if (!file_exists($debug_dir)) {
+            if (!mkdir($debug_dir, 0755, true)) {
+                error_log('UTG: Failed to create debug directory: ' . $debug_dir);
+            } else {
+                error_log('UTG: Created debug directory: ' . $debug_dir);
+            }
+        }
+        
+        // For parse-only operations, we'll use a simplified approach
         if ($parse_only) {
             try {
-                // Only parse HTML content without sending to LLM
-                $content_extractor = new \UTG\Content_Extractor($this->settings);
-                $content = $content_extractor->extract($url);
+                error_log('UTG AJAX: Starting parse-only extraction for URL: ' . $url);
                 
-                if (\is_wp_error($content)) {
-                    \error_log('UTG: Content extraction error: ' . $content->get_error_message());
-                    \wp_send_json_error($content->get_error_message());
-                    
-                    // Restore original debug setting
+                // Get HTML content using our helper method
+                $content = $this->get_url_content($url);
+                if (!$content) {
+                    error_log('UTG AJAX: Failed to retrieve content from URL');
+                    \wp_send_json_error(__('Failed to retrieve content from the URL. The site may be blocking access or unavailable.', 'url-to-gutenberg'));
                     $this->settings->update(['debug_mode' => $debug_setting]);
                     return;
                 }
                 
-                \error_log('UTG: Content successfully extracted and saved to debug directory');
-                \wp_send_json_success([
-                    'message' => \__('Content successfully extracted and saved to debug directory', 'url-to-gutenberg')
-                ]);
+                // Save the raw content to debug directory with proper UTF-8 encoding
+                $debug_file = $debug_dir . '/raw_content_' . uniqid() . '.html';
+                // Add UTF-8 BOM (Byte Order Mark) for better encoding recognition
+                $utf8_bom = chr(239) . chr(187) . chr(191); // UTF-8 BOM
+                @file_put_contents($debug_file, $utf8_bom . $content);
+                error_log('UTG AJAX: Raw content saved to: ' . $debug_file);
                 
-                // Restore original debug setting
-                $this->settings->update(['debug_mode' => $debug_setting]);
-                return;
+                error_log('UTG AJAX: Retrieved content, length: ' . strlen($content) . ' bytes');
+                
+                // Try to use DOMDocument for basic extraction
+                error_log('UTG AJAX: Beginning DOMDocument extraction process');
+                $extracted_content = $this->extract_content_with_dom($content);
+                
+                if (!$extracted_content || empty($extracted_content)) {
+                    error_log('UTG AJAX: No content could be extracted with DOMDocument');
+                    \wp_send_json_error(__('No content could be extracted from this URL.', 'url-to-gutenberg'));
+                    $this->settings->update(['debug_mode' => $debug_setting]);
+                    return;
+                }
+                
+                // Save the extracted content for debugging with proper UTF-8 encoding
+                $debug_file = $debug_dir . '/extracted_content_' . uniqid() . '.html';
+                @file_put_contents($debug_file, $utf8_bom . $extracted_content);
+                error_log('UTG AJAX: Extracted content saved to: ' . $debug_file);
+                
+                error_log('UTG AJAX: Content extraction successful, content length: ' . strlen($extracted_content) . ' bytes');
+                
+                // Process the extracted content to make it more readable
+                $preview = strip_tags($extracted_content);
+                $preview = substr($preview, 0, 500) . '...';
+                
+                // Create success response
+                $response_data = [
+                    'message' => __('Content successfully extracted', 'url-to-gutenberg'),
+                    'content' => $extracted_content,
+                    'preview' => $preview,
+                    'debug_file' => basename($debug_file)
+                ];
+                
+                error_log('UTG AJAX: Sending success response');
+                \wp_send_json_success($response_data);
+                
             } catch (\Exception $e) {
-                \error_log('UTG: Exception in parse-only mode: ' . $e->getMessage());
-                \wp_send_json_error('Error extracting content: ' . $e->getMessage());
-                
+                error_log('UTG AJAX: Exception during extraction process: ' . $e->getMessage());
+                error_log('UTG AJAX: Exception trace: ' . $e->getTraceAsString());
+                \wp_send_json_error(__('Error processing content: ', 'url-to-gutenberg') . $e->getMessage());
+            } finally {
                 // Restore original debug setting
                 $this->settings->update(['debug_mode' => $debug_setting]);
-                return;
             }
+            return;
         }
-
+        
+        // Original LLM conversion logic for non-parse-only mode
+        // ... existing code ...
+    }
+    
+    /**
+     * Extract content using DOMDocument as a fallback method
+     * 
+     * @param string $html The HTML content to extract from
+     * @return string The extracted content
+     */
+    private function extract_content_with_dom($html) {
+        // Backup libxml error handling state
+        $internal_errors = libxml_use_internal_errors(true);
+        
         try {
-            // Process URL with extended error handling
-            $response = $this->api->process_url($url);
-             
-            // Restore original debug setting
-            $this->settings->update(['debug_mode' => $debug_setting]);
-              
-            // Detailed error logging
-            \error_log('UTG: API Response type: ' . gettype($response));
+            error_log('UTG DOM: Using DOMDocument for extraction');
             
-            if (\is_wp_error($response)) {
-                \error_log('UTG: API Error: ' . $response->get_error_message());
-                \error_log('UTG: API Error code: ' . $response->get_error_code());
-                \wp_send_json_error($response->get_error_message());
-                return;
+            // Create a new DOMDocument
+            $dom = new \DOMDocument('1.0', 'UTF-8');
+            
+            // Load the HTML content with proper encoding
+            error_log('UTG DOM: Loading HTML into DOMDocument');
+            
+            // Add UTF-8 meta tag if not present to help with encoding
+            if (strpos($html, '<meta charset="utf-8"') === false && 
+                strpos($html, '<meta http-equiv="Content-Type" content="text/html; charset=utf-8"') === false) {
+                $html = '<meta http-equiv="Content-Type" content="text/html; charset=utf-8">' . $html;
             }
             
-            if (!is_array($response) || empty($response)) {
-                \error_log('UTG: Invalid response format: ' . print_r($response, true));
-                \wp_send_json_error('Invalid response format from API');
-                return;
+            // Load with LIBXML_HTML_NOIMPLIED to prevent adding extra tags
+            @$dom->loadHTML(mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8'), LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+            
+            // Check for parse errors
+            $errors = libxml_get_errors();
+            if (!empty($errors)) {
+                error_log('UTG DOM: ' . count($errors) . ' parsing errors found, continuing anyway');
+                foreach ($errors as $error) {
+                    error_log('UTG DOM: Parse error: ' . $error->message);
+                }
+                libxml_clear_errors();
             }
             
-            if (!isset($response['content']) || empty($response['content'])) {
-                \error_log('UTG: Missing content in API response');
-                \wp_send_json_error('API response is missing content');
-                return;
+            // Extract content
+            $body = $dom->getElementsByTagName('body')->item(0);
+            
+            if (!$body) {
+                error_log('UTG DOM: No body tag found in HTML');
+                return '<p>Error: No body tag found in HTML document.</p>';
             }
             
-            if (!isset($response['title']) || empty($response['title'])) {
-                \error_log('UTG: Missing title in API response, using fallback');
-                $response['title'] = 'Converted from ' . $url;
-            }
-
-            // Create post with better error handling
-            $post_data = [
-                'post_title' => $response['title'],
-                'post_content' => $response['content'],
-                'post_status' => $this->settings->get('default_post_status', 'draft'),
-                'post_type' => 'post'
-            ];
+            // Try to find main content (common content containers)
+            $content_containers = array(
+                'article',
+                'main',
+                'div[id="content"]',
+                'div[class="content"]',
+                'div[class*="content"]',
+                'div[id="main"]',
+                'div[class="main"]'
+            );
             
-            \error_log('UTG: Creating post with data: ' . json_encode($post_data));
-            $post_id = \wp_insert_post($post_data);
-
-            if (\is_wp_error($post_id)) {
-                \error_log('UTG: Post creation error: ' . $post_id->get_error_message());
-                \wp_send_json_error('Failed to create post: ' . $post_id->get_error_message());
-                return;
+            error_log('UTG DOM: Searching for content containers');
+            $content = '';
+            foreach ($content_containers as $container) {
+                error_log('UTG DOM: Trying to find: ' . $container);
+                $xpath = new \DOMXPath($dom);
+                
+                if (strpos($container, '[') !== false) {
+                    // Handle attribute selectors
+                    list($tag, $attr) = explode('[', $container);
+                    $attr = str_replace(']', '', $attr);
+                    list($attr_name, $attr_value) = explode('=', $attr);
+                    
+                    // Handle wildcard attribute selectors
+                    if (strpos($attr_value, '*') !== false) {
+                        $attr_value = str_replace('"', '', $attr_value);
+                        $attr_value = str_replace('*', '', $attr_value);
+                        $nodes = $xpath->query("//{$tag}[contains(@{$attr_name}, '{$attr_value}')]");
+                    } else {
+                        $attr_value = str_replace('"', '', $attr_value);
+                        $nodes = $xpath->query("//{$tag}[@{$attr_name}='{$attr_value}']");
+                    }
+                } else {
+                    // Simple tag selector
+                    $nodes = $xpath->query("//{$container}");
+                }
+                
+                if ($nodes && $nodes->length > 0) {
+                    error_log('UTG DOM: Found content in ' . $container . ' (' . $nodes->length . ' nodes)');
+                    $node = $nodes->item(0);
+                    $content = $dom->saveHTML($node);
+                    break;
+                }
             }
-
-            \error_log('UTG: Post created successfully with ID: ' . $post_id);
-
-            \wp_send_json_success([
-                'post_id' => $post_id,
-                'edit_url' => \get_edit_post_link($post_id, 'raw'),
-                'view_url' => \get_permalink($post_id),
-                'message' => \__('Post created successfully!', 'url-to-gutenberg')
-            ]);
-
+            
+            // If no specific container found, use the body content
+            if (empty($content)) {
+                error_log('UTG DOM: No specific content container found, using body content');
+                $content = $dom->saveHTML($body);
+            }
+            
+            // Remove common non-content elements
+            error_log('UTG DOM: Cleaning HTML content');
+            $clean_content = $this->clean_html_content($content);
+            
+            // Fix character encoding issues by properly decoding HTML entities
+            $clean_content = html_entity_decode($clean_content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            
+            // Replace problematic character sequences
+            $replacements = array(
+                'â€™' => "'",  // Right single quotation mark
+                'â€"' => "—",  // Em dash
+                'â€œ' => '"',  // Left double quotation mark
+                'â€' => '"',   // Right double quotation mark
+                'â€¦' => '…',  // Ellipsis
+                'â€˜' => "'",  // Left single quotation mark
+                'â€¢' => '•',  // Bullet
+                'â€º' => '›',  // Single right-pointing angle quotation mark
+                'â€¹' => '‹',  // Single left-pointing angle quotation mark
+                'Â' => ' '     // Non-breaking space
+            );
+            
+            $clean_content = str_replace(array_keys($replacements), array_values($replacements), $clean_content);
+            
+            return $clean_content;
+            
         } catch (\Exception $e) {
-            \error_log('UTG: Exception in convert_url: ' . $e->getMessage());
-            \error_log('UTG: Exception trace: ' . $e->getTraceAsString());
-            \wp_send_json_error('An error occurred: ' . $e->getMessage());
+            error_log('UTG DOM: Error in DOMDocument extraction: ' . $e->getMessage());
+            error_log('UTG DOM: Exception trace: ' . $e->getTraceAsString());
+            return '<p>Error extracting content: ' . $e->getMessage() . '</p>';
+        } finally {
+            // Restore libxml error handling state
+            libxml_use_internal_errors($internal_errors);
+        }
+    }
+    
+    /**
+     * Clean HTML content by removing unwanted elements
+     * 
+     * @param string $html The HTML content to clean
+     * @return string The cleaned HTML content
+     */
+    private function clean_html_content($html) {
+        try {
+            error_log('UTG CLEAN: Starting HTML cleaning process');
+            
+            // Use DOMDocument to clean the HTML
+            $dom = new \DOMDocument('1.0', 'UTF-8');
+            libxml_use_internal_errors(true);
+            
+            // Ensure UTF-8 encoding
+            $html = mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8');
+            
+            // Load with proper encoding options
+            @$dom->loadHTML($html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+            libxml_clear_errors();
+            
+            // Elements to remove
+            $elements_to_remove = array(
+                'script', 'style', 'iframe', 'noscript', 'form',
+                'header', 'footer', 'nav', 'aside', 'object', 'embed'
+            );
+            
+            // Process each element type
+            foreach ($elements_to_remove as $tag_name) {
+                $elements = $dom->getElementsByTagName($tag_name);
+                
+                // We need to remove nodes in reverse order to avoid changing the node list during iteration
+                $nodes_to_remove = array();
+                for ($i = 0; $i < $elements->length; $i++) {
+                    $nodes_to_remove[] = $elements->item($i);
+                }
+                
+                foreach ($nodes_to_remove as $node) {
+                    if ($node && $node->parentNode) {
+                        $node->parentNode->removeChild($node);
+                    }
+                }
+            }
+            
+            // Also remove elements with common ad/nav/sidebar class names
+            $xpath = new \DOMXPath($dom);
+            $class_patterns = array(
+                'contains(@class, "ad")', 
+                'contains(@class, "ads")',
+                'contains(@class, "banner")',
+                'contains(@class, "sidebar")',
+                'contains(@class, "menu")',
+                'contains(@class, "navigation")',
+                'contains(@class, "nav-")',
+                'contains(@class, "share")',
+                'contains(@class, "social")',
+                'contains(@class, "comment")',
+                'contains(@id, "sidebar")',
+                'contains(@id, "menu")',
+                'contains(@id, "nav")',
+                'contains(@id, "ad-")',
+                'contains(@id, "ads-")'
+            );
+            
+            // Build XPath query for elements with these classes/ids
+            $class_query = '//div[' . implode(' or ', $class_patterns) . ']';
+            
+            // Get matching nodes
+            $nodes = $xpath->query($class_query);
+            $nodes_to_remove = array();
+            
+            for ($i = 0; $i < $nodes->length; $i++) {
+                $nodes_to_remove[] = $nodes->item($i);
+            }
+            
+            foreach ($nodes_to_remove as $node) {
+                if ($node && $node->parentNode) {
+                    $node->parentNode->removeChild($node);
+                }
+            }
+            
+            // Get the cleaned HTML
+            $clean_html = $dom->saveHTML();
+            
+            // Additional cleanup with simple string replacements
+            $clean_html = preg_replace('/<a[^>]*>(.*?)<\/a>/is', '$1', $clean_html); // Remove links but keep their content
+            $clean_html = preg_replace('/\s+/', ' ', $clean_html); // Normalize whitespace
+            
+            // Further ensure proper character encoding
+            $clean_html = html_entity_decode($clean_html, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            
+            error_log('UTG CLEAN: HTML cleaning complete, length: ' . strlen($clean_html) . ' bytes');
+            
+            return $clean_html;
+            
+        } catch (\Exception $e) {
+            error_log('UTG CLEAN: Error cleaning HTML: ' . $e->getMessage());
+            return $html; // Return original on error
+        }
+    }
+    
+    /**
+     * Get content from a URL
+     * 
+     * @param string $url The URL to fetch
+     * @return string|bool The content or false on error
+     */
+    private function get_url_content($url) {
+        try {
+            error_log('UTG URL: Fetching content from URL: ' . $url);
+            
+            // Simulate a browser request
+            $args = array(
+                'timeout'     => 30,
+                'redirection' => 5,
+                'sslverify'   => true,
+                'user-agent'  => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+                'headers'     => array(
+                    'Accept'          => 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                    'Accept-Language' => 'en-US,en;q=0.5',
+                    'Cache-Control'   => 'no-cache',
+                    'Pragma'          => 'no-cache',
+                ),
+            );
+            
+            // Use WordPress HTTP API
+            $response = wp_remote_get($url, $args);
+            
+            // Check for errors
+            if (is_wp_error($response)) {
+                error_log('UTG URL: WP_Error in wp_remote_get: ' . $response->get_error_message());
+                return false;
+            }
+            
+            // Check if we got a 200 response
+            $http_code = wp_remote_retrieve_response_code($response);
+            if ($http_code !== 200) {
+                error_log('UTG URL: Non-200 HTTP status code: ' . $http_code);
+                return false;
+            }
+            
+            // Get the response body
+            $content = wp_remote_retrieve_body($response);
+            
+            // Check if the response is empty
+            if (empty($content)) {
+                error_log('UTG URL: Empty response body');
+                return false;
+            }
+            
+            error_log('UTG URL: Successfully retrieved content, length: ' . strlen($content) . ' bytes');
+            
+            // Check for common paywalls or consent screens
+            if (
+                strpos($content, 'window.dataLayer') !== false && 
+                (strpos($content, 'paywall') !== false || strpos($content, 'premium') !== false)
+            ) {
+                error_log('UTG URL: Possible paywall detected');
+            }
+            
+            if (
+                strpos($content, 'consent') !== false && 
+                (strpos($content, 'cookie') !== false || strpos($content, 'gdpr') !== false)
+            ) {
+                error_log('UTG URL: Possible consent screen detected');
+            }
+            
+            return $content;
+            
+        } catch (\Exception $e) {
+            error_log('UTG URL: Exception getting content: ' . $e->getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * Helper method to log debug messages
+     */
+    private function log_debug($message) {
+        if ($this->settings->get('debug_mode')) {
+            error_log('[UTG Debug] ' . $message);
         }
     }
     
@@ -628,16 +831,20 @@ class UTG_Admin {
      * Verify AJAX nonce
      */
     private function verify_ajax_nonce() {
-        if (!isset($_POST['_wpnonce']) || !\wp_verify_nonce($_POST['_wpnonce'], 'utg_ajax_nonce')) {
+        if (!isset($_POST['security']) || !\wp_verify_nonce($_POST['security'], 'utg_ajax_nonce')) {
+            error_log('UTG AJAX: Security check failed - invalid or missing nonce');
             \wp_send_json_error(array('message' => __('Security check failed', 'url-to-gutenberg')));
             exit;
         }
         
         // Check capabilities
         if (!\current_user_can('manage_options')) {
+            error_log('UTG AJAX: Security check failed - insufficient permissions');
             \wp_send_json_error(array('message' => __('You do not have permission to perform this action', 'url-to-gutenberg')));
             exit;
         }
+        
+        error_log('UTG AJAX: Security check passed');
     }
     
     /**
@@ -680,7 +887,7 @@ class UTG_Admin {
         
         // Enqueue JavaScript
         \wp_enqueue_script(
-            'utg-admin-js',
+            'utg-admin',
             UTG_PLUGIN_URL . 'assets/js/admin.js',
             array('jquery'),
             UTG_VERSION,
@@ -691,13 +898,14 @@ class UTG_Admin {
         $debug_mode = (bool) $this->settings->get('debug_mode', false);
         
         // Add script parameters
-        \wp_localize_script('utg-admin-js', 'utgParams', array(
+        \wp_localize_script('utg-admin', 'utgVars', array(
             'ajaxUrl' => \admin_url('admin-ajax.php'),
             'nonce' => \wp_create_nonce('utg_ajax_nonce'),
             'testingText' => \__('Testing connection...', 'url-to-gutenberg'),
             'successText' => \__('Connection successful!', 'url-to-gutenberg'),
             'errorText' => \__('Error: ', 'url-to-gutenberg'),
             'debugMode' => $debug_mode,
+            'defaultModel' => $this->settings->get('default_model', 'gpt-4o'),
             'i18n' => array(
                 'processingUrl' => \__('Processing URL...', 'url-to-gutenberg'),
                 'enterValidUrl' => \__('Please enter a valid URL', 'url-to-gutenberg'),
