@@ -611,31 +611,12 @@ class Content_Extractor {
                 file_put_contents($debug_dir . '/.htaccess', 'Deny from all');
             }
             
-            // Create a safe filename based on URL
-            $url_hash = md5($url);
-            $safe_url = preg_replace('/[^a-z0-9]+/i', '-', parse_url($url, PHP_URL_HOST));
-            $timestamp = date('Ymd-His');
-            
-            $filename = $debug_dir . '/' . $safe_url . '-' . $url_hash . '-' . $type . '-' . $timestamp;
-            
-            // Use appropriate extension based on content type
-            if ($type === 'raw_html' || $type === 'extracted_article' || $type === 'body_fallback' || 
-                $type === 'medium_cleaned_article' || $type === 'aggressive_cleaned_article' || 
-                $type === 'standard_cleaned_article') {
-                $filename .= '.html';
-            } elseif ($type === 'extracted_title') {
-                $filename .= '.txt';
-            } elseif ($type === 'final_content' || $type === 'fallback_content') {
-                $filename .= '.json';
-            } elseif ($type === 'extraction_error') {
-                $filename .= '.log';
-            } else {
-                // Default extension for any other type
-                $filename .= '.html';
-            }
+            // Generate standardized filename
+            $filename = $this->get_debug_filename($url, $type);
+            $full_path = $debug_dir . '/' . $filename;
             
             // Save the content
-            if (file_put_contents($filename, $content)) {
+            if (file_put_contents($full_path, $content)) {
                 error_log('UTG: Debug content saved: ' . $filename);
                 return true;
             }
@@ -647,6 +628,40 @@ class Content_Extractor {
             error_log('UTG: Exception while saving debug content: ' . $e->getMessage());
             return false;
         }
+    }
+
+    /**
+     * Generates a standardized debug filename for a given URL and content type.
+     * 
+     * @param string $url The URL being processed
+     * @param string $type The type of content (raw_html, extracted_article, etc.)
+     * @return string The generated filename
+     */
+    public function get_debug_filename($url, $type) {
+        // Create a safe filename based on URL
+        $url_hash = md5($url);
+        $safe_url = preg_replace('/[^a-z0-9]+/i', '-', parse_url($url, PHP_URL_HOST));
+        $timestamp = date('Ymd-His');
+        
+        $filename = $safe_url . '-' . $url_hash . '-' . $type . '-' . $timestamp;
+        
+        // Use appropriate extension based on content type
+        if ($type === 'raw_html' || $type === 'extracted_article' || $type === 'body_fallback' || 
+            $type === 'medium_cleaned_article' || $type === 'aggressive_cleaned_article' || 
+            $type === 'standard_cleaned_article') {
+            $filename .= '.html';
+        } elseif ($type === 'extracted_title') {
+            $filename .= '.txt';
+        } elseif ($type === 'final_content' || $type === 'fallback_content') {
+            $filename .= '.json';
+        } elseif ($type === 'extraction_error') {
+            $filename .= '.log';
+        } else {
+            // Default extension for any other type
+            $filename .= '.html';
+        }
+        
+        return $filename;
     }
 
     /**

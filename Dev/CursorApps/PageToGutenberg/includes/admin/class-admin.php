@@ -484,7 +484,7 @@ class UTG_Admin {
                 }
                 
                 // Save the raw content to debug directory with proper UTF-8 encoding
-                $debug_file = $debug_dir . '/raw_content_' . uniqid() . '.html';
+                $debug_file = $debug_dir . '/' . $extractor->get_debug_filename($url, 'raw_html');
                 // Add UTF-8 BOM (Byte Order Mark) for better encoding recognition
                 $utf8_bom = chr(239) . chr(187) . chr(191); // UTF-8 BOM
                 @file_put_contents($debug_file, $utf8_bom . $content);
@@ -509,7 +509,7 @@ class UTG_Admin {
                 // First, save the raw extracted content (before any cleaning was applied)
                 if (!empty($extracted['raw_extracted_content'])) {
                     $raw_extracted_content = $extracted['raw_extracted_content'];
-                    $extracted_file = $debug_dir . '/extracted_article_' . uniqid() . '.html';
+                    $extracted_file = $debug_dir . '/' . $extractor->get_debug_filename($url, 'extracted_article');
                     @file_put_contents($extracted_file, $utf8_bom . $raw_extracted_content);
                     error_log('UTG AJAX: Raw extracted article saved to: ' . $extracted_file);
                 }
@@ -532,15 +532,10 @@ class UTG_Admin {
                     }
                 }
                 
-                // Save the extracted content for debugging with proper UTF-8 encoding
-                $debug_file = $debug_dir . '/extracted_content_' . uniqid() . '.html';
+                // Save the final content with proper UTF-8 encoding using the standardized naming convention
+                $debug_file = $debug_dir . '/' . $extractor->get_debug_filename($url, $cleaning_level . '_cleaned_content');
                 @file_put_contents($debug_file, $utf8_bom . $extracted_content);
-                error_log('UTG AJAX: Extracted content saved to: ' . $debug_file);
-                
-                // Also save a properly labeled version based on cleaning level
-                $labeled_debug_file = $debug_dir . '/' . $cleaning_level . '_cleaned_content_' . uniqid() . '.html';
-                @file_put_contents($labeled_debug_file, $utf8_bom . $extracted_content);
-                error_log('UTG AJAX: ' . ucfirst($cleaning_level) . ' cleaned content saved to: ' . $labeled_debug_file);
+                error_log('UTG AJAX: ' . ucfirst($cleaning_level) . ' cleaned content saved to: ' . $debug_file);
                 
                 error_log('UTG AJAX: Content extraction successful, content length: ' . strlen($extracted_content) . ' bytes');
                 
@@ -584,7 +579,7 @@ class UTG_Admin {
             }
             
             // Save the raw content to debug directory
-            $debug_file = $debug_dir . '/raw_content_' . uniqid() . '.html';
+            $debug_file = $debug_dir . '/' . $extractor->get_debug_filename($url, 'raw_html');
             $utf8_bom = chr(239) . chr(187) . chr(191); // UTF-8 BOM
             @file_put_contents($debug_file, $utf8_bom . $content);
             error_log('UTG AJAX: Raw content saved to: ' . $debug_file);
@@ -612,7 +607,7 @@ class UTG_Admin {
                 // First, save the raw extracted content (before any cleaning was applied)
                 if (!empty($extracted['raw_extracted_content'])) {
                     $raw_extracted_content = $extracted['raw_extracted_content'];
-                    $extracted_file = $debug_dir . '/extracted_article_' . uniqid() . '.html';
+                    $extracted_file = $debug_dir . '/' . $extractor->get_debug_filename($url, 'extracted_article');
                     @file_put_contents($extracted_file, $utf8_bom . $raw_extracted_content);
                     error_log('UTG AJAX: Raw extracted article saved to: ' . $extracted_file);
                 }
@@ -621,15 +616,10 @@ class UTG_Admin {
                 $extracted_content = $extracted['content'];
             }
             
-            // Save the extracted content for debugging
-            $debug_file = $debug_dir . '/extracted_content_' . uniqid() . '.html';
+            // Save the final content with proper UTF-8 encoding using the standardized naming convention
+            $debug_file = $debug_dir . '/' . $extractor->get_debug_filename($url, $cleaning_level . '_cleaned_content');
             @file_put_contents($debug_file, $utf8_bom . $extracted_content);
-            error_log('UTG AJAX: Extracted content saved to: ' . $debug_file);
-            
-            // Also save a properly labeled version based on cleaning level
-            $labeled_debug_file = $debug_dir . '/' . $cleaning_level . '_cleaned_content_' . uniqid() . '.html';
-            @file_put_contents($labeled_debug_file, $utf8_bom . $extracted_content);
-            error_log('UTG AJAX: ' . ucfirst($cleaning_level) . ' cleaned content saved to: ' . $labeled_debug_file);
+            error_log('UTG AJAX: ' . ucfirst($cleaning_level) . ' cleaned content saved to: ' . $debug_file);
             
             error_log('UTG AJAX: Content extraction successful, content length: ' . strlen($extracted_content) . ' bytes');
             
