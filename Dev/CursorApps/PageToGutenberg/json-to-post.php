@@ -184,6 +184,9 @@ function process_json_file($file) {
                 $processed_content = substr($processed_content, $first_block_pos);
             }
             
+            // Process any image blocks to download images and update references
+            $processed_content = utg_process_gutenberg_image_blocks($processed_content);
+            
             // Use the extracted blocks as post content directly
             $post_data = array(
                 'post_title'   => $title,
@@ -312,6 +315,31 @@ function process_json_file($file) {
                     !preg_match('/width="?[0-9]+"?/i', $image_matches[0][$img_index]) &&
                     !preg_match('/height="?[0-5]+"?/i', $image_matches[0][$img_index])
                 ) {
+                    // Download the remote image if it's a valid URL
+                    if (filter_var($img_src, FILTER_VALIDATE_URL)) {
+                        $attachment_id = utg_download_remote_image($img_src, $alt_text);
+                        
+                        if (!is_wp_error($attachment_id) && $attachment_id > 0) {
+                            // Get image details from the attachment
+                            $image_src = wp_get_attachment_image_src($attachment_id, 'full');
+                            $local_url = $image_src ? $image_src[0] : $img_src;
+                            
+                            $blocks[] = array(
+                                'blockName' => 'core/image',
+                                'attrs' => array(
+                                    'url' => $local_url,
+                                    'alt' => $alt_text,
+                                    'id' => $attachment_id
+                                ),
+                                'innerBlocks' => array(),
+                                'innerHTML' => '<figure class="wp-block-image"><img src="' . $local_url . '" alt="' . $alt_text . '" class="wp-image-' . $attachment_id . '"/></figure>',
+                                'innerContent' => array('<figure class="wp-block-image"><img src="' . $local_url . '" alt="' . $alt_text . '" class="wp-image-' . $attachment_id . '"/></figure>')
+                            );
+                            continue;
+                        }
+                    }
+                    
+                    // Fallback if download fails or URL is not valid
                     $blocks[] = array(
                         'blockName' => 'core/image',
                         'attrs' => array(
@@ -389,6 +417,31 @@ function process_json_file($file) {
                                     $alt_text = $alt_match[1];
                                 }
                                 
+                                // Download the remote image if it's a valid URL
+                                if (filter_var($img_src, FILTER_VALIDATE_URL)) {
+                                    $attachment_id = utg_download_remote_image($img_src, $alt_text);
+                                    
+                                    if (!is_wp_error($attachment_id) && $attachment_id > 0) {
+                                        // Get image details from the attachment
+                                        $image_src = wp_get_attachment_image_src($attachment_id, 'full');
+                                        $local_url = $image_src ? $image_src[0] : $img_src;
+                                        
+                                        $blocks[] = array(
+                                            'blockName' => 'core/image',
+                                            'attrs' => array(
+                                                'url' => $local_url,
+                                                'alt' => $alt_text,
+                                                'id' => $attachment_id
+                                            ),
+                                            'innerBlocks' => array(),
+                                            'innerHTML' => '<figure class="wp-block-image"><img src="' . $local_url . '" alt="' . $alt_text . '" class="wp-image-' . $attachment_id . '"/></figure>',
+                                            'innerContent' => array('<figure class="wp-block-image"><img src="' . $local_url . '" alt="' . $alt_text . '" class="wp-image-' . $attachment_id . '"/></figure>')
+                                        );
+                                        continue;
+                                    }
+                                }
+                                
+                                // Fallback if download fails or URL is not valid
                                 $blocks[] = array(
                                     'blockName' => 'core/image',
                                     'attrs' => array(
@@ -521,6 +574,30 @@ function convert_element_to_block($element) {
             $src = isset($element['src']) ? esc_url($element['src']) : '';
             $alt = isset($element['alt']) ? esc_attr($element['alt']) : '';
             
+            // Handle remote images by downloading them to the WordPress media library
+            if (!empty($src) && filter_var($src, FILTER_VALIDATE_URL)) {
+                $attachment_id = utg_download_remote_image($src, $alt);
+                
+                if (!is_wp_error($attachment_id) && $attachment_id > 0) {
+                    // Get image details from the attachment
+                    $image_src = wp_get_attachment_image_src($attachment_id, 'full');
+                    $image_url = $image_src ? $image_src[0] : $src;
+                    
+                    return array(
+                        'blockName' => 'core/image',
+                        'attrs' => array(
+                            'url' => $image_url,
+                            'alt' => $alt,
+                            'id' => $attachment_id
+                        ),
+                        'innerBlocks' => array(),
+                        'innerHTML' => '<figure class="wp-block-image"><img src="' . $image_url . '" alt="' . $alt . '" class="wp-image-' . $attachment_id . '"/></figure>',
+                        'innerContent' => array('<figure class="wp-block-image"><img src="' . $image_url . '" alt="' . $alt . '" class="wp-image-' . $attachment_id . '"/></figure>')
+                    );
+                }
+            }
+            
+            // Fallback to the original method if download fails or URL is not valid
             return array(
                 'blockName' => 'core/image',
                 'attrs' => array(
@@ -721,4 +798,213 @@ function convert_content_to_html($content) {
     }
     
     return $html;
+}
+
+/**
+ * Download a remote image and add it to the WordPress media library
+ *
+ * @param string $image_url URL of the remote image
+ * @param string $alt Alt text for the image
+ * @return int|WP_Error Attachment ID on success, WP_Error on failure
+ */
+function utg_download_remote_image($image_url, $alt = '') {
+    // Check if the URL is valid
+    if (empty($image_url) || !filter_var($image_url, FILTER_VALIDATE_URL)) {
+        return new WP_Error('invalid_url', 'Invalid image URL');
+    }
+    
+    // Check if the image has already been downloaded by URL
+    $existing_attachment = utg_get_attachment_by_url($image_url);
+    if ($existing_attachment) {
+        return $existing_attachment;
+    }
+    
+    // Get the WordPress upload directory
+    $upload_dir = wp_upload_dir();
+    
+    // Download the file
+    $response = wp_remote_get($image_url, array(
+        'timeout' => 60,
+    ));
+    
+    if (is_wp_error($response) || wp_remote_retrieve_response_code($response) !== 200) {
+        error_log("UTG: Failed to download image from $image_url");
+        return new WP_Error('download_error', 'Failed to download image');
+    }
+    
+    $image_data = wp_remote_retrieve_body($response);
+    
+    // Generate a unique file name
+    $file_name = basename($image_url);
+    
+    // Remove query strings if present
+    if (strpos($file_name, '?') !== false) {
+        $file_name = substr($file_name, 0, strpos($file_name, '?'));
+    }
+    
+    // Ensure unique filename
+    $file_name = wp_unique_filename($upload_dir['path'], sanitize_file_name($file_name));
+    $file_path = $upload_dir['path'] . '/' . $file_name;
+    
+    // Save the image file
+    if (!file_put_contents($file_path, $image_data)) {
+        error_log("UTG: Failed to save image to $file_path");
+        return new WP_Error('save_error', 'Failed to save image file');
+    }
+    
+    // Check the file type
+    $file_type = wp_check_filetype($file_name, null);
+    if (empty($file_type['type'])) {
+        // Try to detect from content
+        $file_info = getimagesize($file_path);
+        if ($file_info) {
+            switch ($file_info[2]) {
+                case IMAGETYPE_JPEG:
+                    $file_type['type'] = 'image/jpeg';
+                    break;
+                case IMAGETYPE_PNG:
+                    $file_type['type'] = 'image/png';
+                    break;
+                case IMAGETYPE_GIF:
+                    $file_type['type'] = 'image/gif';
+                    break;
+                case IMAGETYPE_WEBP:
+                    $file_type['type'] = 'image/webp';
+                    break;
+            }
+        }
+        
+        if (empty($file_type['type'])) {
+            unlink($file_path);
+            error_log("UTG: Unknown file type for $file_path");
+            return new WP_Error('invalid_image', 'Unknown image file type');
+        }
+    }
+    
+    // Prepare attachment data
+    $attachment = array(
+        'post_mime_type' => $file_type['type'],
+        'post_title' => preg_replace('/\.[^.]+$/', '', $file_name),
+        'post_content' => '',
+        'post_excerpt' => $alt,
+        'post_status' => 'inherit',
+        'meta_input' => array(
+            'utg_original_url' => $image_url
+        )
+    );
+    
+    // Insert the attachment
+    $attach_id = wp_insert_attachment($attachment, $file_path);
+    
+    if (is_wp_error($attach_id)) {
+        unlink($file_path);
+        error_log("UTG: Failed to create attachment for $file_path: " . $attach_id->get_error_message());
+        return $attach_id;
+    }
+    
+    // Generate attachment metadata
+    if (function_exists('wp_generate_attachment_metadata') && function_exists('wp_update_attachment_metadata')) {
+        require_once(ABSPATH . 'wp-admin/includes/image.php');
+        $attach_data = wp_generate_attachment_metadata($attach_id, $file_path);
+        wp_update_attachment_metadata($attach_id, $attach_data);
+    }
+    
+    // Set alt text
+    if (!empty($alt)) {
+        update_post_meta($attach_id, '_wp_attachment_image_alt', $alt);
+    }
+    
+    return $attach_id;
+}
+
+/**
+ * Get attachment ID by image URL
+ *
+ * @param string $url Image URL
+ * @return int|false Attachment ID if found, false otherwise
+ */
+function utg_get_attachment_by_url($url) {
+    global $wpdb;
+    
+    // First, check if we have stored the original URL as meta
+    $attachment_id = $wpdb->get_var($wpdb->prepare(
+        "SELECT post_id FROM $wpdb->postmeta WHERE meta_key = 'utg_original_url' AND meta_value = %s LIMIT 1",
+        $url
+    ));
+    
+    if (!empty($attachment_id)) {
+        return (int) $attachment_id;
+    }
+    
+    // If not found, try to match by URL directly
+    $attachment = $wpdb->get_col($wpdb->prepare(
+        "SELECT ID FROM $wpdb->posts WHERE guid = %s AND post_type = 'attachment' LIMIT 1",
+        $url
+    ));
+    
+    if (!empty($attachment[0])) {
+        return (int) $attachment[0];
+    }
+    
+    return false;
+}
+
+/**
+ * Process Gutenberg image blocks in content string
+ * This function searches for image blocks and downloads remote images
+ *
+ * @param string $content Gutenberg blocks content string
+ * @return string Updated content with proper image references
+ */
+function utg_process_gutenberg_image_blocks($content) {
+    // Pattern to match image blocks
+    $pattern = '/<!-- wp:image\s+({[^}]*})\s*-->.*?<img[^>]*src="([^"]*)"[^>]*\/>.*?<!-- \/wp:image -->/s';
+    
+    return preg_replace_callback($pattern, function($matches) {
+        // Get the entire image block
+        $image_block = $matches[0];
+        
+        // Try to parse block attributes
+        $attrs_json = $matches[1];
+        $attrs = json_decode($attrs_json, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            $attrs = array();
+        }
+        
+        // Get image URL from the src attribute
+        $image_url = $matches[2];
+        
+        // Get alt text if available
+        $alt = '';
+        if (preg_match('/alt="([^"]*)"/', $image_block, $alt_matches)) {
+            $alt = $alt_matches[1];
+        }
+        
+        // Download the image if it's a remote URL
+        if (!empty($image_url) && filter_var($image_url, FILTER_VALIDATE_URL)) {
+            $attachment_id = utg_download_remote_image($image_url, $alt);
+            
+            if (!is_wp_error($attachment_id) && $attachment_id > 0) {
+                // Get image details from the attachment
+                $image_src = wp_get_attachment_image_src($attachment_id, 'full');
+                $local_url = $image_src ? $image_src[0] : $image_url;
+                
+                // Update the block with the new image reference
+                $updated_attrs = array_merge($attrs, array(
+                    'id' => $attachment_id,
+                    'url' => $local_url
+                ));
+                
+                // Create a new block with updated attributes
+                $updated_json = json_encode($updated_attrs);
+                $updated_img = str_replace('src="' . $image_url . '"', 'src="' . $local_url . '" class="wp-image-' . $attachment_id . '"', $matches[0]);
+                $updated_block = str_replace('<!-- wp:image ' . $attrs_json . ' -->', '<!-- wp:image ' . $updated_json . ' -->', $updated_img);
+                
+                return $updated_block;
+            }
+        }
+        
+        // Return original block if download fails or URL is not valid
+        return $image_block;
+    }, $content);
 } 
