@@ -559,7 +559,6 @@ class UTG_Admin {
             // Create a structured data array with all the relevant information
             $debug_data = [
                 'title' => isset($extracted_content['title']) ? $extracted_content['title'] : '',
-                'original_content' => isset($extracted_content['content']) ? $extracted_content['content'] : '',
                 'processed_content' => $processed_content,
                 'images' => isset($extracted_content['images']) ? $extracted_content['images'] : [],
                 'processed_timestamp' => date('Y-m-d H:i:s')

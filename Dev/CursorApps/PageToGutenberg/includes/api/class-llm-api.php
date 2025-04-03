@@ -121,7 +121,18 @@ class LLM_API {
             'messages' => [
                 [
                     'role' => 'system',
-                    'content' => 'You are a helpful assistant that converts web page content into well-structured WordPress Gutenberg blocks.'
+                    'content' => 'You are a specialized conversion tool that transforms web page content into WordPress Gutenberg blocks. Your ONLY task is to output raw Gutenberg block markup. 
+
+CRITICAL REQUIREMENTS:
+1. NEVER include any explanatory text, introductions, or descriptions in your output
+2. NEVER include separator lines, dashes, or any other non-Gutenberg elements
+3. NEVER include the original HTML in your response
+4. ALWAYS ensure every block has complete JSON attributes with properly closed braces {}
+5. ALWAYS include proper opening and closing tags for every block
+6. PAY SPECIAL ATTENTION to the final blocks in your response to ensure they are not truncated
+7. Your output should start immediately with the first Gutenberg block comment and end with the last closing block comment
+
+Any deviation from these rules will cause the output to be unusable.'
                 ],
                 [
                     'role' => 'user',
@@ -276,9 +287,20 @@ class LLM_API {
             }
         }
         
-        $instructions = isset($options['instructions']) 
+        // Base instructions for content conversion
+        $base_instructions = isset($options['instructions']) 
             ? $options['instructions'] 
             : 'Convert the following HTML content into WordPress Gutenberg blocks while preserving the structure, formatting, and media. Focus on creating a clean, readable output.';
+        
+        // Enhanced instructions for proper Gutenberg block formatting
+        $gutenberg_instructions = "\n\nFOLLOW THESE CRITICAL REQUIREMENTS STRICTLY:
+1. Output ONLY raw Gutenberg block comments - nothing else
+2. START your response with the FIRST block comment and END with the LAST closing block comment
+3. DO NOT include ANY explanatory text, separator lines, or original HTML
+4. Every block MUST have proper opening and closing tags
+5. All JSON attributes MUST be complete with properly closed braces
+6. DO NOT truncate the final block in your response
+7. Produce ONLY valid Gutenberg blocks that can be pasted directly into WordPress";
         
         // Check for Campaign Monitor content
         $is_campaign_monitor = (strpos($content, 'campaign-view.com') !== false || 
@@ -287,7 +309,7 @@ class LLM_API {
         if ($is_campaign_monitor && $this->debug) {
             \error_log('UTG: Detected Campaign Monitor content, applying special processing instructions');
             // Add campaign monitor specific instructions
-            $instructions .= "\n\nThis is an email from Campaign Monitor. Convert it into clean, structured Gutenberg blocks. Pay special attention to handling tables, images, and formatting. Remove any excessive styling but maintain the content structure.";
+            $base_instructions .= "\n\nThis is an email from Campaign Monitor. Convert it into clean, structured Gutenberg blocks. Pay special attention to handling tables, images, and formatting. Remove any excessive styling but maintain the content structure.";
         }
         
         // Check content length
@@ -298,7 +320,8 @@ class LLM_API {
         // Sanitize content for better processing
         $content = $this->sanitize_content_for_processing($content);
         
-        $prompt = $instructions . "\n\nContent:\n" . $content;
+        // Combine all instructions with content
+        $prompt = $base_instructions . $gutenberg_instructions . "\n\nContent:\n" . $content;
         
         /** @var array{content: string, usage?: array, model?: string}|\WP_Error $result */
         $result = $this->send_request($prompt, $options);
@@ -514,7 +537,17 @@ class LLM_API {
                 Convert the following HTML content into WordPress Gutenberg blocks, preserving the 
                 structure and formatting. Pay special attention to promotional sections, 
                 buttons, and multi-column layouts. Use appropriate Gutenberg blocks for 
-                each content element including buttons, columns, and images with captions.';
+                each content element including buttons, columns, and images with captions.
+                
+                CRITICAL REQUIREMENTS FOR YOUR OUTPUT:
+                1. START immediately with the first block comment (<!-- wp:) and END with the last closing block comment
+                2. Output ONLY the raw Gutenberg blocks - no explanatory text, notes, or separator lines
+                3. NEVER include phrases like "Below is one way to translate" or any other introduction
+                4. NEVER include dashed lines, asterisks, or any other separator elements
+                5. Every block MUST have proper opening and closing tags, especially group blocks
+                6. All JSON attributes MUST be complete with properly closed braces
+                7. Output MUST be valid and complete - no truncated blocks or attributes
+                8. NEVER include the original HTML in your response';
             return $instructions;
         }
         
@@ -600,7 +633,7 @@ class LLM_API {
      *
      * @param string $type Either 'request' or 'response'
      * @param array $payload The request payload
-     * @param array|null $response The API response (for response logs only)
+     * @param array|\WP_Error|null $response The API response (for response logs only)
      */
     private function log_api_interaction($type, $payload, $response = null) {
         // Temporarily disabled to fix 500 errors
