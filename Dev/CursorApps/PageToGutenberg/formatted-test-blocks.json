@@ -1,0 +1,37 @@
+{
+  "title": "Test Properly Formatted Blocks",
+  "blocks": [
+    {
+      "blockName": "core/heading",
+      "attrs": {
+        "level": 2
+      },
+      "innerBlocks": [],
+      "innerHTML": "<h2>This is a heading</h2>",
+      "innerContent": ["<h2>This is a heading</h2>"]
+    },
+    {
+      "blockName": "core/paragraph",
+      "attrs": {},
+      "innerBlocks": [],
+      "innerHTML": "<p>This is a paragraph of text that should be properly rendered as a Gutenberg block.</p>",
+      "innerContent": ["<p>This is a paragraph of text that should be properly rendered as a Gutenberg block.</p>"]
+    },
+    {
+      "blockName": "core/list",
+      "attrs": {
+        "ordered": false
+      },
+      "innerBlocks": [],
+      "innerHTML": "<ul><li>First item in the list</li><li>Second item in the list</li><li>Third item in the list</li></ul>",
+      "innerContent": ["<ul><li>First item in the list</li><li>Second item in the list</li><li>Third item in the list</li></ul>"]
+    },
+    {
+      "blockName": "core/quote",
+      "attrs": {},
+      "innerBlocks": [],
+      "innerHTML": "<blockquote class=\"wp-block-quote\"><p>This is a blockquote example.</p><cite>Citation text here</cite></blockquote>",
+      "innerContent": ["<blockquote class=\"wp-block-quote\"><p>This is a blockquote example.</p><cite>Citation text here</cite></blockquote>"]
+    }
+  ]
+} 

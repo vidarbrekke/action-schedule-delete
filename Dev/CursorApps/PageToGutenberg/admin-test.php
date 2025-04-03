@@ -423,5 +423,5 @@ function process_llm_json_file($file_path) {
 }
 
 // Main execution
-$file_path = '/home/staging/public_html/wp-content/uploads/utg-debug/nijv-zgpvh-campaign-view-com-ad1ec848509c58ac4de2ae7db367042c-llm_processed_content-20250403-013508.json';
+$file_path = '/home/staging/public_html/wp-content/uploads/utg-debug/nijv-zgpvh-campaign-view-com-c808f40bcdc68fa9bc699c09e2fc92be-llm_processed_content-20250403-155736.json';
 process_llm_json_file($file_path); 

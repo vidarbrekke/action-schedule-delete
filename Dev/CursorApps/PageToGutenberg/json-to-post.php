@@ -49,6 +49,7 @@ if (defined('WP_CLI') && WP_CLI) {
         $post_id = null;
         $blocks = array();
         $title = 'Untitled';
+        $serialized_blocks = '';
         
         // Extract title from filename
         if (preg_match('/([^\/]+)-final_content-\d+/i', $filename, $matches)) {
@@ -90,7 +91,7 @@ if (defined('WP_CLI') && WP_CLI) {
                         $blocks[] = $block;
                     }
                 }
-            } else {
+        } else {
                 // Unknown structure, add as single block
                 WP_CLI::log("Unknown JSON structure, using as HTML block");
                 $blocks[] = array(
@@ -432,8 +433,10 @@ function process_json_file($file) {
     $title = str_replace(['final_content-', '-'], [' ', ' '], $title);
     $title = ucwords($title);
 
-    // Initialize blocks array
-    $blocks = array();
+    // Initialize variables
+    $serialized_blocks = '';
+    $blocks = [];
+    $content = '';
     
     // Create a paragraph block with the HTML content
     $content = trim($json_content);
@@ -445,6 +448,17 @@ function process_json_file($file) {
         // If valid JSON with expected structure
         if (!empty($json_data['title'])) {
             $title = $json_data['title'];
+        }
+        
+        // Look for an extracted title file
+        $title_file_path = str_replace('final_content', 'extracted_title', $json_file_path);
+        $title_file_path = str_replace('.json', '.txt', $title_file_path);
+        if (file_exists($title_file_path)) {
+            $extracted_title = trim(file_get_contents($title_file_path));
+            if (!empty($extracted_title)) {
+                // Remove any trailing % character that might have been added
+                $title = rtrim($extracted_title, '%');
+            }
         }
         
         // Check for LLM-processed content format first
@@ -500,6 +514,68 @@ function process_json_file($file) {
                 'edit_url'  => admin_url("post.php?post={$post_id}&action=edit"),
                 'view_url'  => get_permalink($post_id)
             );
+        }
+        // Campaign-view.com format - process HTML content into proper blocks
+        else if (is_string($content) && strpos($content, 'campaign-view.com') !== false) {
+            // Handle campaign-view.com format by parsing HTML
+            $html_content = $content;
+            
+            // Extract heading blocks
+            preg_match_all('/<h([1-6])[^>]*>(.*?)<\/h\1>/is', $html_content, $headings, PREG_SET_ORDER);
+            foreach ($headings as $heading) {
+                $level = (int) $heading[1];
+                $text = wp_strip_all_tags($heading[2]);
+                
+                $blocks[] = array(
+                    'blockName' => 'core/heading',
+                    'attrs' => array(
+                        'level' => $level
+                    ),
+                    'innerBlocks' => array(),
+                    'innerHTML' => "<h{$level}>{$text}</h{$level}>",
+                    'innerContent' => array("<h{$level}>{$text}</h{$level}>")
+                );
+            }
+            
+            // Extract paragraph content - look for p tags or DIV with plaintext attribute
+            preg_match_all('/<p[^>]*>(.*?)<\/p>/is', $html_content, $paragraphs, PREG_SET_ORDER);
+            foreach ($paragraphs as $para) {
+                $text = wp_strip_all_tags($para[1]);
+                if (!empty(trim($text))) {
+                    $blocks[] = array(
+                        'blockName' => 'core/paragraph',
+                        'attrs' => array(),
+                        'innerBlocks' => array(),
+                        'innerHTML' => "<p>{$text}</p>",
+                        'innerContent' => array("<p>{$text}</p>")
+                    );
+                }
+            }
+            
+            // Extract image references - these will be downloaded as media library items
+            preg_match_all('/<img[^>]*src="([^"]+)"[^>]*>/is', $html_content, $images, PREG_SET_ORDER);
+            foreach ($images as $image) {
+                $img_url = $image[1];
+                $alt_text = '';
+                
+                // Extract alt text if available
+                if (preg_match('/alt="([^"]*)"/is', $image[0], $alt_matches)) {
+                    $alt_text = $alt_matches[1];
+                }
+                
+                if (!empty($img_url) && filter_var($img_url, FILTER_VALIDATE_URL)) {
+                    $blocks[] = array(
+                        'blockName' => 'core/image',
+                        'attrs' => array(
+                            'url' => $img_url,
+                            'alt' => $alt_text
+                        ),
+                        'innerBlocks' => array(),
+                        'innerHTML' => '<figure class="wp-block-image"><img src="' . esc_url($img_url) . '" alt="' . esc_attr($alt_text) . '"/></figure>',
+                        'innerContent' => array('<figure class="wp-block-image"><img src="' . esc_url($img_url) . '" alt="' . esc_attr($alt_text) . '"/></figure>')
+                    );
+                }
+            }
         }
         // Then check for standard content format
         else if (!empty($json_data['content']) && is_array($json_data['content'])) {
@@ -787,13 +863,65 @@ function process_json_file($file) {
         }
     }
     
+    // Convert blocks to serialized format if needed
+    if (!empty($blocks) && empty($serialized_blocks)) {
+        WP_CLI::log("Converting " . count($blocks) . " blocks to serialized format");
+        
+        foreach ($blocks as $block) {
+            $serialized_blocks .= generate_block_html($block);
+        }
+    }
+    
+    // Process plain text attributes if present
+    if (isset($data['plaintext']) && !empty($data['plaintext'])) {
+        WP_CLI::log("Processing plaintext content");
+        
+        // Decode HTML entities
+        $plaintext = html_entity_decode($data['plaintext']);
+        
+        // Split into paragraphs
+        $paragraphs = preg_split('/\n\s*\n/', $plaintext);
+        
+        // Create paragraph blocks
+        foreach ($paragraphs as $paragraph) {
+            $paragraph = trim($paragraph);
+            if (!empty($paragraph)) {
+                $serialized_blocks .= '<!-- wp:paragraph --><p>' . $paragraph . '</p><!-- /wp:paragraph -->';
+            }
+        }
+    }
+    
+    // If the serialized_blocks is empty but we have content, add it as a single HTML block
+    if (empty($serialized_blocks) && !empty($content)) {
+        WP_CLI::log("Falling back to all content as single HTML block");
+        $serialized_blocks = '<!-- wp:html -->' . $content . '<!-- /wp:html -->';
+    }
+    
+    // Extract serialized blocks from content
+    if (strpos($serialized_blocks, '<!-- wp:') !== false) {
+        // Remove any text before the first block
+        $serialized_blocks = preg_replace('/^.*?(<!-- wp:)/', '$1', $serialized_blocks, 1);
+        
+        // Process image blocks
+        if (function_exists('utg_process_gutenberg_image_blocks')) {
+            WP_CLI::log("Processing image blocks in serialized content");
+            $serialized_blocks = utg_process_gutenberg_image_blocks($serialized_blocks);
+        } elseif (class_exists('\\UTG\\Generator\\UTG_Media_Handler')) {
+            WP_CLI::log("Using UTG_Media_Handler to process image blocks");
+            $media_handler = new \UTG\Generator\UTG_Media_Handler();
+            if (method_exists($media_handler, 'process_gutenberg_image_blocks')) {
+                $serialized_blocks = $media_handler->process_gutenberg_image_blocks($serialized_blocks);
+            }
+        }
+    }
+    
     // Create post data
     $post_data = array(
         'post_title'   => $title,
         'post_status'  => 'publish',
         'post_author'  => 1,
         'post_type'    => 'post',
-        'post_content' => serialize_blocks($blocks),
+        'post_content' => $serialized_blocks,
         'meta_input'   => array(
             'utg_json_source' => basename($file),
             'utg_generated_at' => date('Y-m-d H:i:s'),

@@ -45,7 +45,7 @@ class Post_Generator {
      */
     public function create_post_from_api_response($response, $source_url) {
         // Validate response
-        if (!isset($response['title']) || !isset($response['blocks'])) {
+        if (!isset($response['title'])) {
             return new \WP_Error('invalid_response', __('Invalid API response format', 'url-to-gutenberg'));
         }
         
@@ -57,7 +57,7 @@ class Post_Generator {
         if (isset($response['screenshot']) && !empty($response['screenshot'])) {
             $screenshot_id = $this->media_handler->save_base64_image(
                 $response['screenshot'],
-                'screenshot-' . sanitize_title($response['title']) . '.png'
+                'screenshot-' . \sanitize_title($response['title']) . '.png'
             );
             
             if (is_wp_error($screenshot_id)) {
@@ -83,8 +83,53 @@ class Post_Generator {
             }
         }
         
-        // Replace image URLs with WordPress attachments in blocks
-        $blocks = $this->process_blocks($response['blocks'], $image_ids);
+        // Initialize blocks array
+        $blocks = array();
+        
+        // Handle different content formats
+        if (isset($response['blocks']) && is_array($response['blocks'])) {
+            // Process Gutenberg blocks format
+            $blocks = $this->process_blocks($response['blocks'], $image_ids);
+        } else if (isset($response['content']) && !empty($response['content'])) {
+            // Process as HTML content
+            $content = $response['content'];
+            
+            if (is_string($content)) {
+                // Content is provided as a string of HTML, parse it into blocks
+                $blocks = $this->html_to_blocks($content, $image_ids);
+            } else if (is_array($content)) {
+                // Content is already structured, convert each element to blocks
+                foreach ($content as $element) {
+                    $block = $this->convert_element_to_block($element, $image_ids);
+                    if ($block) {
+                        $blocks[] = $block;
+                    }
+                }
+            }
+        }
+        
+        // If no blocks were created, create a fallback block with the entire content
+        if (empty($blocks)) {
+            $this->log_debug('No blocks created', 'Creating fallback HTML block');
+            
+            // Create a single HTML block
+            $html_content = '';
+            
+            if (isset($response['content'])) {
+                $html_content = is_string($response['content']) ? 
+                    $response['content'] : wp_json_encode($response['content'], JSON_PRETTY_PRINT);
+            } else {
+                $html_content = wp_json_encode($response, JSON_PRETTY_PRINT);
+            }
+            
+            $blocks[] = array(
+                'blockName' => 'core/html',
+                'attrs' => array(),
+                'innerBlocks' => array(),
+                'innerHTML' => $html_content,
+                'innerContent' => array($html_content)
+            );
+        }
         
         // Convert blocks to post content
         $post_content = $this->blocks_to_post_content($blocks);
@@ -103,13 +148,13 @@ class Post_Generator {
         
         // Prepare post data
         $post_data = array(
-            'post_title'    => sanitize_text_field($response['title']),
+            'post_title'    => \sanitize_text_field($response['title']),
             'post_content'  => $post_content,
             'post_status'   => $post_status,
             'post_type'     => apply_filters('utg_post_type', 'post'),
             'meta_input'    => array(
-                'utg_source_url' => esc_url_raw($source_url),
-                'utg_generated_at' => current_time('mysql'),
+                'utg_source_url' => \esc_url_raw($source_url),
+                'utg_generated_at' => \current_time('mysql'),
             ),
         );
         
@@ -117,7 +162,7 @@ class Post_Generator {
         $post_data = apply_filters('utg_post_data', $post_data, $response, $source_url);
         
         // Insert the post
-        $post_id = wp_insert_post($post_data, true); // true = return WP_Error on failure
+        $post_id = \wp_insert_post($post_data, true); // true = return WP_Error on failure
         
         if (is_wp_error($post_id)) {
             $this->log_error('Post creation failed', $post_id->get_error_message());
@@ -126,12 +171,12 @@ class Post_Generator {
         
         // Set featured image if screenshot is available
         if ($screenshot_id && !is_wp_error($screenshot_id)) {
-            set_post_thumbnail($post_id, $screenshot_id);
+            \set_post_thumbnail($post_id, $screenshot_id);
         }
         
         // Save additional meta data
-        update_post_meta($post_id, 'utg_image_count', count($image_ids));
-        update_post_meta($post_id, 'utg_block_count', count($blocks));
+        \update_post_meta($post_id, 'utg_image_count', count($image_ids));
+        \update_post_meta($post_id, 'utg_block_count', count($blocks));
         
         // Allow post-processing actions
         do_action('utg_post_created', $post_id, $response, $source_url);
@@ -333,6 +378,151 @@ class Post_Generator {
     private function log_debug($title, $message) {
         if ($this->settings && $this->settings->get('debug_mode')) {
             error_log(sprintf('[URL to Gutenberg] DEBUG: %s - %s', $title, $message));
+        }
+    }
+    
+    /**
+     * Convert HTML content to Gutenberg blocks
+     *
+     * @param string $html     HTML content to convert.
+     * @param array  $image_ids Image IDs indexed by URL.
+     * @return array Blocks array.
+     */
+    private function html_to_blocks($html, $image_ids = array()) {
+        $blocks = array();
+        
+        // Extract heading blocks
+        preg_match_all('/<h([1-6])[^>]*>(.*?)<\/h\1>/is', $html, $headings, PREG_SET_ORDER);
+        foreach ($headings as $heading) {
+            $level = (int) $heading[1];
+            $text = \wp_strip_all_tags($heading[2]);
+            
+            if (!empty(trim($text))) {
+                $blocks[] = array(
+                    'blockName' => 'core/heading',
+                    'attrs' => array(
+                        'level' => $level
+                    ),
+                    'innerBlocks' => array(),
+                    'innerHTML' => "<h{$level}>{$text}</h{$level}>",
+                    'innerContent' => array("<h{$level}>{$text}</h{$level}>")
+                );
+            }
+        }
+        
+        // Extract paragraph content
+        preg_match_all('/<p[^>]*>(.*?)<\/p>/is', $html, $paragraphs, PREG_SET_ORDER);
+        foreach ($paragraphs as $para) {
+            $text = \wp_strip_all_tags($para[1]);
+            
+            if (!empty(trim($text))) {
+                $blocks[] = array(
+                    'blockName' => 'core/paragraph',
+                    'attrs' => array(),
+                    'innerBlocks' => array(),
+                    'innerHTML' => "<p>{$text}</p>",
+                    'innerContent' => array("<p>{$text}</p>")
+                );
+            }
+        }
+        
+        // Extract image references
+        preg_match_all('/<img[^>]*src="([^"]+)"[^>]*>/is', $html, $images, PREG_SET_ORDER);
+        foreach ($images as $image) {
+            $img_url = $image[1];
+            $alt_text = '';
+            
+            // Extract alt text if available
+            if (preg_match('/alt="([^"]*)"/is', $image[0], $alt_matches)) {
+                $alt_text = $alt_matches[1];
+            }
+            
+            if (!empty($img_url) && filter_var($img_url, FILTER_VALIDATE_URL)) {
+                // Try to get the attachment ID if the image has already been downloaded
+                $attachment_id = isset($image_ids[$img_url]) ? $image_ids[$img_url] : 0;
+                
+                $blocks[] = array(
+                    'blockName' => 'core/image',
+                    'attrs' => array(
+                        'url' => $img_url,
+                        'alt' => $alt_text,
+                        'id' => $attachment_id
+                    ),
+                    'innerBlocks' => array(),
+                    'innerHTML' => '<figure class="wp-block-image"><img src="' . \esc_url($img_url) . '" alt="' . \esc_attr($alt_text) . '"' . 
+                                   ($attachment_id ? ' class="wp-image-' . $attachment_id . '"' : '') . '/></figure>',
+                    'innerContent' => array('<figure class="wp-block-image"><img src="' . \esc_url($img_url) . '" alt="' . \esc_attr($alt_text) . '"' . 
+                                           ($attachment_id ? ' class="wp-image-' . $attachment_id . '"' : '') . '/></figure>')
+                );
+            }
+        }
+        
+        return $blocks;
+    }
+    
+    /**
+     * Convert an element to a Gutenberg block
+     *
+     * @param array $element   Element to convert.
+     * @param array $image_ids Image IDs indexed by URL.
+     * @return array|false Block array or false on failure.
+     */
+    private function convert_element_to_block($element, $image_ids = array()) {
+        if (!isset($element['type'])) {
+            return false;
+        }
+        
+        switch ($element['type']) {
+            case 'heading':
+                $level = isset($element['level']) ? intval($element['level']) : 2;
+                $content = isset($element['content']) ? $element['content'] : '';
+                
+                return array(
+                    'blockName' => 'core/heading',
+                    'attrs' => array(
+                        'level' => $level
+                    ),
+                    'innerBlocks' => array(),
+                    'innerHTML' => "<h{$level}>{$content}</h{$level}>",
+                    'innerContent' => array("<h{$level}>{$content}</h{$level}>")
+                );
+                
+            case 'paragraph':
+                $content = isset($element['content']) ? $element['content'] : '';
+                
+                return array(
+                    'blockName' => 'core/paragraph',
+                    'attrs' => array(),
+                    'innerBlocks' => array(),
+                    'innerHTML' => "<p>{$content}</p>",
+                    'innerContent' => array("<p>{$content}</p>")
+                );
+                
+            case 'image':
+                $url = isset($element['url']) ? $element['url'] : (isset($element['src']) ? $element['src'] : '');
+                $alt = isset($element['alt']) ? $element['alt'] : '';
+                $attachment_id = isset($image_ids[$url]) ? $image_ids[$url] : 0;
+                
+                if (empty($url)) {
+                    return false;
+                }
+                
+                return array(
+                    'blockName' => 'core/image',
+                    'attrs' => array(
+                        'url' => $url,
+                        'alt' => $alt,
+                        'id' => $attachment_id
+                    ),
+                    'innerBlocks' => array(),
+                    'innerHTML' => '<figure class="wp-block-image"><img src="' . \esc_url($url) . '" alt="' . \esc_attr($alt) . '"' . 
+                                   ($attachment_id ? ' class="wp-image-' . $attachment_id . '"' : '') . '/></figure>',
+                    'innerContent' => array('<figure class="wp-block-image"><img src="' . \esc_url($url) . '" alt="' . \esc_attr($alt) . '"' . 
+                                           ($attachment_id ? ' class="wp-image-' . $attachment_id . '"' : '') . '/></figure>')
+                );
+                
+            default:
+                return false;
         }
     }
 } 
