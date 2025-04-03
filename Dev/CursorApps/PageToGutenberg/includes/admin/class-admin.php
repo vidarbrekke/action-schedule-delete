@@ -540,8 +540,8 @@ class UTG_Admin {
             $extracted_content, 
             [
                 'url' => $url,
-                'temperature' => 0.2, // Lower temperature for more consistent results
-                'max_tokens' => 4000
+                'temperature' => 0.1, // Lower temperature for more consistent and complete results
+                'max_tokens' => 12000
             ]
         );
         

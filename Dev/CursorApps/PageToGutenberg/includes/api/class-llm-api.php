@@ -79,7 +79,7 @@ class LLM_API {
         }
         $this->api_model = $this->settings->get('api_model');
         $this->max_tokens = $this->settings->get('max_tokens');
-        $this->temperature = $this->settings->get('temperature');
+        $this->temperature = $this->settings->get('temperature', 0.1);
         $this->debug = (bool) $this->settings->get('debug_mode', false);
         $this->use_cache = (bool) $this->settings->get('use_cache', true);
     }
@@ -131,6 +131,18 @@ CRITICAL REQUIREMENTS:
 5. ALWAYS include proper opening and closing tags for every block
 6. PAY SPECIAL ATTENTION to the final blocks in your response to ensure they are not truncated
 7. Your output should start immediately with the first Gutenberg block comment and end with the last closing block comment
+8. DO NOT shorten or truncate your answer; continue until your response is complete
+9. You MUST process the ENTIRE content, not just part of it
+10. CRITICAL: Process ALL images and content sections completely - even lengthy content must be converted fully
+11. CRITICALLY IMPORTANT: YOU MUST CONVERT THE ENTIRE DOCUMENT TO THE VERY END
+
+WORDPRESS BLOCK FORMAT REQUIREMENTS:
+1. For image blocks, use the format: <!-- wp:image {"align":"center","sizeSlug":"large"} --> and avoid adding custom attributes
+2. For separator blocks, use the standard format: <!-- wp:separator {"className":"is-style-wide"} --> <hr class="wp-block-separator is-style-wide"/> <!-- /wp:separator -->
+3. For colored separators, use proper WordPress color classes instead of inline styles
+4. Always use standard Gutenberg block attributes as defined in WordPress core - do not create custom attributes
+5. For styling elements with colors, use WordPress color classes (has-text-color has-[color-name]-color) rather than inline style attributes
+6. Never use has-alpha-channel-opacity in your attributes as it can cause validation errors
 
 Any deviation from these rules will cause the output to be unusable.'
                 ],
@@ -139,8 +151,8 @@ Any deviation from these rules will cause the output to be unusable.'
                     'content' => $prompt
                 ]
             ],
-            'max_tokens' => $max_tokens,
-            'temperature' => $temperature,
+            'max_tokens' => isset($options['max_tokens']) ? $options['max_tokens'] : 12000,
+            'temperature' => isset($options['temperature']) ? $options['temperature'] : 0.1,
         ];
 
         try {
@@ -324,7 +336,10 @@ Any deviation from these rules will cause the output to be unusable.'
         $prompt = $base_instructions . $gutenberg_instructions . "\n\nContent:\n" . $content;
         
         /** @var array{content: string, usage?: array, model?: string}|\WP_Error $result */
-        $result = $this->send_request($prompt, $options);
+        $result = $this->send_request($prompt, [
+            'max_tokens' => isset($options['max_tokens']) ? $options['max_tokens'] : 12000,
+            'temperature' => isset($options['temperature']) ? $options['temperature'] : 0.1
+        ]);
         
         if (\is_wp_error($result)) {
             \error_log('UTG: Error from send_request: ' . $result->get_error_message());
