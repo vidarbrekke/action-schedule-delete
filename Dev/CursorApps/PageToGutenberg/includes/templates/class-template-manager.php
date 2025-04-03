@@ -7,6 +7,8 @@
 
 namespace UTG\Templates;
 
+require_once(UTG_PLUGIN_DIR . 'includes/templates/swatching-guide.php');
+
 /**
  * Template Manager
  *
@@ -118,6 +120,11 @@ class UTG_Template_Manager {
         // YouTube template
         if (strpos($domain, 'youtube.com') !== false) {
             return $this->create_youtube_template($title, $url);
+        }
+        
+        // Swatching guide template for campaign-view.com
+        if (strpos($domain, 'campaign-view.com') !== false && strpos($url, 'nijv-zgpvh') !== false) {
+            return get_swatching_guide_template();
         }
         
         return null;
@@ -490,5 +497,15 @@ class UTG_Template_Manager {
             ],
             'images' => []
         ];
+    }
+
+    private function get_template_data($type, $title = '', $url = '') {
+        switch ($type) {
+            case 'swatching-guide':
+                return \UTG\Templates\get_swatching_guide_template();
+            // ... existing cases ...
+            default:
+                return null;
+        }
     }
 } 

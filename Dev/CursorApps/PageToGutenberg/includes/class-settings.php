@@ -27,10 +27,10 @@ class Settings {
      */
     private $defaults = array(
         'api_key' => '',
-        'api_endpoint' => 'https://api.openai.com/v1/chat/completions',
-        'api_model' => 'gpt-3.5-turbo',
-        'max_tokens' => 2000,
-        'temperature' => 0.7,
+        'api_endpoint' => 'https://api.openrouter.ai/api/v1',
+        'api_model' => 'anthropic/claude-3-sonnet',
+        'max_tokens' => 4000,
+        'temperature' => 0.2,
         'extract_images' => true,
         'create_featured_image' => true,
         'default_category' => 1,
@@ -39,6 +39,8 @@ class Settings {
         'debug_mode' => false,
         'cache_enabled' => true,
         'cache_lifetime' => 86400, // 24 hours in seconds
+        'use_cache' => true,
+        'cleaning_level' => 'standard',
     );
 
     /**

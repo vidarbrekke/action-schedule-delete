@@ -10,4 +10,6 @@ Ssh login: ssh staging@45.33.31.79
 you don't need an ssh password, an authentication key is used, found here:
 /Users/vidarbrekke/Dev/socialintent/staging.motherknitter.pem
 
+sudo user password is: @Flatbygdi73?
+
 Plugin location: /home/staging/public_html/wp-content/plugins/

@@ -1,3 +1,31 @@
+## 2024-04-06: Fixed Gutenberg Block Generation from LLM Output
+
+### Current Status
+- Fixed issue where LLM-processed content was being wrapped in a single HTML block
+- Implemented support for direct string-based Gutenberg block content from LLM
+- Successfully deployed and tested changes on staging server
+- Identified new issue with image blocks displaying "Block contains unexpected or invalid content"
+
+### Completed Tasks
+- Identified that the `processed_content` field in LLM output was a string containing Gutenberg block markup rather than an array
+- Modified the `json-to-post.php` script to detect when `processed_content` is a string containing Gutenberg blocks
+- Added logic to strip any introductory text before the first Gutenberg block
+- Implemented direct content usage instead of wrapping in a single HTML block
+- Deployed changes to staging server and verified increased block count (from 3 to 13 blocks)
+
+### Challenges & Solutions
+- **Challenge**: Content from LLM was properly formatted as Gutenberg blocks but wrapped in a single HTML block
+  **Solution**: Added detection for string-based `processed_content` containing block markers and special handling for this case
+
+- **Challenge**: Deployment required careful validation to avoid breaking existing functionality
+  **Solution**: Implemented step-by-step testing process with careful verification of block generation
+
+### Next Steps
+- Address issue with image blocks showing "Block contains unexpected or invalid content"
+- Implement proper image downloading and media library integration
+- Ensure remote images are saved to WordPress media library and properly referenced in Gutenberg blocks
+- Continue refining the content processing pipeline for better block conversion
+
 ## 2024-04-05: Fixed Debug JSON File Size Issue
 
 ### Current Status
@@ -469,3 +497,35 @@
 - Continue testing with different types of content sources
 - Consider implementing domain-specific adjustments for common sources
 - Expand the basic HTML cleaning functionality for better results with edge cases
+
+## 2024-04-06: Enhanced LLM Integration for Gutenberg Block Generation
+
+### Current Status
+- Improved integration between extracted JSON content and LLM when "HTML extraction only" is unchecked
+- Added domain-specific processing instructions to the LLM based on content source
+- Implemented structured JSON response handling for more reliable block generation
+
+### Completed Tasks
+- Redesigned the `process_page_content` method in the LLM_API class to handle the entire content object
+- Added image metadata processing to provide better context to the LLM
+- Created comprehensive prompt engineering with specialized instructions for different content types
+- Improved JSON response parsing with fallbacks for markdown code blocks
+- Added a `set_model` method to the LLM_API class for dynamic model selection
+- Created domain-specific instruction generation in the Content_Extractor class
+- Added documentation explaining the LLM integration process
+
+### Challenges & Solutions
+- **Challenge**: Ensuring LLM produces consistent, well-structured Gutenberg blocks
+  **Solution**: Created detailed prompt with specific output format requirements and examples
+
+- **Challenge**: Handling different content structures across various website types
+  **Solution**: Implemented domain-specific instructions based on URL patterns
+
+- **Challenge**: Making image references usable in generated blocks
+  **Solution**: Added explicit image URL listings in the prompt with positional metadata
+
+### Next Steps
+- Implement error recovery for partial LLM responses
+- Add support for more domain-specific instructions
+- Consider implementing block validation before post creation
+- Explore caching successful prompts to improve performance

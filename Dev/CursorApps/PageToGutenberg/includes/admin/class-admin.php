@@ -83,18 +83,18 @@ class UTG_Admin {
         \register_setting(
             'utg_settings',  // Option group
             'utg_settings',  // Option name
-            array(
-                'sanitize_callback' => array($this, 'sanitize_settings'),
-                'default' => array(
-                    'api_key' => '',
-                    'default_model' => 'openai/gpt-4-turbo',
-                    'api_endpoint' => 'https://openrouter.ai/api/v1',
-                    'debug_mode' => false,
-                    'cache_enabled' => true,
-                    'cache_expiration' => 86400, // 24 hours
-                    'default_post_status' => 'draft'
-                )
-            )
+            array($this, 'sanitize_settings')
+        );
+
+        // Default settings
+        $defaults = array(
+            'api_key' => '',
+            'api_endpoint' => 'https://api.openrouter.ai/api/v1/chat/completions',
+            'default_model' => 'anthropic/claude-3-sonnet',
+            'default_post_status' => 'draft',
+            'cache_enabled' => true,
+            'cache_expiration' => 3600,
+            'debug_mode' => false
         );
     }
     
@@ -107,14 +107,10 @@ class UTG_Admin {
     public function sanitize_settings($input) {
         $sanitized = array();
         
-        // API Key
+        // Sanitize input values
         $sanitized['api_key'] = isset($input['api_key']) ? \sanitize_text_field($input['api_key']) : '';
-        
-        // Default Model
-        $sanitized['default_model'] = isset($input['default_model']) ? \sanitize_text_field($input['default_model']) : 'openai/gpt-4-turbo';
-        
-        // API Endpoint
-        $sanitized['api_endpoint'] = isset($input['api_endpoint']) ? \esc_url_raw($input['api_endpoint']) : 'https://openrouter.ai/api/v1';
+        $sanitized['api_endpoint'] = isset($input['api_endpoint']) ? \esc_url_raw($input['api_endpoint']) : 'https://api.openrouter.ai/api/v1/chat/completions';
+        $sanitized['default_model'] = isset($input['default_model']) ? \sanitize_text_field($input['default_model']) : 'anthropic/claude-3-sonnet';
         
         // Debug Mode (boolean)
         $sanitized['debug_mode'] = isset($input['debug_mode']) && $input['debug_mode'] ? true : false;
@@ -123,7 +119,7 @@ class UTG_Admin {
         $sanitized['cache_enabled'] = isset($input['cache_enabled']) && $input['cache_enabled'] ? true : false;
         
         // Cache Expiration (integer)
-        $sanitized['cache_expiration'] = isset($input['cache_expiration']) ? \absint($input['cache_expiration']) : 86400;
+        $sanitized['cache_expiration'] = isset($input['cache_expiration']) ? \absint($input['cache_expiration']) : 3600;
         
         // Default Post Status (select)
         $valid_statuses = array('draft', 'publish', 'pending', 'private');
@@ -415,277 +411,206 @@ class UTG_Admin {
      * Test API connection (AJAX handler)
      */
     public function test_api_connection() {
-        // Verify nonce
-        $this->verify_ajax_nonce();
-        
-        // Test API connection
-        $result = $this->api->test_connection();
-        
-        if (is_wp_error($result)) {
-            \wp_send_json_error(array('message' => $result->get_error_message()));
+        try {
+            // Verify nonce
+            $this->verify_ajax_nonce();
+            
+            // Log debug information
+            $debug_mode = $this->settings->get('debug_mode', false);
+            if ($debug_mode) {
+                error_log('UTG: Starting API connection test');
+            }
+            
+            // Make sure the API object is initialized
+            if (!$this->api) {
+                error_log('UTG: API object not available');
+                \wp_send_json_error(array('message' => 'API handler not properly initialized'));
+                return;
+            }
+            
+            // Test API connection
+            $result = $this->api->test_connection();
+            
+            if ($debug_mode) {
+                error_log('UTG: API test result: ' . print_r($result, true));
+            }
+            
+            if (\is_wp_error($result)) {
+                error_log('UTG: API test failed with WP_Error: ' . $result->get_error_message());
+                \wp_send_json_error(array('message' => $result->get_error_message()));
+                return;
+            }
+            
+            // Handle array response format from test_connection
+            if (is_array($result) && isset($result['success'])) {
+                if ($result['success'] === false) {
+                    error_log('UTG: API test returned success=false with message: ' . $result['message']);
+                    \wp_send_json_error(array('message' => $result['message']));
+                    return;
+                }
+                
+                error_log('UTG: API test successful');
+                \wp_send_json_success(array('message' => $result['message']));
+                return;
+            }
+            
+            // If we got here without a proper response format, return an error
+            error_log('UTG: API test returned unexpected response format');
+            \wp_send_json_error(array('message' => 'Unexpected response format from API test'));
+            
+        } catch (\Exception $e) {
+            error_log('UTG: Exception in test_api_connection: ' . $e->getMessage());
+            \wp_send_json_error(array('message' => 'Error: ' . $e->getMessage()));
         }
-        
-        \wp_send_json_success(array('message' => __('Connection successful!', 'url-to-gutenberg')));
     }
     
     /**
-     * AJAX handler for converting URLs to Gutenberg blocks
+     * Convert URL AJAX handler
      */
     public function convert_url() {
-        // Verify nonce
         $this->verify_ajax_nonce();
         
-        // Get URL and parse_only flag
-        $url = isset($_POST['url']) ? sanitize_text_field($_POST['url']) : '';
-        $parse_only = isset($_POST['parse_only']) && $_POST['parse_only'] === 'true';
-        $cleaning_level = isset($_POST['cleaning_level']) ? sanitize_text_field($_POST['cleaning_level']) : 'standard';
-        
-        // Validate cleaning level (only accept valid values)
-        if (!in_array($cleaning_level, ['standard', 'medium', 'aggressive'])) {
-            $cleaning_level = 'standard'; // Default to standard if invalid value provided
+        $debug_mode = $this->settings->get('debug_mode', false);
+        if ($debug_mode) {
+            $this->log_debug('Starting URL conversion');
         }
         
-        error_log('UTG AJAX: Request params - URL: ' . $url . ', Parse only: ' . ($parse_only ? 'true' : 'false') . ', Cleaning level: ' . $cleaning_level);
+        $url = isset($_POST['url']) ? esc_url_raw($_POST['url']) : '';
+        $parse_only = isset($_POST['parse_only']) ? filter_var($_POST['parse_only'], FILTER_VALIDATE_BOOLEAN) : false;
+        $cleaning_level = isset($_POST['cleaning_level']) ? sanitize_text_field($_POST['cleaning_level']) : 'standard';
         
-        // Validate URL
-        if (empty($url) || !filter_var($url, FILTER_VALIDATE_URL)) {
-            \wp_send_json_error(__('Please enter a valid URL', 'url-to-gutenberg'));
+        if (empty($url)) {
+            wp_send_json_error('URL cannot be empty');
             return;
         }
         
-        // Store original debug setting
-        $debug_setting = $this->settings->get('debug_mode');
-        
-        // Always enable debug mode for the AJAX operation
-        $this->settings->update(['debug_mode' => true]);
-        
-        // Create debug directory if it doesn't exist
-        $debug_dir = WP_CONTENT_DIR . '/uploads/utg-debug';
-        if (!file_exists($debug_dir)) {
-            if (!mkdir($debug_dir, 0755, true)) {
-                error_log('UTG: Failed to create debug directory: ' . $debug_dir);
-            } else {
-                error_log('UTG: Created debug directory: ' . $debug_dir);
-            }
+        if ($debug_mode) {
+            $this->log_debug(sprintf('Processing URL: %s (Parse Only: %s, Cleaning Level: %s)', 
+                $url, $parse_only ? 'Yes' : 'No', $cleaning_level));
         }
         
-        // For parse-only operations, we'll use a simplified approach
+        // Get content from URL
+        $content_extractor = new \UTG\Content_Extractor($this->settings);
+        $extracted_content = $content_extractor->extract($url, $cleaning_level);
+        
+        if (is_wp_error($extracted_content)) {
+            $this->log_debug('Content extraction failed: ' . $extracted_content->get_error_message());
+            wp_send_json_error('Content extraction failed: ' . $extracted_content->get_error_message());
+            return;
+        }
+        
+        // Create debug file path if in debug mode
+        $debug_file_path = '';
+        if ($debug_mode) {
+            $debug_file_name = $content_extractor->get_debug_filename($url, 'final_content');
+            $debug_file_path = basename($debug_file_name);
+            $this->log_debug('Debug file created: ' . $debug_file_path);
+        }
+        
+        // If parse only, return the extracted HTML content
         if ($parse_only) {
-            try {
-                error_log('UTG AJAX: Starting parse-only extraction for URL: ' . $url);
-                
-                // Get HTML content using our helper method
-                $content = $this->get_url_content($url);
-                if (!$content) {
-                    error_log('UTG AJAX: Failed to retrieve content from URL');
-                    \wp_send_json_error(__('Failed to retrieve content from the URL. The site may be blocking access or unavailable.', 'url-to-gutenberg'));
-                    $this->settings->update(['debug_mode' => $debug_setting]);
-                return;
-            }
-
-                // Create a Content_Extractor instance with settings
-                $extractor = new \UTG\Content_Extractor($this->settings);
-                
-                // Save the raw content to debug directory with proper UTF-8 encoding
-                $debug_file = $debug_dir . '/' . $extractor->get_debug_filename($url, 'raw_html');
-                // Add UTF-8 BOM (Byte Order Mark) for better encoding recognition
-                $utf8_bom = chr(239) . chr(187) . chr(191); // UTF-8 BOM
-                @file_put_contents($debug_file, $utf8_bom . $content);
-                error_log('UTG AJAX: Raw content saved to: ' . $debug_file);
-                
-                error_log('UTG AJAX: Retrieved content, length: ' . strlen($content) . ' bytes');
-                
-                // Extract content with the appropriate cleaning level
-                error_log('UTG AJAX: Beginning content extraction' . ($cleaning_level !== 'standard' ? ' with cleaning level: ' . $cleaning_level : ''));
-                $extracted = $extractor->extract($url, $cleaning_level);
-                
-                if (is_wp_error($extracted)) {
-                    error_log('UTG AJAX: Content extraction failed: ' . $extracted->get_error_message());
-                    \wp_send_json_error(__('Content extraction failed: ', 'url-to-gutenberg') . $extracted->get_error_message());
-                    $this->settings->update(['debug_mode' => $debug_setting]);
-                return;
-            }
-
-                // First, save the raw extracted content (before any cleaning was applied)
-                if (!empty($extracted['raw_extracted_content'])) {
-                    $raw_extracted_content = $extracted['raw_extracted_content'];
-                    $extracted_file = $debug_dir . '/' . $extractor->get_debug_filename($url, 'extracted_article');
-                    @file_put_contents($extracted_file, $utf8_bom . $raw_extracted_content);
-                    error_log('UTG AJAX: Raw extracted article saved to: ' . $extracted_file);
-                }
-                
-                // Get the final cleaned content
-                $extracted_content = $extracted['content'];
-                
-                if (!$extracted_content || empty($extracted_content)) {
-                    error_log('UTG AJAX: No content could be extracted with Content_Extractor');
-                    
-                    // Try our fallback DOM extraction method
-                    error_log('UTG AJAX: Trying fallback DOMDocument extraction');
-                    $extracted_content = $this->extract_content_with_dom($content);
-                    
-                    if (!$extracted_content || empty($extracted_content)) {
-                        error_log('UTG AJAX: No content could be extracted with either method');
-                        \wp_send_json_error(__('No content could be extracted from this URL.', 'url-to-gutenberg'));
-                        $this->settings->update(['debug_mode' => $debug_setting]);
-                return;
-                    }
-                }
-                
-                // Save the final content with proper UTF-8 encoding using the standardized naming convention
-                // Only save this file if we're using the fallback extraction method, not the main Content_Extractor
-                // since the Content_Extractor already saves its own debug file with '_cleaned_article' suffix
-                if (!isset($extracted) || is_wp_error($extracted)) {
-                    $debug_file = $debug_dir . '/' . $extractor->get_debug_filename($url, $cleaning_level . '_cleaned_content');
-                    @file_put_contents($debug_file, $utf8_bom . $extracted_content);
-                    error_log('UTG AJAX: Fallback ' . ucfirst($cleaning_level) . ' cleaned content saved to: ' . $debug_file);
-                } else {
-                    // Use the existing debug file that was already created by Content_Extractor
-                    $debug_file = $debug_dir . '/' . $extractor->get_debug_filename($url, $cleaning_level . '_cleaned_article');
-                }
-                
-                error_log('UTG AJAX: Content extraction successful, content length: ' . strlen($extracted_content) . ' bytes');
-                
-                // Process the extracted content to make it more readable
-                $preview = strip_tags($extracted_content);
-                $preview = substr($preview, 0, 500) . '...';
-                
-                // Create success response
-                $response_data = [
-                    'message' => __('Content successfully extracted', 'url-to-gutenberg'),
-                    'content' => $extracted_content,
-                    'preview' => $preview,
-                    'debug_file' => basename($debug_file)
-                ];
-                
-                error_log('UTG AJAX: Sending success response');
-                \wp_send_json_success($response_data);
-                
-            } catch (\Exception $e) {
-                error_log('UTG AJAX: Exception during extraction process: ' . $e->getMessage());
-                error_log('UTG AJAX: Exception trace: ' . $e->getTraceAsString());
-                \wp_send_json_error(__('Error processing content: ', 'url-to-gutenberg') . $e->getMessage());
-            } finally {
-                // Restore original debug setting
-                $this->settings->update(['debug_mode' => $debug_setting]);
-            }
-                return;
-            }
-
-        // Original LLM conversion logic for non-parse-only mode
-        try {
-            error_log('UTG AJAX: Starting URL conversion for: ' . $url);
+            $this->log_debug('Parse only mode - returning raw extracted content');
             
-            // Get HTML content using our helper method
-            $content = $this->get_url_content($url);
-            if (!$content) {
-                error_log('UTG AJAX: Failed to retrieve content from URL');
-                \wp_send_json_error(__('Failed to retrieve content from the URL. The site may be blocking access or unavailable.', 'url-to-gutenberg'));
-                $this->settings->update(['debug_mode' => $debug_setting]);
-                return;
-            }
-
-            // Use the content extractor to get the relevant part of the page
-            $extractor = new \UTG\Content_Extractor($this->settings);
+            // Format the content for display
+            $content_html = isset($extracted_content['content']) ? $extracted_content['content'] : '';
+            $content_preview = substr(strip_tags($content_html), 0, 200) . '...';
             
-            // Save the raw content to debug directory
-            $debug_file = $debug_dir . '/' . $extractor->get_debug_filename($url, 'raw_html');
-            $utf8_bom = chr(239) . chr(187) . chr(191); // UTF-8 BOM
-            @file_put_contents($debug_file, $utf8_bom . $content);
-            error_log('UTG AJAX: Raw content saved to: ' . $debug_file);
-            
-            error_log('UTG AJAX: Retrieved content, length: ' . strlen($content) . ' bytes');
-            
-            $extracted = $extractor->extract($url, $cleaning_level);
-            
-            if (is_wp_error($extracted)) {
-                error_log('UTG AJAX: Content extraction failed: ' . $extracted->get_error_message());
-                
-                // Try our fallback extraction method
-                error_log('UTG AJAX: Trying fallback DOMDocument extraction');
-                $extracted_content = $this->extract_content_with_dom($content);
-                
-                if (!$extracted_content || empty($extracted_content)) {
-                    error_log('UTG AJAX: Fallback extraction also failed');
-                    \wp_send_json_error(__('No content could be extracted from this URL.', 'url-to-gutenberg'));
-                    $this->settings->update(['debug_mode' => $debug_setting]);
-                    return;
-                }
-            } else {
-                // First, save the raw extracted content (before any cleaning was applied)
-                if (!empty($extracted['raw_extracted_content'])) {
-                    $raw_extracted_content = $extracted['raw_extracted_content'];
-                    $extracted_file = $debug_dir . '/' . $extractor->get_debug_filename($url, 'extracted_article');
-                    @file_put_contents($extracted_file, $utf8_bom . $raw_extracted_content);
-                    error_log('UTG AJAX: Raw extracted article saved to: ' . $extracted_file);
-                }
-                
-                // Get the final cleaned content
-                $extracted_content = $extracted['content'];
-            }
-            
-            // Save the final content with proper UTF-8 encoding using the standardized naming convention
-            // Only save this file if we're using the fallback extraction method, not the main Content_Extractor
-            // since the Content_Extractor already saves its own debug file with '_cleaned_article' suffix
-            if (!isset($extracted) || is_wp_error($extracted)) {
-                $debug_file = $debug_dir . '/' . $extractor->get_debug_filename($url, $cleaning_level . '_cleaned_content');
-                @file_put_contents($debug_file, $utf8_bom . $extracted_content);
-                error_log('UTG AJAX: Fallback ' . ucfirst($cleaning_level) . ' cleaned content saved to: ' . $debug_file);
-            } else {
-                // Use the existing debug file that was already created by Content_Extractor
-                $debug_file = $debug_dir . '/' . $extractor->get_debug_filename($url, $cleaning_level . '_cleaned_article');
-            }
-            
-            error_log('UTG AJAX: Content extraction successful, content length: ' . strlen($extracted_content) . ' bytes');
-            
-            // Use API for extraction
-            $api = new \UTG\API\LLM_API($this->settings);
-            
-            // Get the default model from settings
-            $model = $this->settings->get('default_model', 'gpt-4o');
-            error_log('UTG AJAX: Using model from settings: ' . $model);
-            
-            $prompt = 'Convert the following HTML content into WordPress Gutenberg blocks. ' .
-                      'Preserve the meaning, formatting, and structure of the content. ' .
-                      'Content to convert: ' . $extracted_content;
-            
-            $result = $api->send_request($prompt);
-            
-            if (\is_wp_error($result)) {
-                error_log('UTG AJAX: API error: ' . $result->get_error_message());
-                \wp_send_json_error(__('API Error: ', 'url-to-gutenberg') . $result->get_error_message());
-                $this->settings->update(['debug_mode' => $debug_setting]);
-                return;
-            }
-            
-            // Get the response content
-            $converted_content = $result['content'];
-            
-            // Save the converted content to a debug file
-            $debug_file = $debug_dir . '/converted_content_' . uniqid() . '.html';
-            @file_put_contents($debug_file, $converted_content);
-            error_log('UTG AJAX: Converted content saved to: ' . $debug_file);
-            
-            // Create a preview version
-            $preview = substr(strip_tags($converted_content), 0, 300) . '...';
-            
-            // Send the success response
-            \wp_send_json_success([
-                'message' => __('URL successfully converted to Gutenberg blocks', 'url-to-gutenberg'),
-                'content' => $converted_content,
-                'preview' => $preview,
-                'debug_file' => basename($debug_file),
-                'model_used' => $model
+            wp_send_json_success([
+                'message' => 'Content extracted successfully',
+                'content' => $content_html,
+                'preview' => $content_preview,
+                'debug_file' => $debug_file_path,
             ]);
-
-        } catch (\Exception $e) {
-            error_log('UTG AJAX: Exception during conversion process: ' . $e->getMessage());
-            error_log('UTG AJAX: Exception trace: ' . $e->getTraceAsString());
-            \wp_send_json_error(__('Error converting URL: ', 'url-to-gutenberg') . $e->getMessage());
-        } finally {
-            // Restore original debug setting
-            $this->settings->update(['debug_mode' => $debug_setting]);
+            return;
         }
+        
+        // If not parse only, send to LLM API for block conversion
+        $this->log_debug('Processing content with LLM API');
+        
+        // Get the model from settings with fallback to default
+        $model = $this->settings->get('default_model', 'openai/gpt-4-turbo');
+        $this->log_debug('Using model for conversion: ' . $model);
+        
+        // Set the model for the API instance
+        $this->api->set_model($model);
+        
+        // Process with the API using the enhanced process_page_content method
+        // Pass the extracted content object and source URL to provide more context
+        $processed_content = $this->api->process_page_content(
+            $extracted_content, 
+            [
+                'url' => $url,
+                'temperature' => 0.2, // Lower temperature for more consistent results
+                'max_tokens' => 4000
+            ]
+        );
+        
+        if (is_wp_error($processed_content)) {
+            $this->log_debug('API processing failed: ' . $processed_content->get_error_message());
+            wp_send_json_error('API processing failed: ' . $processed_content->get_error_message());
+            return;
+        }
+        
+        // Save LLM-processed content to debug file if in debug mode
+        if ($debug_mode) {
+            $llm_debug_file_name = $content_extractor->get_debug_filename($url, 'llm_processed_content');
+            $llm_debug_file_path = wp_upload_dir()['basedir'] . '/utg-debug/' . basename($llm_debug_file_name);
+            
+            // Create a structured data array with all the relevant information
+            $debug_data = [
+                'title' => isset($extracted_content['title']) ? $extracted_content['title'] : '',
+                'original_content' => isset($extracted_content['content']) ? $extracted_content['content'] : '',
+                'processed_content' => $processed_content,
+                'images' => isset($extracted_content['images']) ? $extracted_content['images'] : [],
+                'processed_timestamp' => date('Y-m-d H:i:s')
+            ];
+            
+            // Write the debug file
+            file_put_contents($llm_debug_file_path, json_encode($debug_data, JSON_PRETTY_PRINT));
+            $this->log_debug('LLM-processed content debug file created: ' . basename($llm_debug_file_name));
+        }
+        
+        // Create post from the processed content if requested
+        if (isset($_POST['create_post']) && $_POST['create_post']) {
+            $this->log_debug('Creating post from processed content');
+            
+            $post_generator = new \UTG\Generator\Post_Generator($this->media_handler, $this->settings);
+            $post_id = $post_generator->create_post_from_api_response($processed_content, $url);
+            
+            if (is_wp_error($post_id)) {
+                $this->log_debug('Post creation failed: ' . $post_id->get_error_message());
+                wp_send_json_error('Post creation failed: ' . $post_id->get_error_message());
+                return;
+            }
+            
+            wp_send_json_success([
+                'message' => 'Post created successfully',
+                'post_id' => $post_id,
+                'edit_url' => get_edit_post_link($post_id, 'raw'),
+                'debug_file' => $debug_file_path,
+            ]);
+            return;
+        }
+        
+        // If no post creation requested, return the processed blocks as serialized content
+        $blocks_content = '';
+        if (isset($processed_content['blocks']) && is_array($processed_content['blocks'])) {
+            foreach ($processed_content['blocks'] as $block) {
+                $blocks_content .= serialize_block($block);
+            }
+        } else {
+            // Fallback in case the API returned a different structure
+            $blocks_content = isset($processed_content['content']) ? $processed_content['content'] : '';
+        }
+        
+        $content_preview = substr(strip_tags($blocks_content), 0, 200) . '...';
+        
+        wp_send_json_success([
+            'message' => 'Content processed successfully',
+            'content' => $blocks_content,
+            'preview' => $content_preview,
+            'debug_file' => $debug_file_path,
+        ]);
     }
     
     /**

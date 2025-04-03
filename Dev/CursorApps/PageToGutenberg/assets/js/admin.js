@@ -24,14 +24,54 @@
      * Initialize the script
      */
     function init() {
-        // Check if we're on the right page by looking for our form
+        console.log('UTG: Starting initialization');
+        // Initialize both settings and converter page functionality
+        initSettingsPage();
+        initConverterPage();
+        console.log('UTG: Initialization complete');
+    }
+    
+    /**
+     * Initialize settings page functionality
+     */
+    function initSettingsPage() {
+        // Check if we're on the settings page
+        var $testApiBtn = $('#utg-test-api');
+        console.log('UTG: Test API button found?', $testApiBtn.length > 0);
+        
+        if (!$testApiBtn.length) {
+            console.log('UTG: Test API button not found, possibly not on settings page');
+            return;
+        }
+        
+        console.log('UTG: Initializing settings page functionality');
+        
+        // Log button properties for debugging
+        console.log('UTG: Test button ID:', $testApiBtn.attr('id'));
+        console.log('UTG: Test button text:', $testApiBtn.text());
+        
+        // Add event listener for test API button
+        $testApiBtn.on('click', function(e) {
+            console.log('UTG: Test API button clicked');
+            e.preventDefault();
+            testApiConnection();
+        });
+        
+        console.log('UTG: Test API button event listener attached');
+    }
+    
+    /**
+     * Initialize converter page functionality
+     */
+    function initConverterPage() {
+        // Check if we're on the converter page by looking for our form
         $form = $('#utg-form');
         if (!$form.length) {
             console.log('UTG: Form not found, possibly not on URL converter page');
             return;
         }
         
-        console.log('UTG: Initializing admin panel functionality');
+        console.log('UTG: Initializing converter page functionality');
         
         // Cache DOM elements
         $url = $('#utg-url');
@@ -51,9 +91,86 @@
         handleParseOnlyChange();
         
         // Show the textarea container if it already has content
-        if ($result.val()) {
+        if ($result && $result.val && $result.val()) {
             $('.utg-textarea-container').show();
         }
+    }
+    
+    /**
+     * Test the API connection
+     */
+    function testApiConnection() {
+        var $testBtn = $('#utg-test-api');
+        var $spinner = $testBtn.next('.spinner');
+        var $result = $('#utg-test-result');
+        
+        console.log('UTG: testApiConnection called');
+        console.log('UTG: utgVars available?', typeof utgVars !== 'undefined');
+        
+        if (typeof utgVars === 'undefined') {
+            console.error('UTG: utgVars is not defined, AJAX request cannot proceed');
+            alert('Error: WordPress AJAX variables not found. Please refresh the page and try again.');
+            return;
+        }
+        
+        // Log AJAX parameters for debugging
+        console.log('UTG: AJAX URL:', utgVars.ajaxUrl);
+        console.log('UTG: Security nonce:', utgVars.nonce ? 'Available' : 'Missing');
+        
+        // Prevent multiple test requests
+        if ($testBtn.prop('disabled')) {
+            console.log('UTG: Button disabled, ignoring click');
+            return;
+        }
+        
+        // Update UI to show we're testing
+        $testBtn.prop('disabled', true);
+        $spinner.addClass('is-active');
+        $result.removeClass('notice-success notice-error').addClass('hidden').empty();
+        
+        console.log('UTG: Testing API connection');
+        
+        // AJAX request to test the API connection
+        $.ajax({
+            url: utgVars.ajaxUrl,
+            type: 'POST',
+            data: {
+                action: 'utg_test_api_connection',
+                security: utgVars.nonce
+            },
+            dataType: 'json',
+            success: function(response) {
+                console.log('UTG: API test response received', response);
+                
+                if (response.success) {
+                    $result.addClass('notice notice-success').html('<p>' + response.data.message + '</p>');
+                } else {
+                    $result.addClass('notice notice-error').html('<p>' + response.data.message + '</p>');
+                }
+                
+                $result.removeClass('hidden');
+            },
+            error: function(xhr, status, error) {
+                console.error('UTG: API test AJAX error', {xhr: xhr, status: status, error: error});
+                console.error('UTG: Response text:', xhr.responseText);
+                
+                // Format error message
+                var errorMessage = 'Connection error: ';
+                if (xhr.responseJSON && xhr.responseJSON.data && xhr.responseJSON.data.message) {
+                    errorMessage += xhr.responseJSON.data.message;
+                } else {
+                    errorMessage += status + ' - ' + error;
+                }
+                
+                $result.addClass('notice notice-error').html('<p>' + errorMessage + '</p>').removeClass('hidden');
+            },
+            complete: function() {
+                console.log('UTG: API test request complete');
+                // Restore UI
+                $testBtn.prop('disabled', false);
+                $spinner.removeClass('is-active');
+            }
+        });
     }
     
     /**

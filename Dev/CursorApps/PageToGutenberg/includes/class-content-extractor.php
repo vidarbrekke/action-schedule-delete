@@ -655,7 +655,7 @@ class Content_Extractor {
             $filename .= '.html';
         } elseif ($type === 'extracted_title') {
             $filename .= '.txt';
-        } elseif ($type === 'final_content' || $type === 'fallback_content') {
+        } elseif ($type === 'final_content' || $type === 'fallback_content' || $type === 'llm_processed_content') {
             $filename .= '.json';
         } elseif ($type === 'extraction_error') {
             $filename .= '.log';
@@ -665,6 +665,20 @@ class Content_Extractor {
         }
         
         return $filename;
+    }
+
+    /**
+     * Get the content HTML from the extracted content.
+     * 
+     * @return string The HTML content or empty string if not available.
+     */
+    public function get_content_html() {
+        // Access extraction data from the most recent extraction
+        if (isset($this->extraction_data) && isset($this->extraction_data['content'])) {
+            return $this->extraction_data['content'];
+        }
+        
+        return '';
     }
 
     /**
@@ -961,5 +975,46 @@ class Content_Extractor {
                 $this->clean_element_attributes_medium($child);
             }
         }
+    }
+
+    /**
+     * Get domain-specific instructions for content processing based on URL.
+     * 
+     * @param string $url The URL being processed
+     * @return string Domain-specific instructions for the LLM
+     */
+    public function get_domain_specific_instructions($url) {
+        $domain = parse_url($url, PHP_URL_HOST);
+        
+        // Default instructions
+        $base_instructions = 'Convert this webpage content into WordPress Gutenberg blocks preserving the content hierarchy, structure, and visual elements. Ensure proper headings, paragraphs, lists, and media placement.';
+        
+        // Check for specific domain patterns and customize instructions
+        if (strpos($domain, 'campaign-view.com') !== false || 
+            strpos($domain, 'campaignmonitor') !== false) {
+            return $base_instructions . ' This is an email newsletter. Pay special attention to preserving promotional sections, call-to-action buttons, and multi-column layouts. Remove email tracking elements while maintaining the visual structure.';
+        }
+        
+        if (strpos($domain, 'medium.com') !== false) {
+            return $base_instructions . ' This is a Medium article. Preserve the clean reading experience with proper paragraph spacing, quote formatting, and image placement. Maintain code blocks with proper syntax highlighting if present.';
+        }
+        
+        if (strpos($domain, 'blog.') !== false || strpos($domain, 'wordpress.com') !== false) {
+            return $base_instructions . ' This is a blog post. Ensure proper treatment of post metadata (author, date), image captions, embedded content, and maintaining any special formatting like pull quotes or highlighted sections.';
+        }
+        
+        if (strpos($domain, 'news.') !== false || 
+            strpos($domain, 'nytimes.com') !== false || 
+            strpos($domain, 'washingtonpost.com') !== false ||
+            strpos($domain, 'bbc.') !== false) {
+            return $base_instructions . ' This is a news article. Preserve the headline hierarchy, lead paragraph, image placements with captions, bylines, and any special callout sections or fact boxes.';
+        }
+        
+        if (strpos($domain, 'docs.') !== false || 
+            strpos($domain, 'documentation') !== false) {
+            return $base_instructions . ' This is a documentation page. Maintain proper heading hierarchy, code blocks with syntax highlighting, technical diagrams, and navigation elements. Pay special attention to preserving technical accuracy.';
+        }
+        
+        return $base_instructions;
     }
 } 

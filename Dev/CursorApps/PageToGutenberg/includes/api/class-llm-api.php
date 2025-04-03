@@ -16,9 +16,12 @@ use UTG\Settings;
 class LLM_API {
 
     /**
-     * Settings instance
-     *
-     * @var Settings
+     * @var bool
+     */
+    private $use_cache;
+
+    /**
+     * @var \UTG\Settings
      */
     private $settings;
 
@@ -41,7 +44,7 @@ class LLM_API {
      *
      * @var string
      */
-    private $model;
+    private $api_model;
 
     /**
      * Debug mode
@@ -51,22 +54,34 @@ class LLM_API {
     private $debug;
 
     /**
-     * Cache enabled
+     * Max tokens
      *
-     * @var bool
+     * @var int
      */
-    private $use_cache;
+    private $max_tokens;
+
+    /**
+     * Temperature
+     *
+     * @var float
+     */
+    private $temperature;
 
     /**
      * Constructor
      */
-    public function __construct( $settings ) {
-        $this->settings = $settings;
-        $this->api_key = $this->settings->get( 'api_key' );
-        $this->api_endpoint = $this->settings->get( 'api_endpoint' );
-        $this->model = $this->settings->get('default_model');
-        $this->debug = (bool) $this->settings->get( 'debug_mode', false );
-        $this->use_cache = (bool) $this->settings->get( 'use_cache', true );
+    public function __construct() {
+        $this->settings = new Settings();
+        $this->api_key = $this->settings->get('api_key');
+        $this->api_endpoint = rtrim($this->settings->get('api_endpoint'), '/');
+        if (!str_ends_with($this->api_endpoint, '/chat/completions')) {
+            $this->api_endpoint .= '/chat/completions';
+        }
+        $this->api_model = $this->settings->get('api_model');
+        $this->max_tokens = $this->settings->get('max_tokens');
+        $this->temperature = $this->settings->get('temperature');
+        $this->debug = (bool) $this->settings->get('debug_mode', false);
+        $this->use_cache = (bool) $this->settings->get('use_cache', true);
     }
 
     /**
@@ -74,7 +89,7 @@ class LLM_API {
      *
      * @param string $prompt The prompt to send to the API.
      * @param array  $options Additional options for the API request.
-     * @return array|WP_Error The API response or WP_Error on failure
+     * @return array|\WP_Error The API response or WP_Error on failure
      */
     public function send_request($prompt, $options = []) {
         if (empty($this->api_key)) {
@@ -82,32 +97,27 @@ class LLM_API {
             return new \WP_Error('missing_api_key', 'API key is not configured');
         }
 
-        $max_tokens = isset($options['max_tokens']) ? $options['max_tokens'] : $this->settings->get('max_tokens');
-        $temperature = isset($options['temperature']) ? $options['temperature'] : $this->settings->get('temperature');
-        $debug_mode = $this->settings->get('debug_mode', false);
+        $max_tokens = isset($options['max_tokens']) ? $options['max_tokens'] : $this->max_tokens;
+        $temperature = isset($options['temperature']) ? $options['temperature'] : $this->temperature;
+        $debug_mode = $this->debug;
 
         if ($debug_mode) {
             \error_log('UTG: Preparing API request with endpoint: ' . $this->api_endpoint);
-            \error_log('UTG: Using model: ' . $this->model);
+            \error_log('UTG: Using model: ' . $this->api_model);
             \error_log('UTG: Max tokens: ' . $max_tokens);
             \error_log('UTG: Temperature: ' . $temperature);
             \error_log('UTG: Prompt length: ' . strlen($prompt));
         }
 
-        // Truncate prompt if it's too long to avoid API errors
-        $max_prompt_length = 32000; // Safe limit for most models
-        if (strlen($prompt) > $max_prompt_length) {
-            \error_log('UTG: Prompt too long (' . strlen($prompt) . ' chars), truncating to ' . $max_prompt_length);
-            $prompt = substr($prompt, 0, $max_prompt_length);
-        }
-
         $headers = [
             'Content-Type' => 'application/json',
             'Authorization' => 'Bearer ' . $this->api_key,
+            'HTTP-Referer' => 'openrouter.ai',
+            'X-Title' => 'URL to Gutenberg'
         ];
 
         $body = [
-            'model' => $this->model,
+            'model' => $this->api_model,
             'messages' => [
                 [
                     'role' => 'system',
@@ -122,33 +132,17 @@ class LLM_API {
             'temperature' => $temperature,
         ];
 
-        // Convert body to JSON and check for errors 
-        $json_body = json_encode($body);
-        if ($json_body === false) {
-            $json_error = json_last_error_msg();
-            \error_log('UTG: JSON encoding error: ' . $json_error);
-            
-            // Try to sanitize the prompt and retry
-            \error_log('UTG: Attempting to sanitize prompt and retry JSON encoding');
-            $body['messages'][1]['content'] = $this->sanitize_for_json($prompt);
-            $json_body = json_encode($body);
-            
-            if ($json_body === false) {
-                \error_log('UTG: JSON encoding still failed after sanitizing prompt');
-                return new \WP_Error('json_encode_error', 'Failed to encode API request: ' . $json_error);
-            }
-        }
-
         try {
             if ($debug_mode) {
                 \error_log('UTG: Sending API request to: ' . $this->api_endpoint);
             }
 
+            /** @var array|\WP_Error $response */
             $response = \wp_remote_post(
                 $this->api_endpoint,
                 [
                     'headers' => $headers,
-                    'body' => $json_body,
+                    'body' => \wp_json_encode($body),
                     'timeout' => 60,
                     'data_format' => 'body',
                 ]
@@ -163,14 +157,14 @@ class LLM_API {
             \error_log('UTG: API response code: ' . $response_code);
             
             if ($response_code !== 200) {
-                $error_message = \wp_remote_retrieve_response_message($response);
                 $body_raw = \wp_remote_retrieve_body($response);
                 \error_log('UTG: API error response body: ' . $body_raw);
                 
                 $body = json_decode($body_raw, true);
+                $error_message = 'API Error';
                 
                 if (!empty($body['error']['message'])) {
-                    $error_message .= ' - ' . $body['error']['message'];
+                    $error_message = $body['error']['message'];
                 }
                 
                 \error_log('UTG: API error: ' . $error_message);
@@ -182,11 +176,7 @@ class LLM_API {
                 \error_log('UTG: Empty API response body');
                 return new \WP_Error('empty_response', 'Empty response from API');
             }
-            
-            if ($debug_mode) {
-                \error_log('UTG: API raw response length: ' . strlen($body_raw));
-            }
-            
+
             // Try to decode the response
             $body = json_decode($body_raw, true);
             if ($body === null) {
@@ -194,47 +184,7 @@ class LLM_API {
                 \error_log('UTG: JSON decoding error: ' . $json_error);
                 \error_log('UTG: First 1000 chars of response: ' . substr($body_raw, 0, 1000));
                 
-                // Additional error handling for specific JSON errors
-                if (json_last_error() === JSON_ERROR_SYNTAX) {
-                    // Log more detailed information about the syntax error
-                    \error_log('UTG: JSON syntax error detected. This usually means malformed JSON.');
-                    
-                    // Try to identify problematic characters (often control characters or invalid Unicode)
-                    $sanitized_body_raw = $this->sanitize_for_json($body_raw);
-                    
-                    // Try with a higher level of sanitization
-                    if (strpos($body_raw, 'campaign-view.com') !== false || 
-                        strpos($body_raw, 'campaignmonitor') !== false) {
-                        \error_log('UTG: Detected Campaign Monitor content in response, applying aggressive sanitization');
-                        $sanitized_body_raw = preg_replace('/[^\p{L}\p{N}\p{P}\p{Z}]/u', '', $sanitized_body_raw);
-                    }
-                    
-                    // Try decoding the sanitized response
-                    $body = json_decode($sanitized_body_raw, true);
-                    
-                    if ($body === null) {
-                        // If still failing, strip all non-ASCII characters as a last resort
-                        \error_log('UTG: Attempting more aggressive JSON sanitization');
-                        $ascii_only = preg_replace('/[^\x20-\x7E]/', '', $body_raw);
-                        $body = json_decode($ascii_only, true);
-                        
-                        if ($body === null) {
-                            \error_log('UTG: All JSON decoding attempts failed');
-                            return new \WP_Error('json_decode_error', 'Failed to decode API response: ' . $json_error);
-                        }
-                    }
-                    
-                    \error_log('UTG: Successfully recovered JSON after sanitization');
-                } else {
-                    // For other JSON errors, try standard sanitization
-                    $sanitized_body = $this->sanitize_for_json($body_raw);
-                    $body = json_decode($sanitized_body, true);
-                    
-                    if ($body === null) {
-                        \error_log('UTG: JSON decoding still failed after sanitizing');
-                        return new \WP_Error('json_decode_error', 'Failed to decode API response: ' . $json_error);
-                    }
-                }
+                return new \WP_Error('json_decode_error', 'Failed to decode API response: ' . $json_error);
             }
             
             if (empty($body['choices'][0]['message']['content'])) {
@@ -246,7 +196,7 @@ class LLM_API {
             return [
                 'content' => $body['choices'][0]['message']['content'],
                 'usage' => isset($body['usage']) ? $body['usage'] : [],
-                'model' => isset($body['model']) ? $body['model'] : $this->model,
+                'model' => isset($body['model']) ? $body['model'] : $this->api_model,
             ];
         } catch (\Exception $e) {
             \error_log('UTG: Exception in send_request: ' . $e->getMessage());
@@ -281,22 +231,45 @@ class LLM_API {
     }
 
     /**
-     * Process a web page content with the LLM
-     *
-     * @param string $content HTML content to process.
-     * @param array  $options Processing options.
-     * @return string|WP_Error The processed content or WP_Error
+     * Process page content through the LLM API
+     * 
+     * @param string|array $content The content to process
+     * @param array{model?: string} $options Processing options
+     * @return \WP_Error|array The processed content or error
      */
     public function process_page_content($content, $options = []) {
-        $debug_mode = $this->settings->get('debug_mode');
-        $cache_enabled = $this->settings->get('cache_enabled');
-        $cache_key = 'utg_content_' . md5($content . serialize($options));
+        if (empty($content)) {
+            return new \WP_Error('empty_content', 'Content cannot be empty');
+        }
+
+        // Handle array content
+        if (is_array($content)) {
+            if (!isset($content['content'])) {
+                if ($this->debug) {
+                    error_log('UTG: Content array missing content key');
+                }
+                return new \WP_Error('invalid_content', 'Content array must have a content key');
+            }
+            $content = $content['content'];
+        }
+
+        // Ensure content is a string
+        if (!is_string($content)) {
+            if ($this->debug) {
+                error_log('UTG: Content must be a string, got ' . gettype($content));
+            }
+            return new \WP_Error('invalid_content', 'Content must be a string');
+        }
+
+        // Generate cache key using model from options if available
+        $model = isset($options['model']) ? $options['model'] : '';
+        $cache_key = md5($content . $model);
         
         // Try to get from cache if enabled
-        if ($cache_enabled) {
+        if ($this->use_cache) {
             $cached_result = \get_transient($cache_key);
             if ($cached_result !== false) {
-                if ($debug_mode) {
+                if ($this->debug) {
                     \error_log('UTG: Retrieved content from cache');
                 }
                 return $cached_result;
@@ -311,14 +284,14 @@ class LLM_API {
         $is_campaign_monitor = (strpos($content, 'campaign-view.com') !== false || 
                                strpos($content, 'campaignmonitor') !== false);
         
-        if ($is_campaign_monitor && $debug_mode) {
+        if ($is_campaign_monitor && $this->debug) {
             \error_log('UTG: Detected Campaign Monitor content, applying special processing instructions');
             // Add campaign monitor specific instructions
             $instructions .= "\n\nThis is an email from Campaign Monitor. Convert it into clean, structured Gutenberg blocks. Pay special attention to handling tables, images, and formatting. Remove any excessive styling but maintain the content structure.";
         }
         
         // Check content length
-        if ($debug_mode) {
+        if ($this->debug) {
             \error_log('UTG: Content length for processing: ' . strlen($content));
         }
         
@@ -327,6 +300,7 @@ class LLM_API {
         
         $prompt = $instructions . "\n\nContent:\n" . $content;
         
+        /** @var array{content: string, usage?: array, model?: string}|\WP_Error $result */
         $result = $this->send_request($prompt, $options);
         
         if (\is_wp_error($result)) {
@@ -337,20 +311,22 @@ class LLM_API {
         // Additional sanitization for Campaign Monitor content
         if ($is_campaign_monitor) {
             // Remove any potentially problematic characters from the response
-            $result['content'] = $this->sanitize_for_json($result['content']);
+            $result = $this->sanitize_for_json($result['content']);
             
-            if ($debug_mode) {
+            if ($this->debug) {
                 \error_log('UTG: Applied extra sanitization for Campaign Monitor content');
             }
+        } else {
+            $result = $result['content'];
         }
         
         // Save to cache if enabled
-        if ($cache_enabled) {
+        if ($this->use_cache) {
             $cache_lifetime = $this->settings->get('cache_lifetime');
-            \set_transient($cache_key, $result['content'], $cache_lifetime);
+            \set_transient($cache_key, $result, $cache_lifetime);
         }
         
-        return $result['content'];
+        return $result;
     }
     
     /**
@@ -414,7 +390,7 @@ class LLM_API {
      * @return array|WP_Error The processed content or WP_Error
      */
     public function process_url($url, $options = []) {
-        if ($this->settings->get('debug_mode')) {
+        if ($this->debug) {
             \error_log('[URL to Gutenberg] LLM_API: Starting URL processing for: ' . $url);
         }
 
@@ -436,21 +412,21 @@ class LLM_API {
             
             $extractor = new \UTG\Content_Extractor($this->settings);
             
-            if ($this->settings->get('debug_mode')) {
+            if ($this->debug) {
                 \error_log('[URL to Gutenberg] LLM_API: Extracting content from URL');
             }
             
             $content = $extractor->extract($url);
 
             if (\is_wp_error($content)) {
-                if ($this->settings->get('debug_mode')) {
+                if ($this->debug) {
                     \error_log('[URL to Gutenberg] LLM_API: Content extraction error: ' . $content->get_error_message());
                 }
                 return $content;
             }
 
             if (!isset($content['content']) || empty($content['content'])) {
-                if ($this->settings->get('debug_mode')) {
+                if ($this->debug) {
                     \error_log('[URL to Gutenberg] LLM_API: No content extracted from URL');
                 }
                 return new \WP_Error('no_content', 'No content could be extracted from the URL');
@@ -460,7 +436,7 @@ class LLM_API {
             $parse_only = !empty($options['parse_only']);
             
             if ($parse_only) {
-                if ($this->settings->get('debug_mode')) {
+                if ($this->debug) {
                     \error_log('[URL to Gutenberg] LLM_API: Parse-only mode, skipping LLM processing');
                 }
                 
@@ -474,7 +450,7 @@ class LLM_API {
                 ];
             }
 
-            if ($this->settings->get('debug_mode')) {
+            if ($this->debug) {
                 \error_log('[URL to Gutenberg] LLM_API: Content extracted successfully, length: ' . strlen($content['content']));
                 \error_log('[URL to Gutenberg] LLM_API: Processing with LLM...');
             }
@@ -486,20 +462,20 @@ class LLM_API {
             // Process the extracted content with LLM
             $options = [
                 'instructions' => $instructions,
-                'max_tokens' => $this->settings->get('max_tokens', 2000),
-                'temperature' => $this->settings->get('temperature', 0.7),
+                'max_tokens' => $this->max_tokens,
+                'temperature' => $this->temperature,
             ];
 
             $result = $this->process_page_content($content['content'], $options);
 
             if (\is_wp_error($result)) {
-                if ($this->settings->get('debug_mode')) {
+                if ($this->debug) {
                     \error_log('[URL to Gutenberg] LLM_API: Content processing error: ' . $result->get_error_message());
                 }
                 return $result;
             }
 
-            if ($this->settings->get('debug_mode')) {
+            if ($this->debug) {
                 \error_log('[URL to Gutenberg] LLM_API: Content processed successfully');
             }
 
@@ -512,7 +488,7 @@ class LLM_API {
             ];
             
         } catch (\Exception $e) {
-            if ($this->settings->get('debug_mode')) {
+            if ($this->debug) {
                 \error_log('[URL to Gutenberg] LLM_API: Exception: ' . $e->getMessage());
                 \error_log('[URL to Gutenberg] LLM_API: Stack trace: ' . $e->getTraceAsString());
             }
@@ -552,47 +528,44 @@ class LLM_API {
      * @return array{success: bool, message: string} Success or error information
      */
     public function test_connection() {
-        // Check if we have an API key
-        if ( empty( $this->api_key ) ) {
+        if (empty($this->api_key)) {
             return array(
                 'success' => false,
-                'message' => 'API key is missing. Please add an API key in the settings.'
+                'message' => 'API key is required.'
             );
         }
 
-        // Check if we have an endpoint
-        $endpoint = ! empty( $this->api_endpoint ) ? $this->api_endpoint : 'https://api.openai.com/v1/chat/completions';
-
-        // Prepare a minimal test request
+        $endpoint = $this->api_endpoint;
         $body = array(
-            'model' => $this->model ? $this->model : 'gpt-3.5-turbo',
+            'model' => $this->api_model,
             'messages' => array(
-                    array(
+                array(
                     'role' => 'user',
-                    'content' => 'This is a connection test.'
+                    'content' => 'Test connection'
                 )
-            ),
-            'max_tokens' => 5
+            )
         );
 
-        // Send a minimal request to test connectivity
         $response = \wp_remote_post(
             $endpoint,
             array(
                 'headers' => array(
                     'Authorization' => 'Bearer ' . $this->api_key,
                     'Content-Type'  => 'application/json',
+                    'HTTP-Referer' => 'openrouter.ai',
+                    'X-Title' => 'URL to Gutenberg'
                 ),
-                'body'    => json_encode( $body ),
+                'body'    => json_encode($body),
                 'timeout' => 15,
             )
         );
 
         // Check for connection errors
         if ( \is_wp_error( $response ) ) {
+            $error_message = $response->get_error_message();
             return array(
                 'success' => false,
-                'message' => 'Error: ' . $response->get_error_message()
+                'message' => 'Error: ' . $error_message
             );
         }
 
@@ -620,5 +593,133 @@ class LLM_API {
             'success' => false,
             'message' => 'Error: ' . $error_message . ' (Status code: ' . $response_code . ')',
         );
+    }
+
+    /**
+     * Log API request and response details for debugging
+     *
+     * @param string $type Either 'request' or 'response'
+     * @param array $payload The request payload
+     * @param array|null $response The API response (for response logs only)
+     */
+    private function log_api_interaction($type, $payload, $response = null) {
+        // Temporarily disabled to fix 500 errors
+        return;
+        
+        // Original code below is kept for reference but not executed
+        /*
+        if (!$this->debug) {
+            return;
+        }
+        
+        try {
+            // Get WordPress uploads directory
+            $upload_dir = \wp_upload_dir();
+            if (isset($upload_dir['error']) && $upload_dir['error'] !== false) {
+                error_log('UTG: Error getting uploads directory: ' . $upload_dir['error']);
+                return;
+            }
+            
+            // Create a logs directory in the uploads folder
+            $logs_dir = $upload_dir['basedir'] . '/utg-logs';
+            if (!file_exists($logs_dir)) {
+                if (!mkdir($logs_dir, 0755, true)) {
+                    error_log('UTG: Failed to create logs directory at ' . $logs_dir);
+                    return;
+                }
+                
+                // Add index.php to prevent directory listing
+                file_put_contents($logs_dir . '/index.php', '<?php // Silence is golden');
+                
+                // Add .htaccess for additional security
+                file_put_contents($logs_dir . '/.htaccess', 'Deny from all');
+            }
+            
+            // Generate a unique log file name
+            $timestamp = date('Y-m-d_H-i-s');
+            $log_file = $logs_dir . '/api_' . $type . '_' . $timestamp . '.log';
+            
+            // Format the log content
+            $log_content = "=== URL To Gutenberg API " . strtoupper($type) . " LOG ===\n";
+            $log_content .= "Time: " . date('Y-m-d H:i:s') . "\n\n";
+            
+            if ($type === 'request') {
+                // Log request details
+                $log_content .= "API Endpoint: " . $this->api_endpoint . "\n";
+                $log_content .= "Model: " . $this->api_model . "\n\n";
+                
+                // Log headers
+                $log_content .= "Headers:\n";
+                $log_content .= "Content-Type: application/json\n";
+                $log_content .= "Authorization: Bearer " . $this->mask_api_key($this->api_key) . "\n\n";
+                
+                // Log payload (masking any sensitive data)
+                $log_content .= "Payload:\n";
+                $log_content .= json_encode($payload, JSON_PRETTY_PRINT) . "\n";
+            } else if ($response) {
+                // Log response details
+                $status_code = isset($response['response']['code']) ? $response['response']['code'] : 'unknown';
+                $log_content .= "Status Code: " . $status_code . "\n\n";
+                
+                // For headers, just note that we're not logging them to avoid dependency issues
+                $log_content .= "Headers: (not logged to avoid dependency issues)\n\n";
+                
+                // Log response body
+                $body = isset($response['body']) ? $response['body'] : '';
+                $log_content .= "Body:\n";
+                
+                // Try to format JSON for better readability
+                $json_body = json_decode($body);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    $log_content .= json_encode($json_body, JSON_PRETTY_PRINT) . "\n";
+                } else {
+                    // Not valid JSON, might be HTML or other format
+                    $log_content .= "Non-JSON response, first 1000 characters:\n";
+                    $log_content .= substr($body, 0, 1000) . "\n";
+                    if (strlen($body) > 1000) {
+                        $log_content .= "... (response truncated, total length: " . strlen($body) . " bytes)\n";
+                    }
+                }
+            }
+            
+            // Write to log file
+            if (!file_put_contents($log_file, $log_content)) {
+                error_log('UTG: Failed to write to log file: ' . $log_file);
+            } else {
+                error_log('UTG: Created ' . $type . ' log file: ' . $log_file);
+                error_log('UTG: Log file location: ' . $log_file);
+            }
+        } catch (\Exception $e) {
+            error_log('UTG: Error creating API log file: ' . $e->getMessage());
+        }
+        */
+    }
+    
+    /**
+     * Mask API key for security in logs
+     *
+     * @param string $api_key The API key to mask
+     * @return string The masked API key
+     */
+    private function mask_api_key($api_key) {
+        if (strlen($api_key) <= 8) {
+            return '********';
+        }
+        return substr($api_key, 0, 4) . '...' . substr($api_key, -4);
+    }
+
+    /**
+     * Set the model to use for API requests
+     *
+     * @param string $model The model identifier
+     * @return void
+     */
+    public function set_model($model) {
+        if (!empty($model)) {
+            $this->api_model = $model;
+            if ($this->debug) {
+                \error_log('UTG: Model set to: ' . $model);
+            }
+        }
     }
 } 
