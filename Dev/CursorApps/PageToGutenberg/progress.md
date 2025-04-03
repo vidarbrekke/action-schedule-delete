@@ -560,3 +560,33 @@
 - Add support for more domain-specific instructions
 - Consider implementing block validation before post creation
 - Explore caching successful prompts to improve performance
+
+## April 3, 2024
+
+### Image Processing Enhancement - Integration with Core Plugin Architecture
+
+Today, we enhanced image processing in the plugin to properly handle remote images in Gutenberg blocks:
+
+1. **Core Plugin Integration**: 
+   - Added `process_gutenberg_image_blocks()` method to the `UTG_Media_Handler` class to properly process remote images in serialized Gutenberg content
+   - Updated `Post_Generator::create_post_from_api_response()` to use our image processing method
+   - Both changes ensure that remote images are downloaded to the WordPress media library and blocks are updated with proper references
+
+2. **WP-CLI Command Enhancement**:
+   - Enhanced the WP-CLI command in `json-to-post.php` to use the core Media_Handler class when available
+   - Added fallback image processing that uses our helper functions 
+   - Improved error handling and messaging for better diagnostics
+
+3. **Key Improvements**:
+   - Images now properly reference WordPress media library attachments with correct IDs
+   - Eliminated "Block contains unexpected or invalid content" errors
+   - Images are now stored locally with proper alt text attributes
+   - The solution works with both the class-based plugin architecture and the CLI tools
+
+These changes represent a significant improvement in how the plugin handles images, ensuring that remote images are properly processed regardless of whether they're part of a JSON payload or embedded in HTML content.
+
+### Additional Notes
+
+- The plugin now uses a more robust architecture with class-based components and proper integration points
+- A consistent image processing workflow is used across all entry points
+- Added proper error handling and fallback mechanisms for greater resilience

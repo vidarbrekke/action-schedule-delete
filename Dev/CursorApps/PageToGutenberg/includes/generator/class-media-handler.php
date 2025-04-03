@@ -246,4 +246,83 @@ class UTG_Media_Handler {
             error_log(sprintf('[URL to Gutenberg] DEBUG: %s - %s', $title, $message));
         }
     }
+
+    /**
+     * Process image blocks in serialized Gutenberg content
+     *
+     * @param string $content Serialized Gutenberg blocks content.
+     * @return string Updated content with local image references.
+     */
+    public function process_gutenberg_image_blocks($content) {
+        if (empty($content)) {
+            return $content;
+        }
+        
+        $this->log_debug('Processing image blocks', 'Starting to process image blocks in content');
+        
+        // Pattern to match image blocks
+        $pattern = '/(<!-- wp:image[^>]*?-->)[\s\S]*?<img[^>]*?src="([^"]+)"[^>]*?\/?>[\s\S]*?(<!-- \/wp:image -->)/i';
+        
+        $processed_content = preg_replace_callback($pattern, function($matches) {
+            $opening_tag = $matches[1];
+            $img_url = $matches[2];
+            $closing_tag = $matches[3];
+            $block_content = $matches[0];
+            
+            // Skip if it's not a valid URL
+            if (empty($img_url) || !filter_var($img_url, FILTER_VALIDATE_URL)) {
+                $this->log_debug('Invalid image URL', 'Skipping invalid URL: ' . substr($img_url, 0, 100));
+                return $block_content;
+            }
+            
+            // Extract alt text if available
+            $alt_text = '';
+            if (preg_match('/alt="([^"]*)"/', $block_content, $alt_matches)) {
+                $alt_text = $alt_matches[1];
+            }
+            
+            // Download the image and get the attachment ID
+            $attachment_id = $this->save_remote_image($img_url, $alt_text);
+            
+            if (is_wp_error($attachment_id)) {
+                $this->log_error('Image download failed', 'Failed to download image: ' . $img_url . ' - ' . $attachment_id->get_error_message());
+                return $block_content;
+            }
+            
+            // Get the new local URL for the image
+            $local_url = wp_get_attachment_url($attachment_id);
+            
+            if (!$local_url) {
+                $this->log_error('Failed to get local URL', 'Could not get local URL for attachment ID: ' . $attachment_id);
+                return $block_content;
+            }
+            
+            // Update the src attribute in the img tag
+            $updated_block_content = preg_replace('/src="[^"]+"/', 'src="' . esc_url($local_url) . '"', $block_content);
+            
+            // Add class="wp-image-{id}" if not already present
+            if (strpos($updated_block_content, 'class="') !== false) {
+                $updated_block_content = preg_replace('/class="([^"]*)"/', 'class="$1 wp-image-' . $attachment_id . '"', $updated_block_content);
+            } else {
+                $updated_block_content = preg_replace('/<img/', '<img class="wp-image-' . $attachment_id . '"', $updated_block_content);
+            }
+            
+            // Update the JSON attributes in the opening tag to include the ID
+            if (strpos($opening_tag, 'data-id=') === false) {
+                $updated_opening_tag = str_replace('<!-- wp:image', '<!-- wp:image {"id":' . $attachment_id . '}', $opening_tag);
+                $updated_block_content = str_replace($opening_tag, $updated_opening_tag, $updated_block_content);
+            } else {
+                // Replace existing ID
+                $updated_block_content = preg_replace('/data-id="[^"]+"/', 'data-id="' . $attachment_id . '"', $updated_block_content);
+            }
+            
+            $this->log_debug('Image block processed', 'Processed image block with URL: ' . $img_url);
+            return $updated_block_content;
+            
+        }, $content);
+        
+        $this->log_debug('Image blocks processing complete', 'Finished processing image blocks in content');
+        
+        return $processed_content;
+    }
 } 

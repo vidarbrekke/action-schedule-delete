@@ -46,7 +46,7 @@ class Post_Generator {
     public function create_post_from_api_response($response, $source_url) {
         // Validate response
         if (!isset($response['title']) || !isset($response['blocks'])) {
-            return new WP_Error('invalid_response', __('Invalid API response format', 'url-to-gutenberg'));
+            return new \WP_Error('invalid_response', __('Invalid API response format', 'url-to-gutenberg'));
         }
         
         // Allow pre-processing of the response
@@ -86,8 +86,17 @@ class Post_Generator {
         // Replace image URLs with WordPress attachments in blocks
         $blocks = $this->process_blocks($response['blocks'], $image_ids);
         
+        // Convert blocks to post content
+        $post_content = $this->blocks_to_post_content($blocks);
+        
+        // Process any image blocks in the serialized content to ensure they reference local images
+        if (method_exists($this->media_handler, 'process_gutenberg_image_blocks')) {
+            $post_content = $this->media_handler->process_gutenberg_image_blocks($post_content);
+            $this->log_debug('Processed serialized image blocks', 'Image blocks in serialized content have been processed');
+        }
+        
         // Allow modification of blocks before post creation
-        $blocks = apply_filters('utg_post_blocks', $blocks, $response, $source_url);
+        $post_content = apply_filters('utg_post_content', $post_content, $response, $source_url);
         
         // Get post status setting
         $post_status = $this->settings ? $this->settings->get('default_post_status', 'draft') : 'draft';
@@ -95,7 +104,7 @@ class Post_Generator {
         // Prepare post data
         $post_data = array(
             'post_title'    => sanitize_text_field($response['title']),
-            'post_content'  => $this->blocks_to_post_content($blocks),
+            'post_content'  => $post_content,
             'post_status'   => $post_status,
             'post_type'     => apply_filters('utg_post_type', 'post'),
             'meta_input'    => array(

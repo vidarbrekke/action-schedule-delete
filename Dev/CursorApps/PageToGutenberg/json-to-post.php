@@ -17,19 +17,305 @@ if (!defined('WPINC')) {
 if (defined('WP_CLI') && WP_CLI) {
     WP_CLI::add_command('utg json-to-post', function($args) {
         if (empty($args[0])) {
-            WP_CLI::error('Missing filename parameter.');
+            WP_CLI::error('Missing filename argument. Usage: wp utg json-to-post <filename>');
             return;
         }
         
-        $result = process_json_file($args[0]);
+        // Get filename from argument
+        $filename = $args[0];
         
-        if (is_wp_error($result)) {
-            WP_CLI::error($result->get_error_message());
-        } else {
-            WP_CLI::success("Post created with ID: {$result['post_id']}");
-            WP_CLI::line("Edit URL: " . $result['edit_url']);
-            WP_CLI::line("View URL: " . $result['view_url']);
+        // Determine file path
+        $uploads_dir = wp_upload_dir();
+        $debug_dir = $uploads_dir['basedir'] . '/utg-debug/';
+        $json_file = $debug_dir . $filename;
+        
+        if (!file_exists($json_file)) {
+            // Try just the filename as provided
+            $json_file = $filename;
+            if (!file_exists($json_file)) {
+                WP_CLI::error("JSON file not found: {$json_file}");
+                return;
+            }
         }
+        
+        // Read file content
+        $json_content = file_get_contents($json_file);
+        if ($json_content === false) {
+            WP_CLI::error("Failed to read file: {$json_file}");
+            return;
+        }
+        
+        // Initialize variables
+        $post_id = null;
+        $blocks = array();
+        $title = 'Untitled';
+        
+        // Extract title from filename
+        if (preg_match('/([^\/]+)-final_content-\d+/i', $filename, $matches)) {
+            $title = str_replace('-', ' ', $matches[1]);
+            $title = ucwords($title);
+        }
+        
+        // Try to decode JSON
+        $data = json_decode($json_content, true);
+        
+        // If JSON decoding worked, process accordingly
+        if (json_last_error() === JSON_ERROR_NONE) {
+            // Handle different JSON structures
+            if (isset($data['blocks']) && is_array($data['blocks'])) {
+                // Got correct format with blocks
+                WP_CLI::log("Found blocks data in JSON");
+                $blocks = $data['blocks'];
+                if (isset($data['title'])) {
+                    $title = $data['title'];
+                }
+            } elseif (isset($data['content']) && is_array($data['content'])) {
+                // This is a different format with 'content' array
+                WP_CLI::log("Found content array in JSON");
+                foreach ($data['content'] as $element) {
+                    $block = convert_element_to_block($element);
+                    if ($block) {
+                        $blocks[] = $block;
+                    }
+                }
+                if (isset($data['title'])) {
+                    $title = $data['title'];
+                }
+            } elseif (isset($data[0]) && is_array($data[0])) {
+                // Array at root level
+                WP_CLI::log("Found array at root level in JSON");
+                foreach ($data as $element) {
+                    $block = convert_element_to_block($element);
+                    if ($block) {
+                        $blocks[] = $block;
+                    }
+                }
+            } else {
+                // Unknown structure, add as single block
+                WP_CLI::log("Unknown JSON structure, using as HTML block");
+                $blocks[] = array(
+                    'blockName' => 'core/html',
+                    'attrs' => array(),
+                    'innerBlocks' => array(),
+                    'innerHTML' => '<pre>' . wp_json_encode($data, JSON_PRETTY_PRINT) . '</pre>',
+                );
+            }
+        } else {
+            // Not valid JSON, treat as HTML
+            WP_CLI::log("Invalid JSON, treating as HTML");
+            
+            // Try to extract content based on common patterns
+            $content = $json_content;
+            
+            // Extract blocks from HTML content
+            $serialized_blocks = '';
+            
+            // First, check if there are already Gutenberg blocks
+            if (strpos($content, '<!-- wp:') !== false) {
+                WP_CLI::log("Found existing Gutenberg blocks");
+                $serialized_blocks = $content;
+            } else {
+                // Otherwise, parse HTML and create blocks
+                WP_CLI::log("Creating blocks from HTML content");
+                
+                // Clean up the content
+                $content = wp_strip_all_tags($content, false);
+                
+                // Extract headings
+                preg_match_all('/<h([1-6])>(.*?)<\/h\1>/i', $content, $headings, PREG_SET_ORDER);
+                foreach ($headings as $heading) {
+                    $blocks[] = array(
+                        'blockName' => 'core/heading',
+                        'attrs' => array(
+                            'level' => (int) $heading[1]
+                        ),
+                        'innerBlocks' => array(),
+                        'innerHTML' => $heading[0],
+                    );
+                    $content = str_replace($heading[0], '', $content);
+                }
+                
+                // Extract paragraphs and create blocks
+                preg_match_all('/<p>(.*?)<\/p>/i', $content, $paragraphs, PREG_SET_ORDER);
+                foreach ($paragraphs as $paragraph) {
+                    $blocks[] = array(
+                        'blockName' => 'core/paragraph',
+                        'attrs' => array(),
+                        'innerBlocks' => array(),
+                        'innerHTML' => $paragraph[0],
+                    );
+                    $content = str_replace($paragraph[0], '', $content);
+                }
+                
+                // Extract images
+                preg_match_all('/<img[^>]+>/i', $content, $images, PREG_SET_ORDER);
+                foreach ($images as $image) {
+                    // Extract src attribute
+                    if (preg_match('/src="([^"]+)"/i', $image[0], $src)) {
+                        // Extract alt text if available
+                        $alt = '';
+                        if (preg_match('/alt="([^"]*)"/i', $image[0], $alt_matches)) {
+                            $alt = $alt_matches[1];
+                        }
+                        
+                        // Filter out small icons, spacers, etc.
+                        if (strpos($src[1], 'spacer') === false && strpos($src[1], 'icon') === false) {
+                            $blocks[] = array(
+                                'blockName' => 'core/image',
+                                'attrs' => array(
+                                    'url' => $src[1],
+                                    'alt' => $alt
+                                ),
+                                'innerBlocks' => array(),
+                                'innerHTML' => $image[0],
+                            );
+                        }
+                    }
+                    $content = str_replace($image[0], '', $content);
+                }
+                
+                // Split remaining content into paragraphs
+                $remaining_paragraphs = preg_split('/\n\s*\n/', trim($content));
+                foreach ($remaining_paragraphs as $paragraph) {
+                    $paragraph = trim($paragraph);
+                    if (!empty($paragraph)) {
+                        $blocks[] = array(
+                            'blockName' => 'core/paragraph',
+                            'attrs' => array(),
+                            'innerBlocks' => array(),
+                            'innerHTML' => '<p>' . $paragraph . '</p>',
+                        );
+                    }
+                }
+            }
+            
+            // If no blocks were created, add everything as a single HTML block
+            if (empty($blocks) && empty($serialized_blocks)) {
+                WP_CLI::log("No blocks identified, using all content as single HTML block");
+                $blocks[] = array(
+                    'blockName' => 'core/html',
+                    'attrs' => array(),
+                    'innerBlocks' => array(),
+                    'innerHTML' => $content,
+                );
+            }
+        }
+        
+        // Convert blocks to serialized format if needed
+        if (!empty($blocks) && empty($serialized_blocks)) {
+            WP_CLI::log("Converting " . count($blocks) . " blocks to serialized format");
+            
+            foreach ($blocks as $block) {
+                $serialized_blocks .= generate_block_html($block);
+            }
+        }
+        
+        // Process plain text attributes if present
+        if (isset($data['plaintext']) && !empty($data['plaintext'])) {
+            WP_CLI::log("Processing plaintext content");
+            
+            // Decode HTML entities
+            $plaintext = html_entity_decode($data['plaintext']);
+            
+            // Split into paragraphs
+            $paragraphs = preg_split('/\n\s*\n/', $plaintext);
+            
+            // Create paragraph blocks
+            foreach ($paragraphs as $paragraph) {
+                $paragraph = trim($paragraph);
+                if (!empty($paragraph)) {
+                    $serialized_blocks .= '<!-- wp:paragraph --><p>' . $paragraph . '</p><!-- /wp:paragraph -->';
+                }
+            }
+        }
+        
+        // If the serialized_blocks is empty but we have content, add it as a single HTML block
+        if (empty($serialized_blocks) && !empty($content)) {
+            WP_CLI::log("Falling back to all content as single HTML block");
+            $serialized_blocks = '<!-- wp:html -->' . $content . '<!-- /wp:html -->';
+        }
+        
+        // Extract serialized blocks from content
+        if (strpos($serialized_blocks, '<!-- wp:') !== false) {
+            // Remove any text before the first block
+            $serialized_blocks = preg_replace('/^.*?(<!-- wp:)/', '$1', $serialized_blocks, 1);
+            
+            // Process image blocks
+            if (function_exists('utg_process_gutenberg_image_blocks')) {
+                WP_CLI::log("Processing image blocks in serialized content");
+                $serialized_blocks = utg_process_gutenberg_image_blocks($serialized_blocks);
+            } elseif (class_exists('\\UTG\\Generator\\UTG_Media_Handler')) {
+                WP_CLI::log("Using UTG_Media_Handler to process image blocks");
+                $media_handler = new \UTG\Generator\UTG_Media_Handler();
+                if (method_exists($media_handler, 'process_gutenberg_image_blocks')) {
+                    $serialized_blocks = $media_handler->process_gutenberg_image_blocks($serialized_blocks);
+                }
+            }
+        }
+        
+        // Create post data
+        $post_data = array(
+            'post_title'    => wp_strip_all_tags($title),
+            'post_content'  => $serialized_blocks,
+            'post_status'   => 'draft',
+            'post_author'   => 1,
+            'post_type'     => 'post',
+            'meta_input'    => array(
+                'utg_json_source' => $filename,
+                'utg_generated_at' => current_time('mysql'),
+            ),
+        );
+        
+        // Check for featured image
+        $featured_image_id = null;
+        if (isset($data['featured_image']) && !empty($data['featured_image'])) {
+            WP_CLI::log("Processing featured image");
+            
+            if (isset($data['featured_image']['url']) && !empty($data['featured_image']['url'])) {
+                // It's a URL
+                $alt_text = isset($data['featured_image']['alt']) ? $data['featured_image']['alt'] : '';
+                
+                // Download remote image
+                if (function_exists('utg_download_remote_image')) {
+                    $featured_image_id = utg_download_remote_image($data['featured_image']['url'], $alt_text);
+                } elseif (class_exists('\\UTG\\Generator\\UTG_Media_Handler')) {
+                    $media_handler = new \UTG\Generator\UTG_Media_Handler();
+                    if (method_exists($media_handler, 'save_remote_image')) {
+                        $featured_image_id = $media_handler->save_remote_image($data['featured_image']['url'], $alt_text);
+                    }
+                }
+            } elseif (is_string($data['featured_image']) && strpos($data['featured_image'], 'data:image') === 0) {
+                // It's a base64 image
+                if (function_exists('utg_save_base64_image')) {
+                    $featured_image_id = utg_save_base64_image($data['featured_image']);
+                } elseif (class_exists('\\UTG\\Generator\\UTG_Media_Handler')) {
+                    $media_handler = new \UTG\Generator\UTG_Media_Handler();
+                    if (method_exists($media_handler, 'save_base64_image')) {
+                        $featured_image_id = $media_handler->save_base64_image($data['featured_image']);
+                    }
+                }
+            }
+        }
+        
+        // Create post
+        WP_CLI::log("Creating post with title: " . $post_data['post_title']);
+        $post_id = wp_insert_post($post_data, true);
+        
+        if (is_wp_error($post_id)) {
+            WP_CLI::error("Failed to create post: " . $post_id->get_error_message());
+            return;
+        }
+        
+        // Set featured image if available
+        if (!empty($featured_image_id) && !is_wp_error($featured_image_id)) {
+            set_post_thumbnail($post_id, $featured_image_id);
+        }
+        
+        WP_CLI::success("Post created with ID: {$post_id}");
+        WP_CLI::log("Edit URL: " . admin_url("post.php?post={$post_id}&action=edit"));
+        WP_CLI::log("View URL: " . get_permalink($post_id));
+        
+        return;
     });
 }
 
@@ -808,142 +1094,103 @@ function convert_content_to_html($content) {
  * @return int|WP_Error Attachment ID on success, WP_Error on failure
  */
 function utg_download_remote_image($image_url, $alt = '') {
-    // Check if the URL is valid
-    if (empty($image_url) || !filter_var($image_url, FILTER_VALIDATE_URL)) {
-        return new WP_Error('invalid_url', 'Invalid image URL');
+    // Check if the UTG_Media_Handler class exists and use it
+    if (class_exists('\\UTG\\Generator\\UTG_Media_Handler')) {
+        $media_handler = new \UTG\Generator\UTG_Media_Handler();
+        if (method_exists($media_handler, 'save_remote_image')) {
+            return $media_handler->save_remote_image($image_url, $alt);
+        }
     }
     
-    // Check if the image has already been downloaded by URL
+    // Fallback implementation
+    
+    // Validate URL
+    if (empty($image_url) || !filter_var($image_url, FILTER_VALIDATE_URL)) {
+        return new WP_Error('invalid_url', __('Invalid image URL', 'url-to-gutenberg'));
+    }
+    
+    // Check if image with this URL has already been imported
     $existing_attachment = utg_get_attachment_by_url($image_url);
     if ($existing_attachment) {
         return $existing_attachment;
     }
     
-    // Get the WordPress upload directory
-    $upload_dir = wp_upload_dir();
+    // Download image to temp file
+    $temp_file = download_url($image_url);
     
-    // Download the file
-    $response = wp_remote_get($image_url, array(
-        'timeout' => 60,
-    ));
-    
-    if (is_wp_error($response) || wp_remote_retrieve_response_code($response) !== 200) {
-        error_log("UTG: Failed to download image from $image_url");
-        return new WP_Error('download_error', 'Failed to download image');
+    if (is_wp_error($temp_file)) {
+        return $temp_file;
     }
     
-    $image_data = wp_remote_retrieve_body($response);
-    
-    // Generate a unique file name
-    $file_name = basename($image_url);
-    
-    // Remove query strings if present
-    if (strpos($file_name, '?') !== false) {
-        $file_name = substr($file_name, 0, strpos($file_name, '?'));
+    // Get file name from URL
+    $filename = basename(parse_url($image_url, PHP_URL_PATH));
+    if (empty($filename)) {
+        $filename = 'utg-image-' . time() . '.jpg';
     }
     
-    // Ensure unique filename
-    $file_name = wp_unique_filename($upload_dir['path'], sanitize_file_name($file_name));
-    $file_path = $upload_dir['path'] . '/' . $file_name;
-    
-    // Save the image file
-    if (!file_put_contents($file_path, $image_data)) {
-        error_log("UTG: Failed to save image to $file_path");
-        return new WP_Error('save_error', 'Failed to save image file');
-    }
-    
-    // Check the file type
-    $file_type = wp_check_filetype($file_name, null);
-    if (empty($file_type['type'])) {
-        // Try to detect from content
-        $file_info = getimagesize($file_path);
-        if ($file_info) {
-            switch ($file_info[2]) {
-                case IMAGETYPE_JPEG:
-                    $file_type['type'] = 'image/jpeg';
-                    break;
-                case IMAGETYPE_PNG:
-                    $file_type['type'] = 'image/png';
-                    break;
-                case IMAGETYPE_GIF:
-                    $file_type['type'] = 'image/gif';
-                    break;
-                case IMAGETYPE_WEBP:
-                    $file_type['type'] = 'image/webp';
-                    break;
-            }
-        }
-        
-        if (empty($file_type['type'])) {
-            unlink($file_path);
-            error_log("UTG: Unknown file type for $file_path");
-            return new WP_Error('invalid_image', 'Unknown image file type');
-        }
+    // Determine file type
+    $filetype = wp_check_filetype($filename, null);
+    if (empty($filetype['type'])) {
+        @unlink($temp_file);
+        return new WP_Error('mime_type_error', __('Could not determine file type', 'url-to-gutenberg'));
     }
     
     // Prepare attachment data
     $attachment = array(
-        'post_mime_type' => $file_type['type'],
-        'post_title' => preg_replace('/\.[^.]+$/', '', $file_name),
-        'post_content' => '',
-        'post_excerpt' => $alt,
-        'post_status' => 'inherit',
-        'meta_input' => array(
-            'utg_original_url' => $image_url
-        )
+        'post_mime_type' => $filetype['type'],
+        'post_title'     => sanitize_text_field($alt ?: preg_replace('/\.[^.]+$/', '', $filename)),
+        'post_content'   => '',
+        'post_excerpt'   => sanitize_text_field($alt),
+        'post_status'    => 'inherit',
+        'meta_input'     => array(
+            '_utg_source_url' => esc_url_raw($image_url),
+        ),
     );
     
-    // Insert the attachment
-    $attach_id = wp_insert_attachment($attachment, $file_path);
+    // Insert attachment into WordPress Media Library
+    $attachment_id = wp_insert_attachment($attachment, $temp_file);
     
-    if (is_wp_error($attach_id)) {
-        unlink($file_path);
-        error_log("UTG: Failed to create attachment for $file_path: " . $attach_id->get_error_message());
-        return $attach_id;
+    if (is_wp_error($attachment_id)) {
+        @unlink($temp_file);
+        return $attachment_id;
     }
     
-    // Generate attachment metadata
-    if (function_exists('wp_generate_attachment_metadata') && function_exists('wp_update_attachment_metadata')) {
-        require_once(ABSPATH . 'wp-admin/includes/image.php');
-        $attach_data = wp_generate_attachment_metadata($attach_id, $file_path);
-        wp_update_attachment_metadata($attach_id, $attach_data);
-    }
+    // Generate metadata for the attachment
+    require_once(ABSPATH . 'wp-admin/includes/image.php');
+    $attachment_data = wp_generate_attachment_metadata($attachment_id, $temp_file);
     
-    // Set alt text
-    if (!empty($alt)) {
-        update_post_meta($attach_id, '_wp_attachment_image_alt', $alt);
-    }
+    wp_update_attachment_metadata($attachment_id, $attachment_data);
     
-    return $attach_id;
+    // Clean up
+    @unlink($temp_file);
+    
+    return $attachment_id;
 }
 
 /**
- * Get attachment ID by image URL
+ * Get attachment ID by URL
  *
- * @param string $url Image URL
- * @return int|false Attachment ID if found, false otherwise
+ * @param string $url URL of the image.
+ * @return int|false Attachment ID if found, false otherwise.
  */
 function utg_get_attachment_by_url($url) {
     global $wpdb;
     
-    // First, check if we have stored the original URL as meta
+    // Check in meta for our custom field first
     $attachment_id = $wpdb->get_var($wpdb->prepare(
-        "SELECT post_id FROM $wpdb->postmeta WHERE meta_key = 'utg_original_url' AND meta_value = %s LIMIT 1",
+        "SELECT post_id FROM $wpdb->postmeta WHERE meta_key = '_utg_source_url' AND meta_value = %s LIMIT 1",
         $url
     ));
     
-    if (!empty($attachment_id)) {
+    if ($attachment_id) {
         return (int) $attachment_id;
     }
     
-    // If not found, try to match by URL directly
-    $attachment = $wpdb->get_col($wpdb->prepare(
-        "SELECT ID FROM $wpdb->posts WHERE guid = %s AND post_type = 'attachment' LIMIT 1",
-        $url
-    ));
+    // Fall back to standard WordPress method
+    $attachment_id = attachment_url_to_postid($url);
     
-    if (!empty($attachment[0])) {
-        return (int) $attachment[0];
+    if ($attachment_id) {
+        return $attachment_id;
     }
     
     return false;
@@ -957,54 +1204,76 @@ function utg_get_attachment_by_url($url) {
  * @return string Updated content with proper image references
  */
 function utg_process_gutenberg_image_blocks($content) {
-    // Pattern to match image blocks
-    $pattern = '/<!-- wp:image\s+({[^}]*})\s*-->.*?<img[^>]*src="([^"]*)"[^>]*\/>.*?<!-- \/wp:image -->/s';
+    if (empty($content)) {
+        return $content;
+    }
     
-    return preg_replace_callback($pattern, function($matches) {
-        // Get the entire image block
-        $image_block = $matches[0];
+    // Check if the UTG_Media_Handler class exists and use it
+    if (class_exists('\\UTG\\Generator\\UTG_Media_Handler')) {
+        $media_handler = new \UTG\Generator\UTG_Media_Handler();
+        if (method_exists($media_handler, 'process_gutenberg_image_blocks')) {
+            return $media_handler->process_gutenberg_image_blocks($content);
+        }
+    }
+    
+    // Fall back to using the utg_download_remote_image function directly
+    
+    // Pattern to match image blocks
+    $pattern = '/(<!-- wp:image[^>]*?-->)[\s\S]*?<img[^>]*?src="([^"]+)"[^>]*?\/?>[\s\S]*?(<!-- \/wp:image -->)/i';
+    
+    $processed_content = preg_replace_callback($pattern, function($matches) {
+        $opening_tag = $matches[1];
+        $img_url = $matches[2];
+        $closing_tag = $matches[3];
+        $block_content = $matches[0];
         
-        // Try to parse block attributes
-        $attrs_json = $matches[1];
-        $attrs = json_decode($attrs_json, true);
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            $attrs = array();
+        // Skip if it's not a valid URL
+        if (empty($img_url) || !filter_var($img_url, FILTER_VALIDATE_URL)) {
+            return $block_content;
         }
         
-        // Get image URL from the src attribute
-        $image_url = $matches[2];
-        
-        // Get alt text if available
-        $alt = '';
-        if (preg_match('/alt="([^"]*)"/', $image_block, $alt_matches)) {
-            $alt = $alt_matches[1];
+        // Extract alt text if available
+        $alt_text = '';
+        if (preg_match('/alt="([^"]*)"/', $block_content, $alt_matches)) {
+            $alt_text = $alt_matches[1];
         }
         
-        // Download the image if it's a remote URL
-        if (!empty($image_url) && filter_var($image_url, FILTER_VALIDATE_URL)) {
-            $attachment_id = utg_download_remote_image($image_url, $alt);
-            
-            if (!is_wp_error($attachment_id) && $attachment_id > 0) {
-                // Get image details from the attachment
-                $image_src = wp_get_attachment_image_src($attachment_id, 'full');
-                $local_url = $image_src ? $image_src[0] : $image_url;
-                
-                // Update the block with the new image reference
-                $updated_attrs = array_merge($attrs, array(
-                    'id' => $attachment_id,
-                    'url' => $local_url
-                ));
-                
-                // Create a new block with updated attributes
-                $updated_json = json_encode($updated_attrs);
-                $updated_img = str_replace('src="' . $image_url . '"', 'src="' . $local_url . '" class="wp-image-' . $attachment_id . '"', $matches[0]);
-                $updated_block = str_replace('<!-- wp:image ' . $attrs_json . ' -->', '<!-- wp:image ' . $updated_json . ' -->', $updated_img);
-                
-                return $updated_block;
-            }
+        // Download the image and get the attachment ID
+        $attachment_id = utg_download_remote_image($img_url, $alt_text);
+        
+        if (is_wp_error($attachment_id) || !$attachment_id) {
+            return $block_content;
         }
         
-        // Return original block if download fails or URL is not valid
-        return $image_block;
+        // Get the new local URL for the image
+        $local_url = wp_get_attachment_url($attachment_id);
+        
+        if (!$local_url) {
+            return $block_content;
+        }
+        
+        // Update the src attribute in the img tag
+        $updated_block_content = preg_replace('/src="[^"]+"/', 'src="' . esc_url($local_url) . '"', $block_content);
+        
+        // Add class="wp-image-{id}" if not already present
+        if (strpos($updated_block_content, 'class="') !== false) {
+            $updated_block_content = preg_replace('/class="([^"]*)"/', 'class="$1 wp-image-' . $attachment_id . '"', $updated_block_content);
+        } else {
+            $updated_block_content = preg_replace('/<img/', '<img class="wp-image-' . $attachment_id . '"', $updated_block_content);
+        }
+        
+        // Update the JSON attributes in the opening tag to include the ID
+        if (strpos($opening_tag, 'data-id=') === false) {
+            $updated_opening_tag = str_replace('<!-- wp:image', '<!-- wp:image {"id":' . $attachment_id . '}', $opening_tag);
+            $updated_block_content = str_replace($opening_tag, $updated_opening_tag, $updated_block_content);
+        } else {
+            // Replace existing ID
+            $updated_block_content = preg_replace('/data-id="[^"]+"/', 'data-id="' . $attachment_id . '"', $updated_block_content);
+        }
+        
+        return $updated_block_content;
+        
     }, $content);
+    
+    return $processed_content;
 } 
