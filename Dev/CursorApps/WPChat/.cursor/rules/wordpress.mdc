@@ -1,0 +1,142 @@
+---
+description: wordpress plugin development
+globs: 
+alwaysApply: false
+---
+I. Core Philosophy & Approach
+
+Expert & Thoughtful: Act as an expert WordPress/WooCommerce developer. Evaluate potential solutions, considering simplicity, performance, security, and extensibility implications before selecting the best approach.
+
+Prioritize Native Functionality: Always favor built-in WordPress and WooCommerce functions, APIs, hooks (actions and filters), and established patterns over custom implementations or reinventing the wheel.
+
+Best Practices Focus: Adhere strictly to WordPress and WooCommerce development best practices and official guidelines.
+
+Avoid Core Modifications: Never modify WordPress or WooCommerce core files. All extensions must be implemented via plugins or, where appropriate, child themes.
+
+Modularity & Reusability (DRY): Design code to be modular and reusable. Prefer iteration and well-structured functions/methods over duplicating code blocks (Don't Repeat Yourself). Use Object-Oriented Programming (OOP) principles (like classes and the Single Responsibility Principle) where they enhance structure and maintainability.
+
+II. Coding Standards & Style
+
+WordPress & WooCommerce Standards: Strictly follow the official WordPress PHP Coding Standards and relevant WooCommerce Extension Guidelines. (Assume auto-fixing tools may be used).
+
+Naming Conventions:
+
+Use a unique, plugin-specific prefix for all global functions, classes, constants, hooks, and database table names (if unavoidable) to prevent conflicts.
+
+Use snake_case for function and variable names. Use StudlyCaps for class names.
+
+Use descriptive names for functions, variables, classes, hooks, and files.
+
+Use lowercase with hyphens for directory and file names (e.g., includes/admin-settings.php).
+
+PHP Version & Features: Utilize features from PHP 7.4+ where appropriate and beneficial (e.g., typed properties, arrow functions) but ensure backward compatibility if required. Use strict typing (declare(strict_types=1);) where feasible at the beginning of PHP files.
+
+III. Architecture & File Structure
+
+Standard Plugin Structure: Organize the plugin using a standard, logical directory structure:
+
+plugin-name.php (Main plugin file with header)
+
+includes/ (Core PHP classes/functions, separated by logic - e.g., class-admin.php, class-frontend.php, functions-api.php)
+
+admin/ (If admin logic is extensive - contains admin-specific classes/functions)
+
+public/ or frontend/ (If frontend logic is extensive)
+
+templates/ (User-overridable template files)
+
+assets/ (css/, js/, images/)
+
+languages/ (For .pot file and translation files)
+
+readme.txt (WordPress standard readme)
+
+README.md (Optional, for Git repositories)
+
+uninstall.php (For cleanup on deactivation/deletion)
+
+Admin Interface: If the plugin has configurable settings, provide a clear admin menu link to its settings page using the WordPress Settings API.
+
+IV. Data Handling & Storage
+
+Options API Preference: Use the WordPress Options API (add_option, get_option, update_option, delete_option) for storing plugin settings and data whenever possible.
+
+Custom Tables (Use Sparingly): Avoid custom database tables unless absolutely necessary for performance or data structure reasons. If used:
+
+Use the $wpdb global object for all database interactions.
+
+Always use $wpdb->prepare() to prevent SQL injection vulnerabilities.
+
+Handle schema creation and updates correctly using the dbDelta() function and version comparison.
+
+Prefix table names uniquely.
+
+Data Validation & Sanitization:
+
+Sanitize all input data using appropriate WordPress functions (e.g., sanitize_text_field, sanitize_email, absint, wp_kses_post).
+
+Validate data where necessary to ensure it meets expected formats or values.
+
+V. Security
+
+Nonce Verification: Implement and verify nonces for all form submissions and actions initiated from the admin area or frontend to prevent CSRF attacks.
+
+Output Escaping: Escape all data before outputting it to the browser, using appropriate WordPress functions (e.g., esc_html, esc_attr, esc_js, esc_url).
+
+Roles & Capabilities: Utilize WordPress's built-in user roles and capabilities system to check permissions before performing actions or displaying sensitive data.
+
+VI. Performance & Optimization
+
+Caching: Use the WordPress Transients API (set_transient, get_transient, delete_transient) to cache expensive operations or database queries. Clear transients proactively when underlying data changes.
+
+Efficient Queries: Minimize the number and complexity of database queries. Use WP_Query efficiently and leverage its caching where possible. Avoid direct queries when a WP API function exists.
+
+Conditional Asset Loading: Enqueue scripts and styles using wp_enqueue_script() and wp_enqueue_style(). Load assets only on the pages where they are actually needed.
+
+Background Processing: Use WP-Cron (wp_schedule_event, etc.) for tasks that are long-running or need to run on a schedule, avoiding timeouts during user requests.
+
+JavaScript Use: Limit client-side JavaScript primarily to UI interactions and enhancements. Keep core business logic on the server-side (PHP). Minimize direct DOM manipulations where possible.
+
+VII. Extensibility & Compatibility
+
+Hooks Everywhere: Generously use WordPress actions (do_action) and filters (apply_filters) throughout the plugin's code to allow other developers to extend or modify its functionality without editing plugin files. Document custom hooks clearly.
+
+VIII. Internationalization & Localization (i18n & l10n)
+
+Translate Everything: Wrap all user-facing strings (including admin screens, frontend text, error messages) in appropriate WordPress Gettext functions (e.g., __, _e, _x, _n).
+
+Text Domain: Define a unique text domain in the plugin header and use it consistently in all localization functions.
+
+POT File: Ensure a .pot file can be generated and include it in the languages/ directory.
+
+IX. Error Handling & Debugging
+
+Use WP Debug System: Utilize WordPress's built-in debugging constants (WP_DEBUG, WP_DEBUG_LOG, WP_DEBUG_DISPLAY).
+
+Robust Logging: Implement logging for significant events, errors, or debugging purposes, potentially using custom handlers if WP_DEBUG_LOG isn't sufficient. Consider log rotation for high-volume logs.
+
+Exception Handling: Use try-catch blocks for operations that might predictably fail (e.g., external API calls).
+
+Clear Error Explanations (AI Interaction): When encountering errors during development, clearly explain the error, propose potential solutions, and justify the chosen fix.
+
+X. Testing
+
+Use WP Test Framework: Utilize the WordPress automated testing framework (based on PHPUnit, using WP_UnitTestCase) for unit and integration tests where applicable.
+
+Regular Testing: Perform tests (unit, integration, compatibility, performance) after significant code changes to ensure stability and prevent regressions.
+
+XI. Documentation
+
+Code Documentation (PHPDoc): Write clear, comprehensive PHPDoc blocks (following WordPress standards) for all classes, methods, functions, and hooks.
+
+Inline Comments: Use inline comments (// or #) to explain non-obvious logic or complex sections of code.
+
+Readme Files: Maintain an accurate and informative readme.txt file following WordPress standards. Consider a README.md for repository usage.
+
+Changelog: Keep a detailed changelog documenting changes, fixes, and additions for each version.
+
+Hook Documentation: Clearly document any custom actions and filters, including their purpose, parameters, and example usage.
+
+XII. Cleanup
+
+Uninstall Routine: Implement a thorough cleanup routine in uninstall.php that removes all plugin data (options, transients, custom tables, files) when the plugin is deleted from the WordPress site.
