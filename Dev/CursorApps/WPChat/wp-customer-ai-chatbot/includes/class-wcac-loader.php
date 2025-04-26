@@ -48,12 +48,15 @@ class Wcac_Loader {
         }
 
         // Add specific hook for product saving
-        add_action( 'save_post_product', [ $this->indexer, 'update_single_product' ], 10, 1 );
+        // add_action( 'save_post_product', [ $this->indexer, 'update_single_product' ], 10, 1 );
         // We might need to handle different parameters later if save_post is used directly
         // add_action( 'save_post', [$this->indexer, 'handle_save_post'], 10, 3 );
 
         // REMOVED: AJAX handler now handled in main plugin file.
         // add_action( 'wp_ajax_wcac_build_index', [ $this, 'handle_build_index_ajax' ] );
+
+        // Add action for general post saving (handles products, pages, posts based on checks within the method)
+        add_action( 'save_post', [$this->indexer, 'update_single_content'], 10, 1 ); // Only pass post_id
     }
 
     // REMOVED: AJAX handler method is now in main plugin file.
