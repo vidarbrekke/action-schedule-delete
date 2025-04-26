@@ -442,7 +442,7 @@ EOT;
 				$prompt_content .= "\n\n---
 + User question: ";
 				$prompt_content .= $user_message;
-				$prompt_content .= "\n\nPlease answer my question directly using *only* the information provided above. \n1. **Always try to mention the most relevant page or product from the context first**, especially if it directly matches the user\'s query.\n2. Mention other relevant details like titles and prices if available. \n3. When providing URLs, you MUST format them as markdown links using the Title provided in the context, like this: [Example Title](https://example.com/url). Do NOT use the URL as the link title.\n4. Use markdown lists (starting lines with * or -) or separate paragraphs (using double newlines) to structure your answer for readability.\n5. If the provided information isn't sufficient, state that clearly.";
+				$prompt_content .= "\n\nPlease answer my question directly using *only* the information provided above. \n1. **Always try to mention the most relevant page or product from the context first**, especially if it directly matches the user's query.\n2. Mention other relevant details like titles and prices if available. \n3. When providing URLs, you MUST format them as markdown links using the Title provided in the context, like this: [Example Title](https://example.com/url). Do NOT use the URL as the link title.\n4. Use markdown lists (starting lines with * or -) or separate paragraphs (using double newlines) to structure your answer for readability.";
 				
 				error_log('WCAC DEBUG: Context prompt built successfully');
 			} else {
@@ -450,7 +450,7 @@ EOT;
 				error_log('WCAC DEBUG: No context available, using fallback prompt');
 				$prompt_content = "User question: ";
 				$prompt_content .= $user_message;
-				$prompt_content .= "\n\nNo specific content context was found related to the user's question. Please answer the question based on your general instructions, but state clearly that you don't have specific information available about this query if you cannot answer it directly from the question itself. Do not suggest alternative product categories or types.";
+				$prompt_content .= "\n\nNo specific content context was found related to the user's question. Please answer the question based on your general instructions.";
 			}
 			error_log('WCAC DEBUG: Prompt built successfully');
 
