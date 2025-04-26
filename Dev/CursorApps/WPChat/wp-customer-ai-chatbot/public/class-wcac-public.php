@@ -326,9 +326,20 @@ class Wcac_Public {
 			$formatted_item = [];
 			$formatted_item[] = "Type: " . ucfirst($content_data['type'] ?? 'Unknown');
 			$formatted_item[] = "Title: " . ($content_data['title'] ?? 'N/A');
-			if (isset($content_data['price'])) { // Add price only if it exists (i.e., for products)
-				$formatted_item[] = "Price: " . $content_data['price']; 
+
+			// Handle Price Information
+			if (isset($content_data['regular_price']) && $content_data['regular_price'] !== null) {
+				$regular_price_formatted = wc_price($content_data['regular_price']);
+				if ($content_data['on_sale'] && isset($content_data['sale_price']) && $content_data['sale_price'] !== null) {
+					$sale_price_formatted = wc_price($content_data['sale_price']);
+					$formatted_item[] = "Status: ON SALE";
+					$formatted_item[] = "Sale Price: " . $sale_price_formatted;
+					$formatted_item[] = "Regular Price: " . $regular_price_formatted;
+				} else {
+					$formatted_item[] = "Price: " . $regular_price_formatted;
+				}
 			}
+
 			// Use the pre-formatted 'text' field for the main content snippet, but maybe truncate it further?
 			// For now, let's just use the title, type, price. The LLM gets the full text in the index anyway implicitly.
 			// Let's re-evaluate if we need more detail here. A shorter context string is better for token limits.

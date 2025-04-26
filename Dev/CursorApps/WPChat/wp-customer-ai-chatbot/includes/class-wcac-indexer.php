@@ -281,16 +281,25 @@ class Wcac_Indexer {
 
 		$categories = [];
 		$tags = [];
-		$price = null;
+		$regular_price = null;
+		$sale_price = null;
+		$on_sale = false;
 
 		// Product specific data
 		if ( $content_type === 'product' && class_exists('WooCommerce') ) {
 			$product = wc_get_product( $post->ID );
 			if ( $product ) {
-				// Get Price
-				$price = $product->get_price_html();
-				if (!empty($price)) {
-					$output_lines[] = "Price: " . wp_strip_all_tags($price);
+				// Get Prices and Sale Status
+				$regular_price = $product->get_regular_price();
+				$sale_price = $product->get_sale_price();
+				$on_sale = $product->is_on_sale();
+
+				if ($regular_price) {
+					$output_lines[] = "Regular Price: " . wc_price($regular_price); // Format price
+				}
+				if ($on_sale && $sale_price) {
+					$output_lines[] = "Sale Price: " . wc_price($sale_price); // Format price
+					$output_lines[] = "Status: ON SALE";
 				}
 
 				// Get All Categories (Direct and Parents)
@@ -365,7 +374,8 @@ class Wcac_Indexer {
 				return str_ireplace($negative_keywords, '', $tag);
 			}, $tags);
 			$main_content = str_ireplace($negative_keywords, '', $main_content);
-			$price = $price ? str_ireplace($negative_keywords, '', $price) : null;
+			$regular_price = $regular_price ? str_ireplace($negative_keywords, '', $regular_price) : null;
+			$sale_price = $sale_price ? str_ireplace($negative_keywords, '', $sale_price) : null;
 		}
 
 		return [
@@ -376,7 +386,9 @@ class Wcac_Indexer {
 			'content' => $main_content, // Shorter content for keyword scoring
 			'categories' => array_values(array_filter($categories)), // Store cleaned categories for scoring
 			'tags' => array_values(array_filter($tags)), // Store cleaned tags for scoring
-			'price' => $price, // Store cleaned price
+			'regular_price' => $regular_price,
+			'sale_price' => $sale_price,
+			'on_sale' => $on_sale,
 		];
 	}
 
