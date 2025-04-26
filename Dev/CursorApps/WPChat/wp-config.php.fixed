@@ -1,0 +1,106 @@
+<?php
+define( 'WP_CACHE', false ); // Added by WP Rocket
+
+/**
+ * The base configuration for WordPress
+ *
+ * The wp-config.php creation script uses this file during the installation.
+ * You don't have to use the web site, you can copy this file to "wp-config.php"
+ * and fill in the values.
+ *
+ * This file contains the following configurations:
+ *
+ * * Database settings
+ * * Secret keys
+ * * Database table prefix
+ * * Localized language
+ * * ABSPATH
+ *
+ * @link https://wordpress.org/support/article/editing-wp-config-php/
+ *
+ * @package WordPress
+ */
+// ** Database settings - You can get this info from your web host ** //
+/** The name of the database for WordPress */
+define( 'DB_NAME', 'staging' );
+/** Database username */
+define( 'DB_USER', 'staging' );
+/** Database password */
+define( 'DB_PASSWORD', 'uNd8afbfFhEU4QDvh7UvW5FCtXWrKna' );
+/** Database hostname */
+define( 'DB_HOST', '127.0.0.1' );
+/** Database charset to use in creating database tables. */
+define( 'DB_CHARSET', 'utf8' );
+/** The database collate type. Don't change this if in doubt. */
+define( 'DB_COLLATE', '' );
+define('DISABLE_WP_CRON', false);
+/**#@+
+ * Authentication unique keys and salts.
+ *
+ * Change these to different unique phrases! You can generate these using
+ * the {@link https://api.wordpress.org/secret-key/1.1/salt/ WordPress.org secret-key service}.
+ *
+ * You can change these at any point in time to invalidate all existing cookies.
+ * This will force all users to have to log in again.
+ *
+ * @since 2.6.0
+ */
+define( 'AUTH_KEY',          'feYT9S{<2$2Q:CCV*sluEmkN>5pC9j@@p &#_)vDlR%g;(x:gxUi^ALVII|G3qA=' );
+define( 'SECURE_AUTH_KEY',   '#=<oRxEOJBGKI}iB[C9<`f(k_z{$m5/lNGk]z*Y8>vgua%5|VRc0+e:5[-=XK#3A' );
+define( 'LOGGED_IN_KEY',     '?i<<)3W*DN?lQnKA{X}:kmMsl`hF]ONBeouI@K&#M]b%fV0Y[dn}8~m;`P?,47(b' );
+define( 'NONCE_KEY',         'GG>jlUp?[!6s{xLLq._m}wP(bF0=y1 ^0Ha{qPrTKvh%y;Oll:9]v16Wcxx,4S,/' );
+define( 'AUTH_SALT',         '/6<GCD`gS[b,Bo2sz:ES,,cD#%$8!e|cx+(tTa6LoyAP$>*c7a{TV%lb35M?5O/l' );
+define( 'SECURE_AUTH_SALT',  'LIW}C3<6MRnBjVU=N<{hF4::^st<{4^Hnovu_:52$]uAXYdwkr$WZ{^#*QkH`2|l' );
+define( 'LOGGED_IN_SALT',    '0pr]&1ixy^!@ekVWd/en(mBUYTptBz4g>w2-b(Vxu[;Lv|h-`Q%qGdj>Gah?Z!PT' );
+define( 'NONCE_SALT',        'o1_p=Zn%N6% !B5<8~&[CGe5C[z<LnQ5E8XL=wF)_r0_F3!]VzBfq^c{K]$)qRf]' );
+define( 'WP_CACHE_KEY_SALT', '$98MRrDW^~*jIhaz0U@bC$D1QkH }FOLpU+?4JD^&v(^CW{9D)zem#DR([f};L4;' );
+/**#@-*/
+/**
+ * WordPress database table prefix.
+ *
+ * You can have multiple installations in one database if you give each
+ * a unique prefix. Only numbers, letters, and underscores please!
+ */
+$table_prefix = 'wp_';
+/**
+ * For developers: WordPress debugging mode.
+ *
+ * Change this to true to enable the display of notices during development.
+ * It is strongly recommended that plugin and theme developers use WP_DEBUG
+ * in their development environments.
+ *
+ * For information on other constants that can be used for debugging,
+ * visit the documentation.
+ *
+ * @link https://wordpress.org/support/article/debugging-in-wordpress/
+ */
+// Enable WP_DEBUG mode
+define( 'WP_DEBUG', true );
+define( 'WP_DEBUG_LOG', true );
+define( 'WP_DEBUG_DISPLAY', false );
+// Enable Debug logging to the /wp-content/debug.log file
+// Removed duplicate WP_DEBUG_LOG line that was set to false
+// Disable display of errors and warnings
+// Removed duplicate WP_DEBUG_DISPLAY line
+define( "PHPCOMPAT_DEPRECATIONS", false ); // Disable PHP 8.2 deprecation warnings
+define( "FS_METHOD", "direct" ); // Use direct filesystem method
+@ini_set( "upload_max_filesize", "64M" );
+@ini_set( "post_max_size", "64M" );
+@ini_set( "memory_limit", "256M" );
+define( "ERROR_REPORTING", E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED & ~E_NOTICE & ~E_STRICT );
+@ini_set( 'display_errors', 0 );
+define('ALLOW_UNFILTERED_UPLOADS', true);
+/* Add any custom values between this line and the "stop editing" line. */
+/* That's all, stop editing! Happy publishing. */
+/** Absolute path to the WordPress directory. */
+if ( ! defined( 'ABSPATH' ) ) {
+	define( 'ABSPATH', __DIR__ . '/' );
+}
+/** Sets up WordPress vars and included files. */
+require_once ABSPATH . 'wp-settings.php';
+/** got error messeage that memory limit was already configured, so i comment it out here
+define( 'WP_MEMORY_LIMIT', '512M' ); **/
+// Commented out duplicate debug settings at end of file
+// define('WP_DEBUG', true);
+// define('WP_DEBUG_LOG', true);
+// define('WP_DEBUG_DISPLAY', false); 

@@ -77,6 +77,12 @@ This document outlines the structure, tasks, and development flow for building a
 - Add PHPDoc and inline comments.
 - Maintain a changelog and update documentation.
 
+### **MVP 8: Site Profile Generation and Taxonomy-Aware Indexing**
+- Implement logic to generate a site profile based on site-specific data.
+- Add taxonomy-aware indexing to the retrieval process.
+- Refine the admin UI to show site profile and taxonomy-aware indexing status.
+- Hook into relevant actions for site profile and taxonomy-aware indexing.
+
 ---
 
 ## 3. Best Practices & Guidelines
@@ -117,6 +123,8 @@ This document outlines the structure, tasks, and development flow for building a
 - Add multi-site compatibility.
 - Integrate with other WooCommerce data (orders, customers, etc.).
 - **Index Custom Fields/Taxonomies:** Add configuration or hooks to allow indexing of product data added by third-party plugins (e.g., brand plugins, custom field plugins).
+- **Prioritize Menu/Category Matches:** Enhance retrieval logic to optionally give higher relevance to content items corresponding to navigation menu items or primary site categories.
+- **Index Category/Tag Archive Pages:** Add category and tag archive pages themselves to the index, allowing the chatbot to directly suggest browsing a category if it's a relevant match.
 
 ---
 
