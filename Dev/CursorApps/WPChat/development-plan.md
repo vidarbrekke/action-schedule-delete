@@ -43,10 +43,11 @@ This document outlines the structure, tasks, and development flow for building a
 ### **MVP 4: Content Indexing**
 - Add admin settings checkboxes: "Index Products", "Index Pages", "Index Posts".
 - Implement logic in `Wcac_Indexer` to query selected post types (`product`, `page`, `post`) based on settings.
-- Define a unified index structure (e.g., storing title, content snippet, URL, and post type for each item).
-- Store the combined index using the Options API.
-- Refine the admin UI to show index status (counts per type) and allow rebuilding.
-- Hook into `save_post` action for relevant post types for reindexing.
+- Define a unified index structure (e.g., storing title, content snippet, URL, post type, taxonomy terms, price, etc. for each item).
+- Create a custom database table (`wp_wcac_index`) to store the index data efficiently.
+- Implement batch processing in the indexer (`Wcac_Indexer::index_all_content`) to handle large sites without timeouts.
+- Refine the admin UI to show index status (counts per type) and allow rebuilding the index (triggering the batch process).
+- Hook into `save_post` action for relevant post types for incremental reindexing of individual items.
 
 ### **MVP 5: Retrieval-Augmented Generation (RAG) on Content**
 - Update the retrieval function (`retrieve_relevant_content`) to work with the unified index.
