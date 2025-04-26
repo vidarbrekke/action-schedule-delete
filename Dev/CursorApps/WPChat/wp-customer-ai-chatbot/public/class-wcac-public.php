@@ -35,11 +35,18 @@ class Wcac_Public {
 	private const MAX_RAG_TOKENS = 1000;
 
 	/**
-	 * Number of top products to consider for RAG.
+	 * Number of *distinct* products/items to finally include in context.
 	 *
 	 * @since 0.1.1
 	 */
 	private const RAG_TOP_N_PRODUCTS = 5;
+
+	/**
+	 * Number of results to fetch initially from DB before filtering.
+	 *
+	 * @since 0.1.5
+	 */
+	private const RAG_INITIAL_FETCH_COUNT = 15;
 
 	/**
 	 * Initialize the class and set its properties.
@@ -135,260 +142,302 @@ class Wcac_Public {
 	}
 
 	/**
-	 * Retrieve relevant content for the user's chat message.
+	 * Retrieves and filters relevant content based on the user message and token limits.
 	 *
-	 * @since 0.1.1
-	 * @access private
-	 * @param string $user_message The user's chat message.
-	 * @param int    $max_context_tokens The approximate maximum number of tokens allowed for the context.
-	 * @return array Array of formatted content strings for context.
+	 * @param string $user_message The user's input message.
+	 * @param int $max_context_tokens The maximum number of tokens allowed for the context.
+	 * @return array An array containing 'context_strings' (formatted strings for the prompt) and 'raw_results' (the filtered data objects). Returns an empty array structure if no content is found or on error.
 	 */
 	private function retrieve_relevant_content(string $user_message, int $max_context_tokens): array {
-		$content_index = get_option( Wcac_Indexer::CONTENT_INDEX_KEY, [] ); // Use new index key
-		error_log('WCAC DEBUG: Content index retrieved. Empty: ' . (empty($content_index) ? 'true' : 'false') . ', Type: ' . gettype($content_index) . ', Count: ' . (is_array($content_index) ? count($content_index) : 'N/A'));
-		
-		if ( empty( $content_index ) || ! is_array( $content_index ) ) {
-			error_log('WCAC DEBUG: No valid content index found. Returning empty array.');
-			return []; // No index or invalid index found.
-		}
+		global $wpdb;
+		$table_name = $wpdb->prefix . 'wcac_index';
+		error_log("WCAC Retrieve: Using table '{$table_name}'. User message: " . $user_message);
 
-		// --- Direct Title Check First ---
-		$direct_matches = [];
+		// --- Keyword Extraction (Same as before) ---
 		$message_lower = strtolower( $user_message );
-		
-		foreach ( $content_index as $content_id => $content_data ) { // Changed variable name
-			if (is_array($content_data) && isset($content_data['title'])) {
-				$content_title_lower = strtolower( $content_data['title'] );
-				
-				// Check if the title is directly mentioned in the user's message
-				if ( str_contains( $message_lower, $content_title_lower ) ) {
-					error_log('WCAC DEBUG: Direct title match! Content "' . $content_data['title'] . '" (ID: ' . $content_id . ', Type: ' . ($content_data['type'] ?? 'unknown') . ') found in user message');
-					$direct_matches[ $content_id ] = [
-						'score' => 100, // High score for direct name matches
-						'data'  => $content_data,
-						'match_type' => 'direct_title'
-					];
-				}
-			}
-		}
-		
-		// --- Keyword Extraction ---
 		$stop_words = [
 			'a', 'an', 'the', 'in', 'on', 'at', 'is', 'are', 'was', 'were', 'and', 'or', 'but',
 			'to', 'of', 'for', 'with', 'as', 'by', 'this', 'that', 'it', 'you', 'i', 'me',
 			'my', 'your', 'he', 'she', 'we', 'they', 'what', 'which', 'who', 'whom', 'how',
 			'why', 'when', 'where', 'do', 'does', 'did', 'can', 'could', 'will', 'would',
-			'should', 'has', 'have', 'had', 'about', 'items', 'product', 'page', 'post', // Keep content type words
-			'?', '.', ',', '!', // Punctuation
+			'should', 'has', 'have', 'had', 'about', 'items', 'product', 'page', 'post',
+			'?', '.', ',', '!',
 		];
-		
-		$message_words = preg_split( '/\s+/', preg_replace('/[^\w\s]/', '', $message_lower) ?? '', -1, PREG_SPLIT_NO_EMPTY ); // Split and remove punctuation
+		$message_words = preg_split( '/\s+/', preg_replace('/[^\w\s]/', '', $message_lower) ?? '', -1, PREG_SPLIT_NO_EMPTY );
 		$keywords = array_diff( $message_words ?: [], $stop_words );
-		
-		error_log('WCAC DEBUG: User message: "' . $user_message . '"');
-		error_log('WCAC DEBUG: Extracted keywords: ' . implode(', ', $keywords));
-		
-		// Check if the original message explicitly mentions "sale" or related terms
+		error_log('WCAC Retrieve: Extracted keywords: ' . implode(', ', $keywords));
 		$sale_intent = preg_match('/\b(sale|discount|offer|deal|clearance)\b/i', $user_message);
-		error_log('WCAC DEBUG: Sale intent detected in message: ' . ($sale_intent ? 'Yes' : 'No'));
-
-		// Check specifically for yarn-related queries
 		$yarn_intent = preg_match('/\b(yarn|wool|fiber|thread|knitting|crochet)\b/i', $user_message);
-		error_log('WCAC DEBUG: Yarn-related intent detected in message: ' . ($yarn_intent ? 'Yes' : 'No'));
 
-		if ( empty( $keywords ) && empty( $direct_matches ) && !$sale_intent && !$yarn_intent ) {
-			error_log('WCAC DEBUG: No significant keywords found after filtering, no direct title matches, and no sale/yarn intent.');
-			return []; // No significant keywords or direct sale intent found.
+		if ( empty( $keywords ) && !$sale_intent && !$yarn_intent ) {
+			error_log('WCAC Retrieve: No significant keywords or intents detected.');
+			return ['context_strings' => [], 'raw_results' => []];
 		}
 
-		// --- Content Scoring ---
-		$scored_content = $direct_matches; // Start with direct matches
-		$items_checked = count($direct_matches);
-		$items_matched = count($direct_matches);
-
-		// Define score weights for different field matches
+		// --- Build SQL Query (Refactored Approach) ---
 		$score_weights = [
 			'title' => 25,
 			'category' => 20,
 			'tag' => 15,
-			'attribute' => 10, // Score for matching variation attributes
-			'content' => 5, // For matches in description/excerpt etc.
-			'on_sale_boost' => 40, // Significant boost if 'sale' intent detected and item is on sale
-			'yarn_category_boost' => 25, // Boost for items in 'Yarn' category when yarn-related query
+			'content' => 5,
+			'on_sale_boost' => 40,
+			'yarn_category_boost' => 25,
+			'specific_attribute_boost' => 150, // Very high boost for specific matches
 		];
 
-		foreach ( $content_index as $content_id => $content_data ) {
-			// Skip if already matched directly by title
-			if ( isset( $scored_content[ $content_id ] ) ) {
-				continue;
+		// --- Dynamic Score Adjustment for Variant Attributes ---
+		$attribute_pattern_detected = false;
+		$specific_attribute_term = null;
+		// Simple check for standalone 4+ digit numbers (potential color codes)
+		if (preg_match('/\b(\w*\s*\d{4,}\s*\w*)\b/', $user_message, $matches)) { 
+			$attribute_pattern_detected = true;
+			// Try to capture the word before/after the number if present
+			$potential_term = trim($matches[1]);
+			 // Basic filtering - avoid if it looks like just a year
+			if (!preg_match('/^(19|20)\d{2}$/', $potential_term)) {
+				 $specific_attribute_term = $potential_term;
+				 error_log("WCAC Retrieve: Specific attribute term identified: '{$specific_attribute_term}'");
+			} else {
+				 error_log("WCAC Retrieve: Detected number looks like a year, not treating as specific attribute.");
 			}
 
-			$items_checked++;
-			$current_score = 0;
-			$match_found = false;
-			$match_details = []; // For debugging
+			// Apply a *moderate* general title boost just for seeing the pattern
+			$original_title_weight = $score_weights['title'];
+			$score_weights['title'] *= 1.5; // Moderate general boost
+			error_log("WCAC Retrieve: Attribute pattern detected. Boosting general title score weight from {$original_title_weight} to {$score_weights['title']}.");
+		}
+		// --- End Dynamic Score Adjustment ---
 
-			if ( ! is_array( $content_data ) ) {
-				error_log("WCAC DEBUG Scoring: Skipping ID {$content_id}, content_data is not an array.");
-				continue; // Skip invalid data
-			}
-
-			// *** DETAILED LOGGING FOR VARIATIONS ***
-			if (isset($content_data['type']) && $content_data['type'] === 'product_variation') {
-				error_log("WCAC DEBUG Scoring: Checking VARIATION ID {$content_id} (Parent: {$content_data['parent_id']}). Title: '{$content_data['title']}'. On Sale: " . ($content_data['on_sale'] ? 'YES' : 'NO') . ". Sale Price: {$content_data['sale_price']}. Regular Price: {$content_data['regular_price']}. Attributes: " . implode(', ', $content_data['attributes'] ?? []) . ". Categories: " . implode(', ', $content_data['categories'] ?? []) . ".");
-			}
-			// *** END DETAILED LOGGING ***
-
-			// Prepare searchable strings (lowercase)
-			$searchable_title = isset($content_data['title']) ? strtolower($content_data['title']) : '';
-			$searchable_content = isset($content_data['content']) ? strtolower($content_data['content']) : '';
-			$searchable_categories = isset($content_data['categories']) ? array_map('strtolower', $content_data['categories']) : [];
-			$searchable_tags = isset($content_data['tags']) ? array_map('strtolower', $content_data['tags']) : [];
-			$searchable_attributes = isset($content_data['attributes']) ? array_map('strtolower', $content_data['attributes']) : []; // Variation attributes
-			$searchable_category_string = implode(' ', $searchable_categories); // Combine categories for easier searching
-			$searchable_tag_string = implode(' ', $searchable_tags); // Combine tags
-			$searchable_attribute_string = implode(' ', $searchable_attributes); // Combine attributes
-			$item_on_sale = $content_data['on_sale'] ?? false;
-
-			// Boost score if user asks about sale and item is on sale
-			if ($sale_intent && $item_on_sale) {
-				$current_score += $score_weights['on_sale_boost'];
-				$match_details[] = 'sale_intent_match';
-				$match_found = true; // Mark as matched if sale intent is present and item is on sale
-				error_log("WCAC DEBUG Scoring: Applying sale intent boost (+{$score_weights['on_sale_boost']}) to ID {$content_id}");
-			}
-
-			// Boost score for yarn-related searches if item is in yarn category
-			if ($yarn_intent && !empty($searchable_categories)) {
-				// Check if any category contains 'yarn'
-				$yarn_category_matched = false;
-				foreach ($searchable_categories as $category) {
-					if (stripos($category, 'yarn') !== false || $category === 'wool' || $category === 'fiber') {
-						$yarn_category_matched = true;
-						break;
-					}
-				}
-
-				if ($yarn_category_matched) {
-					$current_score += $score_weights['yarn_category_boost'];
-					$match_details[] = 'yarn_category_match';
-					$match_found = true;
-					error_log("WCAC DEBUG Scoring: Applying yarn category boost (+{$score_weights['yarn_category_boost']}) to ID {$content_id}");
-				}
-			}
-
-			foreach ( $keywords as $keyword ) {
-				$keyword_matched_in_field = false; // Track if this specific keyword matched anywhere
-
-				// Check Title
-				if ( $searchable_title && str_contains( $searchable_title, $keyword ) ) {
-					$current_score += $score_weights['title'];
-					$match_details[] = $keyword . ' (title)';
-					$keyword_matched_in_field = true;
-				}
-
-				// Check Categories (search combined string and individual names)
-				if ( $searchable_category_string && str_contains( strtolower($searchable_category_string), strtolower($keyword) ) ) {
-					// Add score only once per keyword per category check, even if multiple categories match
-					if (!in_array($keyword . ' (category)', $match_details)) {
-						$current_score += $score_weights['category'];
-						$match_details[] = $keyword . ' (category)';
-					}
-					$keyword_matched_in_field = true;
-				}
-
-				// Check Tags (search combined string and individual names)
-				if ( $searchable_tag_string && str_contains( $searchable_tag_string, $keyword ) ) {
-					// Add score only once per keyword per tag check
-					if (!in_array($keyword . ' (tag)', $match_details)) {
-						$current_score += $score_weights['tag'];
-						$match_details[] = $keyword . ' (tag)';
-					}
-					$keyword_matched_in_field = true;
-				}
-
-				// Check Attributes (for variations - search combined string)
-				if ($content_data['type'] === 'product_variation' && $searchable_attribute_string && str_contains( $searchable_attribute_string, $keyword ) ) {
-					if (!in_array($keyword . ' (attribute)', $match_details)) {
-						$current_score += $score_weights['attribute'];
-						$match_details[] = $keyword . ' (attribute)';
-					}
-					$keyword_matched_in_field = true;
-				}
-
-				// Check Content (Description/Excerpt etc.) - only if not matched in more specific fields
-				// This gives content matches the lowest priority if the same keyword appears elsewhere.
-				if ( $searchable_content && str_contains( $searchable_content, $keyword ) ) {
-					// Only add content score if the keyword wasn't found in title, category, tag, or attribute
-					if (!in_array($keyword . ' (title)', $match_details) &&
-						!in_array($keyword . ' (category)', $match_details) &&
-						!in_array($keyword . ' (tag)', $match_details) &&
-						!in_array($keyword . ' (attribute)', $match_details))
-					{
-						$current_score += $score_weights['content'];
-						$match_details[] = $keyword . ' (content)';
-						$keyword_matched_in_field = true;
-					} else if (!$keyword_matched_in_field) {
-						// If it matched in content BUT ALSO in title/cat/tag/attribute earlier,
-						// we still need to mark it as matched overall, but don't add the content score again.
-						$keyword_matched_in_field = true;
-					}
-
-				}
-
-				if ( $keyword_matched_in_field ) {
-					$match_found = true; // Mark that at least one keyword matched this item
-				}
-			} // End foreach keyword
-
-			if ( $match_found && $current_score > 0 ) {
-				$items_matched++;
-				$scored_content[ $content_id ] = [
-					'score' => $current_score,
-					'data'  => $content_data,
-					'match_type' => 'keyword (' . implode(', ', array_unique($match_details)) . ')', // Store matched fields for debug
-				];
-				error_log("WCAC DEBUG Scoring: Scored ID {$content_id} (Type: {$content_data['type']}) with score {$current_score}. Match details: {$scored_content[$content_id]['match_type']}");
-			} else if ($match_found && $current_score <= 0) {
-				// Log items that had a match (e.g. sale intent) but ended with zero keyword score
-				error_log("WCAC DEBUG Scoring: ID {$content_id} (Type: {$content_data['type']}) had matches but final keyword score is 0. Match details: " . implode(', ', array_unique($match_details)));
-			}
-		} // End foreach content_index
-
-		error_log('WCAC DEBUG: Scoring complete. Items checked: ' . $items_checked . ', Items matched initially (keyword/sale intent): ' . $items_matched . ', Direct title matches: ' . count($direct_matches) . ', Final items with score > 0: ' . count($scored_content));
+		$select_fields = "post_id, post_type, title, content_snippet, url, categories, tags, regular_price, sale_price, on_sale, parent_id";
 		
-		if ( empty( $scored_content ) ) {
-			error_log('WCAC DEBUG: No content matched keywords, direct titles, or sale intent with score > 0.');
-			return [];
+        $score_sql_parts = [];
+        $where_sql_parts = ["1=1"]; 
+        $score_bindings = [];
+        $where_bindings = [];
+       
+        // --- Add SPECIFIC Attribute Score Boost (if term identified) ---
+        if ($specific_attribute_term !== null) {
+            $score_sql_parts[] = "(CASE WHEN title LIKE %s THEN %d ELSE 0 END)";
+            $score_bindings[] = '%' . $wpdb->esc_like($specific_attribute_term) . '%';
+            $score_bindings[] = $score_weights['specific_attribute_boost'];
+            error_log("WCAC Retrieve: Adding specific attribute score boost SQL part for term: '{$specific_attribute_term}'");
+        }
+        // --- End Specific Attribute Score Boost ---
+
+		// Add scoring based on keyword matches
+		if (!empty($keywords)) {
+			$keyword_title_cases = [];
+            $keyword_content_cases = [];
+            $keyword_category_cases = [];
+            $keyword_tag_cases = [];
+            
+            $keyword_score_bindings_block = []; // Collect score bindings for all keywords here
+            $keyword_where_bindings_or = []; // Collect bindings for the main keyword OR block
+
+			$keyword_where_or_parts = []; // Collect raw SQL for the main keyword OR block
+
+			foreach ($keywords as $i => $keyword) {
+				$keyword_text_like = '%' . $wpdb->esc_like($keyword) . '%';
+                $keyword_json_like = '%"' . $wpdb->esc_like($keyword) . '"%';
+
+				// Build parts for scoring CASE statements (RAW SQL with placeholders)
+				$keyword_title_cases[]    = "WHEN title LIKE %s THEN %d";
+                $keyword_content_cases[]  = "WHEN content_snippet LIKE %s THEN %d";
+                $keyword_category_cases[] = "WHEN categories LIKE %s THEN %d";
+                $keyword_tag_cases[]      = "WHEN tags LIKE %s THEN %d";
+
+                // Add bindings for these SCORE parts (Text, Int, Text, Int, Json, Int, Json, Int)
+                array_push($keyword_score_bindings_block,
+                    $keyword_text_like, $score_weights['title'],
+                    $keyword_text_like, $score_weights['content'],
+                    $keyword_json_like, $score_weights['category'],
+                    $keyword_json_like, $score_weights['tag']
+                );
+
+                // Build parts for the WHERE OR block (RAW SQL with placeholders)
+                $keyword_where_or_parts[] = "(title LIKE %s OR content_snippet LIKE %s OR categories LIKE %s OR tags LIKE %s)";
+                // Add bindings for this OR part (Text, Text, Json, Json)
+                array_push($keyword_where_bindings_or, $keyword_text_like, $keyword_text_like, $keyword_json_like, $keyword_json_like);
+			}
+
+            // Assemble final SCORE calculations from keyword parts
+            if (!empty($keyword_title_cases))    $score_sql_parts[] = "(CASE " . implode(" ", $keyword_title_cases) . " ELSE 0 END)";
+            if (!empty($keyword_content_cases))  $score_sql_parts[] = "(CASE " . implode(" ", $keyword_content_cases) . " ELSE 0 END)";
+            if (!empty($keyword_category_cases)) $score_sql_parts[] = "(CASE " . implode(" ", $keyword_category_cases) . " ELSE 0 END)";
+            if (!empty($keyword_tag_cases))      $score_sql_parts[] = "(CASE " . implode(" ", $keyword_tag_cases) . " ELSE 0 END)";
+            
+            // Add collected keyword score bindings to main score bindings
+            $score_bindings = array_merge($score_bindings, $keyword_score_bindings_block);
+
+            // Assemble final WHERE OR block from keyword parts
+            if (!empty($keyword_where_or_parts)) {
+                 $where_sql_parts[] = "(" . implode(" OR ", $keyword_where_or_parts) . ")";
+                 // Add collected keyword WHERE bindings to main where bindings
+                 $where_bindings = array_merge($where_bindings, $keyword_where_bindings_or);
+            }
 		}
 
-		// Sort by score descending
-		uasort( $scored_content, fn( $a, $b ) => $b['score'] <=> $a['score'] );
-
-		// --- Context Assembly & Token Management ---
-		$top_content = array_slice( $scored_content, 0, self::RAG_TOP_N_PRODUCTS, true ); // Use constant for N
-		
-		// Enhanced logging: log titles of top content
-		$top_content_info = [];
-		foreach ($top_content as $id => $item) {
-			$item_title = is_array($item['data']) && isset($item['data']['title']) ? $item['data']['title'] : "Unknown";
-			$item_type = is_array($item['data']) && isset($item['data']['type']) ? $item['data']['type'] : "unknown";
-			$item_sale_status = (isset($item['data']['on_sale']) && $item['data']['on_sale']) ? ' [ON SALE]' : ''; // Add sale status indicator
-			$top_content_info[] = "{$id} ({$item_title}, type: {$item_type}{$item_sale_status}, score: {$item['score']}, match: {$item['match_type']})";
+		// Add sale intent boost
+		if ($sale_intent) {
+            // Add raw SQL part for score calculation
+			$score_sql_parts[] = "(CASE WHEN on_sale = 1 THEN %d ELSE 0 END)";
+            // Add binding for score calculation
+            $score_bindings[] = $score_weights['on_sale_boost'];
 		}
-		error_log('WCAC DEBUG: Selected top ' . count($top_content) . ' items: ' . implode('; ', $top_content_info)); // Use semicolon for better readability
-		
-		$context_strings = [];
+
+		// Add yarn intent boost
+		if ($yarn_intent) {
+			$yarn_like = '%"yarn"%';
+			$wool_like = '%"wool"%';
+			$fiber_like = '%"fiber"%';
+
+			// Add raw SQL part for score calculation
+			$score_sql_parts[] = "(CASE WHEN categories LIKE %s THEN %d ELSE 0 END)";
+			// Add bindings for score calculation
+            array_push($score_bindings, $yarn_like, $score_weights['yarn_category_boost']);
+
+			// Add raw SQL part for WHERE clause 
+			$where_sql_parts[] = "(categories LIKE %s OR categories LIKE %s OR categories LIKE %s)";
+			// Add bindings for WHERE clause
+            array_push($where_bindings, $yarn_like, $wool_like, $fiber_like);
+		}
+
+		// Combine final SQL parts
+		$score_sql_final = !empty($score_sql_parts) ? implode(" + ", $score_sql_parts) : "0";
+        $where_sql_final = implode(" AND ", $where_sql_parts);
+
+        // --- Assemble final $bindings array in correct order (Scores, then WHEREs, then Limit) --- 
+        $final_bindings = array_merge($score_bindings, $where_bindings);
+
+		// Build final SQL string using raw parts
+        $sql = "SELECT {$select_fields}, ({$score_sql_final}) AS relevance_score FROM {$table_name} WHERE {$where_sql_final} HAVING relevance_score > 0 ORDER BY relevance_score DESC LIMIT %d";
+
+		// Use INITIAL fetch count for the DB query
+        $limit = self::RAG_INITIAL_FETCH_COUNT;
+		$final_bindings[] = $limit; 
+
+		// Prepare the statement just once
+        error_log("WCAC Retrieve DEBUG: Final SQL String before prepare: " . $sql);
+        error_log("WCAC Retrieve DEBUG: Final Bindings Array before prepare: " . print_r($final_bindings, true));
+		$prepared_sql = $wpdb->prepare($sql, $final_bindings);
+        // Log the result *after* prepare for comparison
+		error_log("WCAC Retrieve: Prepared SQL (after prepare call): " . $prepared_sql);
+
+        // --- Execute Query & Filter Results --- 
+		$initial_results = $wpdb->get_results($prepared_sql);
+
+        // === Logging Raw DB Results ===
+        if (!empty($initial_results)) {
+            error_log("WCAC Retrieve DEBUG: Raw DB Results: " . print_r($initial_results, true));
+        } else if (empty($initial_results)) {
+             error_log("WCAC Retrieve DEBUG: DB query returned empty results.");
+         }
+        if ($wpdb->last_error) {
+            error_log("WCAC Retrieve DB Error: " . $wpdb->last_error);
+            // We should still return here if there's an error, even after logging
+            return ['context_strings' => [], 'raw_results' => []]; 
+        }
+        // === END DEBUGGING ADDITION ===
+
+		if (empty($initial_results)) {
+			error_log("WCAC Retrieve: No relevant content found initially.");
+			return ['context_strings' => [], 'raw_results' => []];
+		}
+        
+        error_log('WCAC Retrieve: Found ' . count($initial_results) . ' potentially relevant items initially.');
+        
+        // === Revised Filtering Logic ===
+        $filtered_results = [];
+        $target_variant = null;
+        $seen_parent_ids = [];
+        $seen_post_ids = [];
+
+        // If a specific attribute was searched for, find the best matching variant first
+        if ($specific_attribute_term !== null) {
+            $best_variant_score = -1;
+            foreach ($initial_results as $item) {
+                // Check if title contains the specific term (case-insensitive)
+                if (isset($item->title) && stripos($item->title, $specific_attribute_term) !== false) {
+                    // Simple score check - could be more sophisticated
+                    if ($item->relevance_score > $best_variant_score) {
+                        $target_variant = $item;
+                        $best_variant_score = $item->relevance_score;
+                    }
+                }
+            }
+            if ($target_variant) {
+                error_log("WCAC Retrieve: Prioritizing target variant based on attribute term: " . $target_variant->title);
+                $filtered_results[] = $target_variant;
+                $seen_post_ids[$target_variant->post_id] = true;
+                if (isset($target_variant->parent_id) && $target_variant->parent_id > 0) {
+                    $seen_parent_ids[$target_variant->parent_id] = true; // Mark parent as seen if target is a variant
+                }
+            }
+        }
+
+        // Fill remaining slots with other distinct items from initial results
+        foreach ($initial_results as $item) {
+            if (count($filtered_results) >= self::RAG_TOP_N_PRODUCTS) {
+                break; 
+            }
+
+            $post_id = $item->post_id;
+            // Skip if it's the target variant we already added
+            if ($target_variant && $post_id === $target_variant->post_id) {
+                continue;
+            }
+
+            // Skip if we've already seen this post ID
+            if (isset($seen_post_ids[$post_id])) {
+                continue;
+            }
+
+            $is_variation = isset($item->parent_id) && $item->parent_id > 0;
+            $parent_id = $is_variation ? $item->parent_id : null;
+
+            // Skip if it's a variation of a parent we've already included (either via target or another item)
+            if ($is_variation && isset($seen_parent_ids[$parent_id])) {
+                 continue;
+            }
+            
+            // Add the distinct item
+            $filtered_results[] = $item;
+            $seen_post_ids[$post_id] = true;
+            if ($is_variation) {
+                $seen_parent_ids[$parent_id] = true; // Mark parent as seen
+            }
+        }
+        error_log('WCAC Retrieve: Filtered down to ' . count($filtered_results) . ' distinct items for context.');
+        // === End Revised Filtering Logic ===
+        
+		// --- Context Assembly & Token Management --- 
+        $product_context_strings = []; 
 		$current_token_count = 0;
+		$instruction_prompt = "Based on the following potentially relevant content from the website:
 
-		// Estimate tokens for base instructions (adjust if prompt changes)
-		$instruction_prompt = "Based on the following potentially relevant content from the website:\n\nPlease answer the user's question:\n\n";
-		$instruction_token_estimate = (int) ceil( strlen( $instruction_prompt ) / 4 ); // Rough estimate
+Please answer the user's question:
 
-		foreach ( $top_content as $content_id => $scored_item ) {
-			$content_data = $scored_item['data'];
-			
-			// Format the context string based on available data
+";
+		$instruction_token_estimate = (int) ceil( strlen( $instruction_prompt ) / 4 );
+
+		// --- Format Product/Post Context (Use $filtered_results) ---
+		foreach ( $filtered_results as $row ) { // <--- Iterate over filtered results
+			// Reconstruct a data structure similar to the old $content_data for formatting
+			$content_data = [
+				'type'          => $row->post_type,
+				'title'         => $row->title,
+				'on_sale'       => (bool) $row->on_sale,
+				'regular_price' => $row->regular_price,
+				'sale_price'    => $row->sale_price,
+				'content'       => $row->content_snippet, // Use the snippet
+				'url'           => $row->url,
+				// Note: categories/tags aren't directly used in formatting below, could skip reconstruction if needed
+				'categories'    => !empty($row->categories) ? json_decode($row->categories, true) : [],
+				'tags'          => !empty($row->tags) ? json_decode($row->tags, true) : [],
+				'parent_id'     => $row->parent_id,
+			];
+
+			// Format the context string (using the same logic as before, adapted variable names)
 			$formatted_item = [];
 			$item_type = $content_data['type'] ?? 'Unknown';
 			$item_title = $content_data['title'] ?? 'N/A';
@@ -396,20 +445,13 @@ class Wcac_Public {
 			$item_regular_price = $content_data['regular_price'] ?? null;
 			$item_sale_price = $content_data['sale_price'] ?? null;
 
-			error_log("WCAC DEBUG Context Format: Processing ID {$content_id} (Type: {$item_type}, Title: {$item_title}, On Sale: " . ($item_on_sale ? 'YES' : 'NO') . ")");
+			error_log("WCAC Context Format: Processing Post ID {$row->post_id} (Type: {$item_type}, Title: {$item_title}, Score: {$row->relevance_score})");
 
 			$formatted_item[] = "Type: " . ucfirst($item_type);
 			$formatted_item[] = "Title: " . $item_title;
 
-			// Add attributes for variations
-			if ($item_type === 'product_variation' && !empty($content_data['attributes'])) {
-				// Reconstruct attribute string with labels if possible (more complex, stick to slugs for now?)
-				// Let's stick to the title which already includes attribute names
-				// $formatted_item[] = "Attributes: " . implode(', ', $content_data['attributes']);
-			}
-
-			// Handle Price Information
-			if ($item_regular_price !== null) {
+			// Add price information if available
+			if ($item_regular_price !== null && function_exists('wc_price')) { // Check if WC is active
 				try {
 					$regular_price_formatted = wc_price($item_regular_price);
 					if ($item_on_sale && $item_sale_price !== null) {
@@ -417,59 +459,138 @@ class Wcac_Public {
 						$formatted_item[] = "Status: ON SALE";
 						$formatted_item[] = "Sale Price: " . $sale_price_formatted;
 						$formatted_item[] = "Regular Price: " . $regular_price_formatted;
-						error_log("WCAC DEBUG Context Format: Added SALE price for ID {$content_id}: Sale={$sale_price_formatted}, Regular={$regular_price_formatted}");
 					} else {
 						$formatted_item[] = "Price: " . $regular_price_formatted;
-						error_log("WCAC DEBUG Context Format: Added regular price for ID {$content_id}: {$regular_price_formatted}");
 					}
 				} catch (\Throwable $e) {
-					error_log("WCAC ERROR: wc_price failed during context formatting for ID {$content_id}. Error: " . $e->getMessage());
-					// Fallback to raw price numbers
+					error_log("WCAC ERROR: wc_price failed during context formatting for Post ID {$row->post_id}. Error: " . $e->getMessage());
+					// Fallback to raw numbers if wc_price fails
 					if ($item_on_sale && $item_sale_price !== null) {
-						$formatted_item[] = "Status: ON SALE";
-						$formatted_item[] = "Sale Price: {$item_sale_price}";
-						$formatted_item[] = "Regular Price: {$item_regular_price}";
+						$formatted_item[] = "Status: ON SALE"; $formatted_item[] = "Sale Price: {$item_sale_price}"; $formatted_item[] = "Regular Price: {$item_regular_price}";
 					} else {
 						$formatted_item[] = "Price: {$item_regular_price}";
 					}
 				}
+			} elseif ($item_regular_price !== null) { // Fallback if wc_price doesn't exist
+				if ($item_on_sale && $item_sale_price !== null) {
+					$formatted_item[] = "Status: ON SALE"; $formatted_item[] = "Sale Price: {$item_sale_price}"; $formatted_item[] = "Regular Price: {$item_regular_price}";
+				} else {
+					$formatted_item[] = "Price: {$item_regular_price}";
+				}
 			} elseif ($item_on_sale) {
-				// Handle case where item is marked on sale but has no price (e.g., variable parent)
 				$formatted_item[] = "Status: ON SALE";
-				error_log("WCAC DEBUG Context Format: Marked ID {$content_id} as ON SALE (no specific prices provided).");
 			}
 
-			// Use the pre-formatted 'text' field for the main content snippet, but maybe truncate it further?
-			// For now, let's just use the title, type, price. The LLM gets the full text in the index anyway implicitly.
-			// Let's re-evaluate if we need more detail here. A shorter context string is better for token limits.
-			// How about: Title, Type, URL, maybe first sentence of 'text'?
-			// $content_text_snippet = mb_substr( strstr($content_data['text'] ?? '', "\n", true) ?: ($content_data['text'] ?? ''), 0, 150); // Extract first line, limit length
-			// $formatted_item[] = "Info: " . str_replace("Title: ", "", $content_text_snippet); // Avoid repeating title
-			// Let's add the short content field back for context
+			// Add content snippet
 			if (!empty($content_data['content'])) {
 				$formatted_item[] = "Info: " . $content_data['content'];
 			}
 
-			if (isset($content_data['url'])) {
+			// Add URL
+			if (!empty($content_data['url'])) {
 				$formatted_item[] = "URL: " . $content_data['url'];
 			}
-			
-			$context_piece = implode("\n", array_filter($formatted_item));
 
+			$context_piece = implode("\n", array_filter($formatted_item));
 			$piece_token_estimate = (int) ceil( strlen( $context_piece ) / 4 );
 
 			if ( ( $current_token_count + $piece_token_estimate + $instruction_token_estimate ) <= $max_context_tokens ) {
-				$context_strings[] = $context_piece;
+				$product_context_strings[] = $context_piece; 
 				$current_token_count += $piece_token_estimate;
-				error_log('WCAC DEBUG Context Format: Added context piece for ID ' . $content_id . '. Piece: [' . str_replace("\n", ' || ', $context_piece) . ']. Current token count: ' . $current_token_count);
+				error_log('WCAC Context Format: Added context piece for Post ID ' . $row->post_id . '. Current token count: ' . $current_token_count);
 			} else {
-				// Log that an item was skipped due to token limits
-				error_log( sprintf( 'WCAC RAG: Content ID %s (%s) skipped for user message due to token limit.', $content_id, ($content_data['title'] ?? 'N/A') ) );
-				break; // Stop adding more items if limit reached
+				error_log( sprintf( 'WCAC RAG: Content ID %s (%s) skipped for user message due to token limit.', $row->post_id, $item_title ) );
+				break;
 			}
 		}
 
-		return $context_strings;
+        // === Revised Category Finding Logic ===
+        $category_context_string = '';
+        if (!empty($keywords) && function_exists('get_terms')) {
+            $best_match_term = null;
+            $highest_match_score = -1; // Use a score instead of just count
+
+            // Get non-numeric keywords for better category matching
+            $non_numeric_keywords = array_filter($keywords, function($kw) {
+                 // Keep if not purely numeric OR if it's the specific attribute term itself
+                 global $specific_attribute_term; // Access the variable from outer scope
+                 return !is_numeric($kw) || ($specific_attribute_term !== null && strcasecmp($kw, $specific_attribute_term) === 0);
+            });
+            
+            $search_query = implode(' ', $non_numeric_keywords);
+            if (empty($search_query) && $specific_attribute_term) { // Fallback if only numeric keywords + attribute
+                $search_query = $specific_attribute_term; // Search based on attribute term if no other words
+            } elseif (empty($search_query)) {
+                 $search_query = implode(' ', $keywords); // Absolute fallback to all keywords
+            }
+
+            error_log("WCAC Category Search: Using search query: '{$search_query}'");
+
+            $args = [
+                'taxonomy'   => 'product_cat',
+                'hide_empty' => true,
+                'search'     => $search_query, 
+                'number'     => 10 // Fetch a few more potential categories
+            ];
+            $potential_terms = get_terms($args);
+
+            if (!is_wp_error($potential_terms) && !empty($potential_terms)) {
+                foreach ($potential_terms as $term) {
+                    $current_score = 0;
+                    // Score based on matching non-numeric keywords (case-insensitive)
+                    foreach ($non_numeric_keywords as $keyword) {
+                        if (stripos($term->name, $keyword) !== false) {
+                            $current_score += 5; // Base score for keyword match
+                             // Boost if specific attribute term is also in category name
+                             if ($specific_attribute_term && stripos($term->name, $specific_attribute_term) !== false) {
+                                 $current_score += 10;
+                             }
+                        }
+                    }
+                    
+                    // Prioritize shorter names if scores are equal (less likely to be overly broad)
+                    if ($current_score > $highest_match_score || 
+                       ($current_score === $highest_match_score && strlen($term->name) < strlen($best_match_term->name))) {
+                        $highest_match_score = $current_score;
+                        $best_match_term = $term;
+                    }
+                }
+            }
+            
+            // Fallback to first keyword if still no match (less likely with broader search)
+            // ... (keep existing fallback logic if needed, but might be less necessary now) ...
+
+            // Format the best term found (if any)
+            if ($best_match_term && $highest_match_score > 0 && function_exists('get_term_link')) {
+                $term_link = get_term_link($best_match_term);
+                if (!is_wp_error($term_link) && $term_link) {
+                    $category_context_string = "Relevant Category: [" . $best_match_term->name . "](" . $term_link . ")";
+                    error_log("WCAC Context Format: Found relevant category: " . $best_match_term->name . " with score: " . $highest_match_score);
+                }
+            }
+        }
+        // === End Revised Category Finding Logic ===
+
+        // --- Combine Category and Product Context ---
+        $final_context_strings = $product_context_strings;
+        if (!empty($category_context_string)) {
+            // Estimate token count for category string
+            $category_token_estimate = (int) ceil( strlen( $category_context_string ) / 4 );
+            // Check if adding category context exceeds limit (unlikely but possible)
+             if (($current_token_count + $category_token_estimate + $instruction_token_estimate ) <= $max_context_tokens) {
+                 array_unshift($final_context_strings, $category_context_string); // Add category to the beginning
+                 $current_token_count += $category_token_estimate; // Update token count
+                 error_log("WCAC Context Format: Prepended category context. Total token count: " . $current_token_count);
+             } else {
+                 error_log("WCAC Context Format: Skipping category context due to token limit.");
+             }
+        }
+
+		// Log the final combined context string
+        $final_joined_context_for_log = implode("\n---\n", $final_context_strings);
+        error_log("WCAC Prompt DEBUG: Final Joined Context String: " . $final_joined_context_for_log);
+
+		return ['context_strings' => $final_context_strings, 'raw_results' => $filtered_results];
 	}
 
 	/**
@@ -512,8 +633,17 @@ class Wcac_Public {
 
 			// --- Retrieve RAG Context ---
 			error_log('WCAC DEBUG: About to retrieve context');
-			$retrieved_context_strings = $this->retrieve_relevant_content( $user_message, self::MAX_RAG_TOKENS );
-			error_log('WCAC DEBUG: Retrieved context: ' . (empty($retrieved_context_strings) ? 'No context' : count($retrieved_context_strings) . ' items'));
+
+			// Force cache clear before fetching to diagnose potential stale cache issue
+			// wp_cache_delete( Wcac_Indexer::CONTENT_INDEX_KEY, 'options' ); // Also remove this cache clear attempt
+			// error_log('WCAC DEBUG: Attempted forceful cache clear for ' . Wcac_Indexer::CONTENT_INDEX_KEY);
+			$retrieved_context = $this->retrieve_relevant_content( $user_message, self::MAX_RAG_TOKENS );
+			error_log('WCAC DEBUG: Retrieved context: ' . (empty($retrieved_context['context_strings']) ? 'No context' : count($retrieved_context['context_strings']) . ' items'));
+
+            // === ADDED FOR DEBUGGING ===
+            // Log the actual array before imploding, just in case implode fails silently or context is lost later
+            error_log('WCAC Prompt DEBUG: Context Strings Array in handler: ' . print_r($retrieved_context['context_strings'], true));
+            // === END DEBUGGING ADDITION ===
 
 			// --- Get Base System Prompt from Settings (with default) ---
 			$default_prompt_template = <<<'EOT'
@@ -548,17 +678,30 @@ EOT;
 
 			// --- Build prompt with context if available ---
 			error_log('WCAC DEBUG: Building prompt');
-			if ( ! empty( $retrieved_context_strings ) ) {
+			if ( ! empty( $retrieved_context['context_strings'] ) ) {
 				error_log('WCAC DEBUG: Using context for prompt');
-				$joined_context = implode( "\n---\n", $retrieved_context_strings );
+				$joined_context = implode( "\n---\n", $retrieved_context['context_strings'] );
 				
-				// Build prompt with straightforward string approach
-				$prompt_content = "I'm looking for information. Based on the following potentially relevant content from the website:\n\n";
-				$prompt_content .= $joined_context;
-				$prompt_content .= "\n\n---\n+ User question: ";
-				$prompt_content .= $user_message;
-				$prompt_content .= "\n\nPlease answer my question directly using *only* the information provided above. \n1. Mention relevant details like titles and prices if available. \n2. When providing URLs, you MUST format them as markdown links using the Title provided in the context, like this: [Example Title](https://example.com/url). Do NOT use the URL as the link title.\n3. Use markdown lists (starting lines with * or -) or separate paragraphs (using double newlines) to structure your answer for readability.";
-				
+				// --- Revised Prompt Instructions ---
+				$prompt_content = <<<EOT
+**Website Context:**
+---
+{$joined_context}
+---
+
+**User Question:** {$user_message}
+
+**Instructions:**
+1.  **Base your entire answer *only* on the Website Context provided above.** Do not add information from external knowledge.
+2.  **If a 'Relevant Category' link is provided, mention it first.**
+3.  **List the specific product examples provided** using their Titles. **If a product has a URL, format its mention as a Markdown link:** `[Title](URL)`.
+4.  Use Markdown lists or separate paragraphs for clarity when listing multiple items.
+5.  Answer directly as the store representative. Avoid phrases like "Based on the context..." or "They belong to...". **Do not add any introductory classifications before listing items.**
+
+Answer:
+EOT;
+				// --- End Revised Prompt Instructions ---
+
 				error_log('WCAC DEBUG: Context prompt built successfully');
 			} else {
 				// If no product context
@@ -600,7 +743,10 @@ EOT;
 				$system_content .= "\n---\nAbout This Site:\n" . $site_profile;
 			}
 			
-			$system_content .= "\n---\nIMPORTANT: Answer *only* based on information explicitly provided. Do not reference general knowledge about brands or products unless that information was given to you.";
+			// --- Revised System Prompt Constraint ---
+            $system_content .= "\n---\nIMPORTANT: Answer *only* based on information explicitly provided in the Website Context section of the user prompt. Do not reference general knowledge unless it was given in the context.";
+            // --- End Revised System Prompt Constraint ---
+
 			error_log('WCAC DEBUG: System content built successfully');
 			
 			// --- Call OpenRouter API ---
@@ -659,6 +805,73 @@ EOT;
 			
 			$bot_message = $response_body->choices[0]->message->content;
 			error_log('WCAC DEBUG: Successfully retrieved AI response (raw): ' . $bot_message);
+
+			// --- BEGIN Server-Side Link Insertion ---
+            $context_items = $retrieved_context['raw_results'] ?? []; // Get the raw items used for context
+            if (!empty($context_items)) {
+                error_log('WCAC DEBUG: Starting server-side link insertion. Context items: ' . count($context_items));
+                foreach ($context_items as $item) {
+                    if (isset($item->title) && !empty($item->title) && isset($item->url) && !empty($item->url)) {
+                        $title = $item->title;
+                        $url = $item->url;
+
+                        // Escape title for use in regex, especially for characters like [, ], (, )
+                        $escaped_title = preg_quote($title, '/');
+
+                        // Regex Explanation:
+                        // Match the exact escaped title, ensuring it's treated as a whole word (\b).
+                        // We are removing the complex lookbehind due to PHP limitations.
+                        // This simpler regex will find the title. We will add checks later
+                        // to ensure we don't replace it if it's already part of a link.
+                        // Match the literal title as a whole word (using word boundaries \b)
+                        $pattern = '/\\b(' . $escaped_title . ')\\b/';
+                        $replacement = '[$1]('. $url . ')';
+
+                        // Find all matches of the plain title
+                        if (preg_match_all($pattern, $bot_message, $matches, PREG_OFFSET_CAPTURE)) {
+                            $replacement_occurred = false;
+                            // Iterate matches in reverse order to avoid offset issues after replacements
+                            for ($i = count($matches[0]) - 1; $i >= 0; $i--) {
+                                $match_info = $matches[0][$i];
+                                $match_text = $match_info[0];
+                                $match_offset = $match_info[1];
+
+                                // Check characters immediately around the match to see if it's already linked
+                                $is_already_linked = false;
+                                $char_before = ($match_offset > 0) ? $bot_message[$match_offset - 1] : '';
+                                $link_pattern_after = '/^\\]\\([^\\)]*\\)/'; // Matches ](...) immediately after
+
+                                if ($char_before === '[') {
+                                     // Check if the text immediately after the matched title looks like the end of a markdown link
+                                     $text_after_match_offset = $match_offset + strlen($match_text);
+                                     if (preg_match($link_pattern_after, substr($bot_message, $text_after_match_offset))) {
+                                         $is_already_linked = true;
+                                     }
+                                }
+
+                                // If not already linked, perform the replacement for this specific match
+                                if (!$is_already_linked) {
+                                    $bot_message = substr_replace($bot_message, '[' . $match_text . '](' . $url . ')', $match_offset, strlen($match_text));
+                                    $replacement_occurred = true;
+                                    error_log('WCAC DEBUG: Replaced title "' . $title . '" with link at offset ' . $match_offset);
+                                    // Since we replace only the *first* valid non-linked occurrence from the end, break after one success.
+                                    break; 
+                                }
+                            }
+                             if (!$replacement_occurred) {
+                                 error_log('WCAC DEBUG: Title "' . $title . '" found, but all occurrences were already linked.');
+                             }
+
+                        } else {
+                             error_log('WCAC DEBUG: Title "' . $title . '" not found as plain text.');
+                        }
+                    }
+                }
+                error_log('WCAC DEBUG: Finished server-side link insertion.');
+            } else {
+                 error_log('WCAC DEBUG: No context items found, skipping server-side link insertion.');
+            }
+            // --- END Server-Side Link Insertion ---
 
 			// 4. Send Success Response
 			wp_send_json_success( [ 'reply' => trim( $bot_message ) ] ); // Send raw message directly

@@ -74,6 +74,7 @@ This document outlines the structure, tasks, and development flow for building a
 - Add hooks and filters for extensibility.
 - Implement localization (i18n/l10n) for all user-facing strings.
 - Add uninstall routine to clean up plugin data.
+- Implement server-side post-processing of LLM responses to ensure reliable product hyperlinking.
 - Add PHPDoc and inline comments.
 - Maintain a changelog and update documentation.
 
