@@ -382,13 +382,14 @@ class Wcac_Public {
 
 			// 3. Get API Key
 			$options = get_option( 'wcac_settings' );
-			error_log('WCAC DEBUG: Retrieved settings: ' . (empty($options) ? 'Settings empty' : 'Settings found'));
+			error_log('WCAC DEBUG: Retrieved options array: ' . print_r($options, true)); // Log the entire options array
+			error_log('WCAC DEBUG: Checking for key wcac_api_key...');
 			
 			$api_key = $options['wcac_api_key'] ?? null;
 			$api_model = $options['wcac_openai_model'] ?? 'gpt-3.5-turbo'; // Keep this key if it's separate
 
 			if ( ! $api_key ) {
-				error_log('WCAC DEBUG: API key is not configured');
+				error_log('WCAC DEBUG: API key check failed! Key wcac_api_key was not found or was empty in the retrieved options.');
 				wp_send_json_error(['message' => esc_html__( 'Error: Chatbot is not configured correctly. Missing API key.', 'wp-customer-ai-chatbot' )]);
 				return;
 			}
