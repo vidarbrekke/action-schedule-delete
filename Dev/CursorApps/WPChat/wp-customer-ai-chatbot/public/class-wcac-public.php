@@ -384,8 +384,8 @@ class Wcac_Public {
 			$options = get_option( 'wcac_settings' );
 			error_log('WCAC DEBUG: Retrieved settings: ' . (empty($options) ? 'Settings empty' : 'Settings found'));
 			
-			$api_key = $options['wcac_openai_api_key'] ?? null;
-			$api_model = $options['wcac_openai_model'] ?? 'gpt-3.5-turbo'; // Default model
+			$api_key = $options['wcac_api_key'] ?? null;
+			$api_model = $options['wcac_openai_model'] ?? 'gpt-3.5-turbo'; // Keep this key if it's separate
 
 			if ( ! $api_key ) {
 				error_log('WCAC DEBUG: API key is not configured');
