@@ -82,6 +82,15 @@ class Wcac_Indexer {
 				'post_status'    => 'publish',
 				'posts_per_page' => -1, // Get all selected posts/pages/products
 				'fields'         => 'ids', // Only get IDs for efficiency
+				'has_password'   => false, // Exclude password protected posts/pages
+				'tax_query'      => [ // Exclude hidden products
+					[
+						'taxonomy' => 'product_visibility',
+						'field'    => 'name', // or 'slug' or 'term_id'
+						'terms'    => ['exclude-from-catalog', 'exclude-from-search'],
+						'operator' => 'NOT IN',
+					],
+				],
 			];
 
 			$post_ids = get_posts( $args );
