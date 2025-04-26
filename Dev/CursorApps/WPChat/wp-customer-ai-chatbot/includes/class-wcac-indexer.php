@@ -86,7 +86,7 @@ class Wcac_Indexer {
 				'tax_query'      => [ // Exclude hidden products
 					[
 						'taxonomy' => 'product_visibility',
-						'field'    => 'name', // or 'slug' or 'term_id'
+						'field'    => 'slug', // Use slug instead of name
 						'terms'    => ['exclude-from-catalog', 'exclude-from-search'],
 						'operator' => 'NOT IN',
 					],
@@ -103,7 +103,14 @@ class Wcac_Indexer {
                 return ['counts' => ['total' => 0], 'error' => null];
             }
 
+			$known_hidden_ids = [99593, 98277]; // Add known hidden IDs here
+
 			foreach ( $post_ids as $post_id ) {
+				// Check if this ID is one of the known hidden ones
+				if (in_array($post_id, $known_hidden_ids)) {
+					error_log("WCAC Indexer DEBUG: Query returned known hidden product ID: {$post_id}. This should NOT happen if tax_query is working.");
+				}
+
 				$post = get_post( $post_id );
 				if ( ! $post ) {
 					continue;
@@ -119,6 +126,7 @@ class Wcac_Indexer {
 
 			// Store the combined index in wp_options
 			update_option( self::CONTENT_INDEX_KEY, $index, false );
+			wp_cache_delete( self::CONTENT_INDEX_KEY, 'options' ); // Clear cache
             $this->update_index_meta( $counts );
 
 		} catch ( \Throwable $e ) {
@@ -157,6 +165,7 @@ class Wcac_Indexer {
 				error_log("WCAC Indexer Single Update: Removing Post ID {$post_id} because type '{$post->post_type}' is not selected for indexing.");
 				unset($index[$post_id]);
 				update_option(self::CONTENT_INDEX_KEY, $index, false);
+				wp_cache_delete( self::CONTENT_INDEX_KEY, 'options' ); // Clear cache
 				// Note: Meta count won't be updated here for performance, rely on full rebuilds.
 			}
 			return;
@@ -170,6 +179,7 @@ class Wcac_Indexer {
 				error_log("WCAC Indexer Single Update: Removing Post ID {$post_id} due to status '{$post->post_status}' or being password protected.");
 				unset( $index[ $post_id ] );
 				update_option( self::CONTENT_INDEX_KEY, $index, false );
+				wp_cache_delete( self::CONTENT_INDEX_KEY, 'options' ); // Clear cache
 			}
 			return;
 		}
@@ -183,10 +193,12 @@ class Wcac_Indexer {
 			if ( has_term( $hidden_terms, 'product_visibility', $post ) ) {
 				// Product is hidden, remove from index
 				$index = get_option( self::CONTENT_INDEX_KEY, [] );
+				error_log("WCAC Indexer DEBUG [update_single_content]: has_term check returned TRUE for Post ID {$post_id}."); // Log has_term result
 				if (isset($index[$post_id])) {
 					error_log("WCAC Indexer Single Update: Removing Product ID {$post_id} because it has exclude-from-catalog or exclude-from-search visibility.");
 					unset( $index[ $post_id ] );
 					update_option( self::CONTENT_INDEX_KEY, $index, false );
+					wp_cache_delete( self::CONTENT_INDEX_KEY, 'options' ); // Clear cache
 				}
 				return;
 			}
@@ -195,6 +207,13 @@ class Wcac_Indexer {
 
 		// If all checks passed, format and update/add the content
 		$index = get_option( self::CONTENT_INDEX_KEY, [] );
+
+		// *** ADD DEBUG LOGGING HERE ***
+		if (in_array($post_id, [99593, 98277])) {
+			error_log("WCAC Indexer DEBUG [update_single_content]: Processing known hidden ID {$post_id}. Exclusion checks PASSED unexpectedly. Formatting and adding/updating.");
+		}
+		// *** END DEBUG LOGGING ***
+
 		$formatted_data = $this->format_content_for_llm( $post );
 
 		if ( $formatted_data ) {
@@ -207,6 +226,7 @@ class Wcac_Indexer {
 		}
 
 		update_option( self::CONTENT_INDEX_KEY, $index, false );
+		wp_cache_delete( self::CONTENT_INDEX_KEY, 'options' ); // Clear cache
         // Note: Meta count won't be updated here for performance, rely on full rebuilds.
 	}
 
