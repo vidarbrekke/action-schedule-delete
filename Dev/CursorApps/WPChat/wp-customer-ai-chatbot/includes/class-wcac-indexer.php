@@ -94,6 +94,7 @@ class Wcac_Indexer {
 			];
 
 			$post_ids = get_posts( $args );
+			error_log('WCAC Indexer DEBUG: get_posts returned ' . count($post_ids) . ' IDs. Sample: [' . implode(', ', array_slice($post_ids, 0, 10)) . ']'); // Log count and sample IDs
 
 			if ( empty( $post_ids ) ) {
                 // No content found for selected types
@@ -141,17 +142,19 @@ class Wcac_Indexer {
 			return;
 		}
 
-		// Check if this post type should be indexed based on settings
+		// --- Start Exclusion Checks ---
+		// 1. Check if post type should be indexed at all
 		$options = get_option( 'wcac_settings', [] );
-		$should_index = false;
-		if ($post->post_type === 'product' && !empty($options['wcac_index_products'])) $should_index = true;
-		if ($post->post_type === 'page' && !empty($options['wcac_index_pages'])) $should_index = true;
-		if ($post->post_type === 'post' && !empty($options['wcac_index_posts'])) $should_index = true;
+		$should_index_type = false;
+		if ($post->post_type === 'product' && !empty($options['wcac_index_products'])) $should_index_type = true;
+		if ($post->post_type === 'page' && !empty($options['wcac_index_pages'])) $should_index_type = true;
+		if ($post->post_type === 'post' && !empty($options['wcac_index_posts'])) $should_index_type = true;
 
-		if (! $should_index) {
+		if (! $should_index_type) {
 			// If this type is not indexed, ensure it's removed if it exists
 			$index = get_option( self::CONTENT_INDEX_KEY, [] );
 			if (isset($index[$post_id])) {
+				error_log("WCAC Indexer Single Update: Removing Post ID {$post_id} because type '{$post->post_type}' is not selected for indexing.");
 				unset($index[$post_id]);
 				update_option(self::CONTENT_INDEX_KEY, $index, false);
 				// Note: Meta count won't be updated here for performance, rely on full rebuilds.
@@ -159,18 +162,47 @@ class Wcac_Indexer {
 			return;
 		}
 
-		$index = get_option( self::CONTENT_INDEX_KEY, [] );
-
-		if ( $post->post_status === 'publish' ) {
-			$formatted_data = $this->format_content_for_llm( $post );
-			if ( $formatted_data ) {
-				$index[ $post_id ] = $formatted_data;
-			} else {
-				// Formatting failed or returned empty, remove if exists
+		// 2. Check if post is published and not password protected
+		if ( $post->post_status !== 'publish' || $post->post_password ) {
+			// Post is deleted, not published, or password protected, remove from index
+			$index = get_option( self::CONTENT_INDEX_KEY, [] );
+			if (isset($index[$post_id])) {
+				error_log("WCAC Indexer Single Update: Removing Post ID {$post_id} due to status '{$post->post_status}' or being password protected.");
 				unset( $index[ $post_id ] );
+				update_option( self::CONTENT_INDEX_KEY, $index, false );
 			}
+			return;
+		}
+
+		// 3. Check WooCommerce hidden visibility (if applicable)
+		if ( $post->post_type === 'product' && taxonomy_exists('product_visibility') ) {
+			$hidden_terms = [
+				'exclude-from-catalog',
+				'exclude-from-search'
+			];
+			if ( has_term( $hidden_terms, 'product_visibility', $post ) ) {
+				// Product is hidden, remove from index
+				$index = get_option( self::CONTENT_INDEX_KEY, [] );
+				if (isset($index[$post_id])) {
+					error_log("WCAC Indexer Single Update: Removing Product ID {$post_id} because it has exclude-from-catalog or exclude-from-search visibility.");
+					unset( $index[ $post_id ] );
+					update_option( self::CONTENT_INDEX_KEY, $index, false );
+				}
+				return;
+			}
+		}
+		// --- End Exclusion Checks ---
+
+		// If all checks passed, format and update/add the content
+		$index = get_option( self::CONTENT_INDEX_KEY, [] );
+		$formatted_data = $this->format_content_for_llm( $post );
+
+		if ( $formatted_data ) {
+			error_log("WCAC Indexer Single Update: Updating/Adding Post ID {$post_id}.");
+			$index[ $post_id ] = $formatted_data;
 		} else {
-			// Post is deleted or not published, remove from index
+			// Formatting failed or returned empty, remove if exists
+			error_log("WCAC Indexer Single Update: Removing Post ID {$post_id} because formatting failed.");
 			unset( $index[ $post_id ] );
 		}
 
