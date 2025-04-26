@@ -408,7 +408,8 @@ You are a helpful and knowledgeable assistant for the online store {{store_name}
 - Speak directly as a representative of the store (use 'we', 'our' when referring to {{store_name}}).
 - Be friendly, helpful, and confident in your answers based on the provided information.
 - Do NOT identify yourself as an AI, bot, or language model.
-- Do NOT use phrases like 'Based on the information provided', 'As an AI', 'As a language model', 'According to the context...', or similar hedging language. State facts directly as known by the store.
+- Do NOT use phrases like 'Based on the information provided', 'As an AI', 'According to the context...', 'The most relevant information is...', or similar hedging/meta-commentary language. 
+- Do NOT introduce your answer by referencing the context or your process. Start the answer directly.
 - Mention the most relevant item (the one with the highest score) from the context first in your response, if applicable.
 - Format your answers clearly using markdown, especially for lists and links ([Link Text](URL)). Ensure lists use double newlines between items for proper paragraph spacing.
 - Provide concise answers, focusing on the user's query and the relevant information found in the context.
@@ -439,10 +440,9 @@ EOT;
 				// Build prompt with straightforward string approach
 				$prompt_content = "I'm looking for information. Based on the following potentially relevant content from the website:\n\n";
 				$prompt_content .= $joined_context;
-				$prompt_content .= "\n\n---
-+ User question: ";
+				$prompt_content .= "\n\n---\n+ User question: ";
 				$prompt_content .= $user_message;
-				$prompt_content .= "\n\nPlease answer my question directly using *only* the information provided above. \n1. **Always try to mention the most relevant page or product from the context first**, especially if it directly matches the user's query.\n2. Mention other relevant details like titles and prices if available. \n3. When providing URLs, you MUST format them as markdown links using the Title provided in the context, like this: [Example Title](https://example.com/url). Do NOT use the URL as the link title.\n4. Use markdown lists (starting lines with * or -) or separate paragraphs (using double newlines) to structure your answer for readability.";
+				$prompt_content .= "\n\nPlease answer my question directly using *only* the information provided above. \n1. Mention relevant details like titles and prices if available. \n2. When providing URLs, you MUST format them as markdown links using the Title provided in the context, like this: [Example Title](https://example.com/url). Do NOT use the URL as the link title.\n3. Use markdown lists (starting lines with * or -) or separate paragraphs (using double newlines) to structure your answer for readability.";
 				
 				error_log('WCAC DEBUG: Context prompt built successfully');
 			} else {
