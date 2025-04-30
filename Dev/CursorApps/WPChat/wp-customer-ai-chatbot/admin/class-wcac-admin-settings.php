@@ -66,6 +66,9 @@ class Wcac_Admin_Settings {
 		add_filter( 'plugin_action_links_' . $this->plugin_basename, [ $this, 'add_action_links' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
         
+        // AJAX Actions
+        add_action( 'wp_ajax_wcac_get_scoring_glossary', [ $this, 'ajax_get_scoring_glossary' ] );
+
         // Apply rules from settings at admin load
         $options = get_option('wcac_settings', []);
         
@@ -1390,6 +1393,12 @@ class Wcac_Admin_Settings {
                 true
             );
             
+            // Base script data for AJAX
+            $script_data = [
+                'ajax_url' => admin_url('admin-ajax.php'),
+                'nonce' => wp_create_nonce('wcac_admin_nonce')
+            ];
+            
             // Only add the settings-specific scripts/data for the main settings page
             if ($hook_suffix === $this->plugin_screen_hook_suffix) {
                 // Enqueue jQuery UI for tabs
@@ -1400,19 +1409,19 @@ class Wcac_Admin_Settings {
                 require_once WCAC_PLUGIN_DIR . 'includes/class-wcac-chatbot-defaults.php';
                 $default_system_prompt = Wcac_ChatbotDefaults::get_default_system_prompt();
      
-                // Localize script data for AJAX
-                $script_data = [
-                    'ajax_url' => admin_url('admin-ajax.php'),
-                    'nonce' => wp_create_nonce('wcac_reindex_nonce'),
+                // Add settings-specific data
+                $script_data = array_merge($script_data, [
                     'reindex_confirm' => esc_html__('Are you sure you want to re-index the selected content types? This might take a while.', 'wp-customer-ai-chatbot'),
                     'reindexing_text' => esc_html__('Indexing...', 'wp-customer-ai-chatbot'),
                     'reindex_success_template' => esc_html__('Success! Indexed Content. Total: %d (Products: %d, Pages: %d, Posts: %d)', 'wp-customer-ai-chatbot'),
                     'reindex_error_text' => esc_html__('Error during re-indexing. Check server logs.', 'wp-customer-ai-chatbot'),
                     'restore_prompt_confirm' => esc_html__('Are you sure you want to restore the default system prompt? Any changes you made will be lost.', 'wp-customer-ai-chatbot'),
                     'default_system_prompt' => $default_system_prompt
-                ];
-                wp_localize_script('wcac-admin-script', 'wcac_admin_data', $script_data);
+                ]);
             }
+
+            // Localize the script with the appropriate data
+            wp_localize_script('wcac-admin-script', 'wcac_admin_data', $script_data);
             
             // Inline CSS specific to the debug logs page
             if ($hook_suffix === $this->debug_logs_hook_suffix) {
@@ -1421,7 +1430,7 @@ class Wcac_Admin_Settings {
                     .log-details-cell { 
                         padding: 20px !important; 
                         background-color: #f9f9f9; 
-                        position: relative; /* Establish positioning context */
+                        position: relative;
                     }
                     .log-details-content {
                         min-height: 50px; /* Prevent collapse with minimal content */
@@ -1712,31 +1721,36 @@ class Wcac_Admin_Settings {
 
         // Display the logs
         ?>
-        <div class="wrap">
+        <div class="wrap wcac-debug-logs-page">
             <h1><?php echo esc_html__('Debug Logs', 'wp-customer-ai-chatbot'); ?></h1>
             
             <?php settings_errors('wcac_messages'); ?>
-
-            <?php if (!empty($logs)): ?>
-                <form method="post" action="" style="margin-bottom: 1em; display:inline-block;">
-                    <?php wp_nonce_field('wcac_delete_all_logs', 'wcac_delete_all_logs_nonce'); ?>
-                    <input type="hidden" name="action" value="delete_all_logs">
-                    <input type="submit" class="button button-secondary" value="<?php esc_attr_e('Delete All Logs', 'wp-customer-ai-chatbot'); ?>" onclick="return confirm('<?php esc_attr_e('Are you sure you want to delete ALL logs? This cannot be undone.', 'wp-customer-ai-chatbot'); ?>');">
-                </form>
-            <?php endif; ?>
-            <form method="post" action="" style="margin-bottom: 1em; display:inline-block; margin-left:10px;">
-                <?php wp_nonce_field('wcac_test_logging', 'wcac_test_logging_nonce'); ?>
-                <input type="hidden" name="action" value="test_logging">
-                <input type="submit" class="button button-secondary" value="<?php esc_attr_e('Test Logging', 'wp-customer-ai-chatbot'); ?>">
-            </form>
             
-            <?php if (current_user_can('manage_options')): ?>
-            <form method="post" action="" style="margin-bottom: 1em; display:inline-block; margin-left:10px;">
-                <?php wp_nonce_field('wcac_force_table_creation', 'wcac_force_table_creation_nonce'); ?>
-                <input type="hidden" name="action" value="force_table_creation">
-                <input type="submit" class="button button-secondary" value="<?php esc_attr_e('Advanced Debug Test', 'wp-customer-ai-chatbot'); ?>" title="<?php esc_attr_e('Force table creation using direct SQL', 'wp-customer-ai-chatbot'); ?>">
-            </form>
-            <?php endif; ?>
+            <div class="wcac-log-actions">
+                <?php if (!empty($logs)): ?>
+                    <form method="post" action="" class="wcac-log-action-form">
+                        <?php wp_nonce_field('wcac_delete_all_logs', 'wcac_delete_all_logs_nonce'); ?>
+                        <input type="hidden" name="action" value="delete_all_logs">
+                        <input type="submit" class="button button-secondary delete-all-logs-button" value="<?php esc_attr_e('Delete All Logs', 'wp-customer-ai-chatbot'); ?>" onclick="return confirm('<?php esc_attr_e('Are you sure you want to delete ALL logs? This cannot be undone.', 'wp-customer-ai-chatbot'); ?>');">
+                    </form>
+                <?php endif; ?>
+                <form method="post" action="" class="wcac-log-action-form">
+                    <?php wp_nonce_field('wcac_test_logging', 'wcac_test_logging_nonce'); ?>
+                    <input type="hidden" name="action" value="test_logging">
+                    <input type="submit" class="button button-secondary" value="<?php esc_attr_e('Test Logging', 'wp-customer-ai-chatbot'); ?>">
+                </form>
+                
+                <?php if (current_user_can('manage_options')): ?>
+                <form method="post" action="" class="wcac-log-action-form">
+                    <?php wp_nonce_field('wcac_force_table_creation', 'wcac_force_table_creation_nonce'); ?>
+                    <input type="hidden" name="action" value="force_table_creation">
+                    <input type="submit" class="button button-secondary" value="<?php esc_attr_e('Advanced Debug Test', 'wp-customer-ai-chatbot'); ?>" title="<?php esc_attr_e('Force table creation using direct SQL', 'wp-customer-ai-chatbot'); ?>">
+                </form>
+                <?php endif; ?>
+                
+                <a href="#" id="wcac-scoring-glossary-link" class="button button-secondary" style="margin-left: 10px;"><?php esc_html_e('Scoring Glossary', 'wp-customer-ai-chatbot'); ?></a>
+
+            </div>
 
             <?php if (empty($logs)): ?>
                 <p><?php echo esc_html__('No debug logs found.', 'wp-customer-ai-chatbot'); ?></p>
@@ -1937,6 +1951,48 @@ class Wcac_Admin_Settings {
                 <?php endif; ?>
             <?php endif; ?>
         </div>
+        
+        <!-- Glossary Modal Structure -->
+        <div id="wcac-glossary-modal" class="wcac-modal">
+            <div class="wcac-modal-content">
+                <span class="wcac-modal-close">&times;</span>
+                <h2><?php esc_html_e('Scoring Factor Glossary', 'wp-customer-ai-chatbot'); ?></h2>
+                <div id="wcac-glossary-content">
+                    <p><?php esc_html_e('Loading glossary...', 'wp-customer-ai-chatbot'); ?></p>
+                </div>
+            </div>
+        </div>
         <?php
     }
-} 
+
+    /**
+     * AJAX handler to fetch the scoring glossary definitions.
+     */
+    public function ajax_get_scoring_glossary(): void {
+        check_ajax_referer('wcac_admin_nonce', 'nonce');
+
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(['message' => esc_html__('Unauthorized', 'wp-customer-ai-chatbot')]);
+            return;
+        }
+
+        // Define the descriptions map
+        $descriptions = [
+            'Type weight' => __('Base score for item type. Higher values (150+) for parent products ensure they appear first in broad searches, while lower values (1-5) for variations prevent them from dominating results.', 'wp-customer-ai-chatbot'),
+            'Title score' => __('Score added for each keyword match in titles. Higher values (25+) prioritize exact title matches, making products with matching titles rank higher.', 'wp-customer-ai-chatbot'),
+            'Content score' => __('Score added per keyword found in the item\'s content or description. Helps surface products where keywords appear in detailed descriptions rather than just titles.', 'wp-customer-ai-chatbot'),
+            'Category score' => __('Score added per keyword found in the item\'s assigned categories. Helps match products when users search by category terms or general product types.', 'wp-customer-ai-chatbot'),
+            'Tag score' => __('Score added per keyword found in the item\'s assigned tags. Useful for matching alternative terms or attributes tagged to products.', 'wp-customer-ai-chatbot'),
+            'Direct title boost' => __('Large bonus added if the user\'s full query exactly matches the item title. Ensures exact matches rank at the top of results.', 'wp-customer-ai-chatbot'),
+            'Multi field boost' => __('Bonus score when keywords match across multiple fields (e.g., title AND content). Rewards items that are more comprehensively relevant to the query.', 'wp-customer-ai-chatbot'),
+            'Title count' => __('Number of query keywords found in the title. More matching keywords generally indicate higher relevance.', 'wp-customer-ai-chatbot'),
+            'All keywords in title boost' => __('Bonus score when ALL extracted keywords from the user query are found within the item title. Indicates a highly relevant match.', 'wp-customer-ai-chatbot'),
+            'Title category boost' => __('Bonus score when keywords match in both the title AND a category. Helps identify products that are well-categorized and match the search intent.', 'wp-customer-ai-chatbot'),
+            'Exact product name boost' => __('Significant bonus when the item title exactly matches (or starts with) a known compound product name (e.g., \'Peer Gynt\', \'Tynn Silk Mohair\'). Helps prioritize specific product results.', 'wp-customer-ai-chatbot'),
+            'Query product boost' => __('Bonus when the user\'s query contains a compound product name that is also found in the title. Ensures specific product searches return the right items.', 'wp-customer-ai-chatbot'),
+            'Parent preference margin' => __('How much to boost parent products above their variations in broad searches. Higher values (25+) ensure parents rank above variations unless the query specifically matches variation attributes.', 'wp-customer-ai-chatbot')
+        ];
+
+        wp_send_json_success($descriptions);
+    }
+} // <-- Ensure this is the final closing brace for the class

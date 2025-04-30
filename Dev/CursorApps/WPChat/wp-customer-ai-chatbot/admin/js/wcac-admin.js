@@ -147,6 +147,76 @@ jQuery(document).ready(function($) {
         }
     }
 
+    // --- Glossary Modal Logic --- //
+    const $glossaryModal = $('#wcac-glossary-modal');
+    const $glossaryLink = $('#wcac-scoring-glossary-link');
+    const $glossaryContent = $('#wcac-glossary-content');
+    const $modalClose = $('.wcac-modal-close');
+    var glossaryData = null; // Cache glossary data
+
+    if ($glossaryLink.length && $glossaryModal.length) {
+        $glossaryLink.on('click', function(e) {
+            e.preventDefault();
+            if (glossaryData) {
+                // Use cached data
+                populateAndShowGlossary(glossaryData);
+            } else {
+                // Fetch data via AJAX
+                $glossaryContent.html('<p>Loading...</p>');
+                $glossaryModal.show(); // Show modal with loading text
+                
+                $.ajax({
+                    url: wcac_admin_data.ajax_url,
+                    type: 'POST',
+                    data: {
+                        action: 'wcac_get_scoring_glossary',
+                        nonce: wcac_admin_data.nonce
+                    },
+                    success: function(response) {
+                        if (response.success && response.data) {
+                            glossaryData = response.data; // Cache the data
+                            populateAndShowGlossary(glossaryData);
+                        } else {
+                            const errorMsg = response.data && response.data.message ? response.data.message : 'Failed to load glossary data.';
+                            $glossaryContent.html('<p style="color:red;">Error: ' + errorMsg + '</p>');
+                        }
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        console.error('Glossary AJAX Error:', textStatus, errorThrown);
+                        $glossaryContent.html('<p style="color:red;">Error: Could not contact server.</p>');
+                    }
+                });
+            }
+        });
+
+        // Close modal handlers
+        $modalClose.on('click', function() {
+            $glossaryModal.hide();
+        });
+        $glossaryModal.on('click', function(e) {
+            if (e.target === this) { // Click outside the modal content
+                $glossaryModal.hide();
+            }
+        });
+        $(document).on('keydown', function(e) {
+            if (e.key === "Escape" && $glossaryModal.is(':visible')) {
+                $glossaryModal.hide();
+            }
+        });
+    }
+    
+    function populateAndShowGlossary(data) {
+        let htmlContent = '<dl>';
+        for (const term in data) {
+            if (data.hasOwnProperty(term)) {
+                htmlContent += `<dt>${term}</dt><dd>${data[term]}</dd>`;
+            }
+        }
+        htmlContent += '</dl>';
+        $glossaryContent.html(htmlContent);
+        $glossaryModal.show(); // Ensure it's visible if already loaded
+    }
+    
     // Initialize tabs if we're on the settings page
     if ($('.wcac-settings-wrapper').length) {
         const $form = $('.wcac-settings-wrapper form');
