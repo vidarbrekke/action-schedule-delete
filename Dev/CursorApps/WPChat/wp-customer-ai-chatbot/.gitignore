@@ -1,36 +1,83 @@
-# WordPress
+# WordPress core files
 wp-config.php
-wp-content/uploads/
-wp-content/blogs.dir/
-wp-content/upgrade/
-wp-content/backup-db/
-wp-content/advanced-cache.php
-wp-content/wp-cache-config.php
-sitemap.xml
-sitemap.xml.gz
+wp-config-sample.php
+index.php
+license.txt
+readme.html
+wp-activate.php
+wp-blog-header.php
+wp-comments-post.php
+wp-cron.php
+wp-links-opml.php
+wp-load.php
+wp-login.php
+wp-mail.php
+wp-settings.php
+wp-signup.php
+wp-trackback.php
+xmlrpc.php
+
+# WordPress system directories
 /wp-admin/
 /wp-includes/
-/xmlrpc.php
-/wp-*.php
-!wp-content/plugins/wp-customer-ai-chatbot/**
+/wp-content/index.php
+/wp-content/plugins/index.php
+/wp-content/themes/index.php
+/wp-content/upgrade/
+/wp-content/languages/
+/wp-content/cache/
 
-# IDE/Editor Files
+# Plugin directories - exclude all except our plugin
+/wp-content/plugins/*
+/wp-content/themes/*
+
+# Plugin files to specifically track
+!wp-content/plugins/wp-customer-ai-chatbot/
+!wp-content/plugins/wp-customer-ai-chatbot/**
+!wp-customer-ai-chatbot.php
+
+# Backup directories
+backup/
+**/backup/
+*backup*/
+
+# IDE and editor files
 .idea/
 .vscode/
 *.sublime-project
 *.sublime-workspace
+*.komodoproject
+.komodotools/
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*.swp
+*.swo
+*~
 
-# Build Artifacts (if any)
+# Build artifacts and dependencies
 node_modules/
 vendor/
-composer.lock
-
-# Logs
+bower_components/
+.sass-cache/
 *.log
-debug.log
+*.sql
+*.sqlite
+*.zip
+*.tar
+*.gz
+*.rar
 
-# OS generated files
-Thumbs.db
-ehthumbs.db
-Desktop.ini 
+# Local development files
+.htaccess
+.htpasswd
+.env
+.env.*
+!.env.example
+phpunit.xml
+docker-compose.yml
+docker-compose.override.yml 

@@ -37,4 +37,11 @@ Provides a customer-facing chatbot that can answer questions based on site conte
 == Upgrade Notice ==
 
 = 0.1.0 =
-* Initial release. 
+* Initial release.
+
+=== New in Version 0.1.1 ===
+
+* Added Debug Logs feature: Track and analyze search queries and scoring details through a new Debug Logs page in the admin dashboard
+* Debug logs show complete breakdown of how product scores are calculated for each search query
+* Visual badges indicating what factors contributed to each product's final score
+* Ability to delete individual or multiple log entries 

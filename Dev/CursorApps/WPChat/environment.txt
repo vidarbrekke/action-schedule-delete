@@ -7,12 +7,19 @@ and
 
 
 Ssh login: ssh staging@45.33.31.79
-you don't need an ssh password, an authentication key is used, found here on the local machine:
+you don't need an ssh password, as an authentication key is used, found here on the local machine:
 /Users/vidarbrekke/Dev/socialintent/staging.motherknitter.pem
 
 sudo user password is: @Flatbygdi73?
 
 Plugin location on staging server: /home/staging/public_html/wp-content/plugins/
+
+
+database :
+DatabaseName: staging
+Username: staging
+Password: uNd8afbfFhEU4QDvh7UvW5FCtXWrKna
+
 
 The server is running PHP 8.2 and Apache.
 

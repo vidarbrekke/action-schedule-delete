@@ -2,20 +2,26 @@
 declare(strict_types=1);
 
 /**
+ * This file is intended to be run within the WordPress environment.
+ * All referenced functions such as get_post, get_post_status, taxonomy_exists, has_term, wc_get_product
+ * are provided by WordPress core or WooCommerce and are expected to be available.
+ */
+
+// At the top, add import for the new rules class
+require_once __DIR__ . '/class-wcac-chatbot-rules.php';
+
+// Ensure this file is only used in a WordPress environment
+if (!function_exists('get_post')) {
+    exit('This file must be used within WordPress.');
+}
+
+/**
  * Handles indexing of WooCommerce products for the chatbot.
  *
  * @package    Wcac_Customer_AI_Chatbot
  * @subpackage Wcac_Customer_AI_Chatbot/includes
  */
 class Wcac_Indexer {
-
-	/**
-	 * Option key where the combined content index is stored.
-	 *
-	 * @since 0.1.1
-	 * @var string
-	 */
-	const CONTENT_INDEX_KEY = 'wcac_content_index';
 
 	/**
 	 * Option key for index metadata (like last updated time and counts).
@@ -34,185 +40,225 @@ class Wcac_Indexer {
 	const SITE_PROFILE_KEY = 'wcac_site_profile';
 
 	/**
-	 * Builds or rebuilds the entire content index based on settings.
+	 * Processes a batch of posts for the index based on settings.
+	 * Does NOT fetch posts itself, relies on caller providing IDs.
+	 * Handles table truncation and site profile generation only on the first batch.
 	 *
-	 * @since 0.1.1
-	 * @return array An array containing 'counts' (array of counts per post type) and 'error' (if any).
+	 * @since 0.1.5 (Refactored for Batch Processing)
+	 * @param array<int> $post_ids_batch Array of post IDs to process in this batch.
+	 * @param bool       $is_first_batch True if this is the very first batch (triggers truncation etc.).
+	 * @return array An array containing 'processed_in_batch' (int), 'errors_in_batch' (int), 'last_error_message' (string|null).
 	 */
-	public function build_index(): array {
-		error_log('WCAC DEBUG: Entering build_index method.');
-		$index = [];
-		$counts = ['product' => 0, 'page' => 0, 'post' => 0, 'product_variation' => 0, 'total' => 0];
-		$error = null;
+	public function build_index( array $post_ids_batch, bool $is_first_batch ): array {
+		global $wpdb;
+		$table_name = $wpdb->prefix . 'wcac_index';
+		error_log("WCAC Indexer Batch: Processing batch. First Batch: " . ($is_first_batch ? 'Yes' : 'No') . ". Batch Size: " . count($post_ids_batch));
 
-		try {
-			// --- Generate and Save Site Profile --- (New in 0.1.2)
-			error_log('WCAC DEBUG: Attempting to call generate_and_save_site_profile.');
-			self::generate_and_save_site_profile();
-		} catch ( \Throwable $e ) {
-			error_log( 'WCAC Indexer Error: Exception during site profile generation - ' . $e->getMessage() . " on line " . $e->getLine() );
-			// Continue with indexing even if profile generation fails
-			$error = 'Site profile generation failed: ' . $e->getMessage();
+		$processed_count = 0;
+		$error_count = 0;
+		$last_error_message = null;
+
+		// --- Initial Setup for First Batch Only ---
+		if ( $is_first_batch ) {
+			// Generate Site Profile
+			try {
+				// error_log('WCAC DEBUG: Attempting to call generate_and_save_site_profile (First Batch).'); // REMOVE DEBUG LOG
+				self::generate_and_save_site_profile();
+			} catch (Throwable $e) {
+				$profile_error = 'Site profile generation failed: ' . $e->getMessage();
+				error_log( 'WCAC Indexer Error: Exception during site profile generation - ' . $profile_error );
+				// Don't stop indexing for profile error, but maybe log it prominently
+				if (!$last_error_message) $last_error_message = $profile_error;
+			}
+
+			// Clear Existing Index Table
+			try {
+				error_log("WCAC Indexer Batch: Clearing existing data from table '{$table_name}' (First Batch).");
+				$wpdb->query("TRUNCATE TABLE {$table_name}");
+				if (!empty($wpdb->last_error)) {
+					throw new Exception("Failed to truncate table. DB Error: " . $wpdb->last_error);
+				}
+			} catch (Throwable $e) {
+				$truncate_error = 'Error clearing index table: ' . $e->getMessage();
+				error_log('WCAC Indexer Error: ' . $truncate_error);
+				// If truncate fails, we cannot proceed with indexing.
+				return ['processed_in_batch' => 0, 'errors_in_batch' => 1, 'last_error_message' => $truncate_error];
+			}
 		}
 
-		try {
-			// Get settings to determine which post types to index
-			$options = get_option( 'wcac_settings', [] );
-			error_log('WCAC Indexer: Reading settings - ' . json_encode($options)); // Log the options read
-			$post_types_to_index = [];
-			if ( ! empty( $options['wcac_index_products'] ) ) {
-				$post_types_to_index[] = 'product';
-				$post_types_to_index[] = 'product_variation'; // Also index variations if products are indexed
-			}
-			if ( ! empty( $options['wcac_index_pages'] ) ) {
-				$post_types_to_index[] = 'page';
-			}
-			if ( ! empty( $options['wcac_index_posts'] ) ) {
-				$post_types_to_index[] = 'post';
-			}
+		// --- Process and Insert Each Item in the Batch ---
+		$parent_product_visibility = []; // Cache for visibility lookups within the batch
+		$parent_product_statuses = [];
 
-			if ( empty( $post_types_to_index ) ) {
-				error_log('WCAC Indexer: No content types selected for indexing in settings.');
-				update_option( self::CONTENT_INDEX_KEY, [] );
-				$this->update_index_meta( ['total' => 0] ); // Update meta with zero counts
-				return ['counts' => ['total' => 0], 'error' => 'No content types selected'];
+		foreach ( $post_ids_batch as $post_id ) {
+			// Check execution time periodically within the loop to potentially prevent silent timeouts
+            // Note: set_time_limit might not work in safe mode or if disabled by hosting.
+            @set_time_limit(300); // Reset timer for each item (if possible)
+
+			$post = get_post( $post_id );
+			if ( ! $post ) {
+				error_log("WCAC Indexer Batch: Skipped Post ID {$post_id} - Post object not found.");
+				continue; // Skip this post, don't count as error for now
 			}
 
-			$args = [
-				'post_type'      => $post_types_to_index,
-				'post_status'    => 'publish', // Variations inherit status, this mainly applies to products/pages/posts
-				'posts_per_page' => -1, // Get all selected items
-				'fields'         => 'ids', // Only get IDs for efficiency
-				'has_password'   => false, // Exclude password protected posts/pages
-				// Note: tax_query for product_visibility only applies to 'product' type, not variations directly.
-				// We'll need to check the parent product's visibility later for variations.
-			];
-
-			$post_ids = get_posts( $args );
-			error_log('WCAC Indexer DEBUG: get_posts returned ' . count($post_ids) . ' IDs for types [' . implode(', ', $post_types_to_index) . ']. Sample: [' . implode(', ', array_slice($post_ids, 0, 10)) . ']');
-
-			if ( empty( $post_ids ) ) {
-				// No content found for selected types
-				update_option( self::CONTENT_INDEX_KEY, [] );
-				$this->update_index_meta( ['total' => 0] );
-				return ['counts' => ['total' => 0], 'error' => null];
+			// Basic check if we should even attempt formatting based on type (already filtered by get_posts in caller)
+			if (!in_array($post->post_type, ['product', 'product_variation', 'page', 'post'])) {
+				error_log("WCAC Indexer Batch: Skipped Post ID {$post_id} - Invalid post type '{$post->post_type}'.");
+				continue;
 			}
 
-			// Pre-fetch parent product statuses and visibility for variations to avoid repeated checks
-			$parent_product_visibility = [];
-			$parent_product_statuses = [];
+			// Visibility/Status Checks (Keep this logic, adapted slightly)
+            try {
+                $should_skip = false;
+                $is_variation = ($post->post_type === 'product_variation');
+				$parent_id_check = $is_variation ? $post->post_parent : 0;
 
-			foreach ( $post_ids as $post_id ) {
-				$post = get_post( $post_id );
-				if ( ! $post ) {
-					continue;
-				}
-
-				// --- Visibility/Status Checks ---
-				$is_variation = ($post->post_type === 'product_variation');
-				$parent_id = $is_variation ? $post->post_parent : 0;
-
-				// 1. Basic Status & Password Check
-				if ($post->post_status !== 'publish' && !$is_variation) { // Variations inherit status but check anyway later if needed
-					error_log("WCAC Indexer Filter: Skipping Post ID {$post_id} (type: {$post->post_type}) due to status: {$post->post_status}");
-					continue;
-				}
-				if ($post->post_password) {
-					error_log("WCAC Indexer Filter: Skipping Post ID {$post_id} (type: {$post->post_type}) due to password protection.");
-					continue;
-				}
-
-				// 2. Parent Product Check (for Variations)
+                if ($post->post_status !== 'publish' && !$is_variation) { $should_skip = true; }
+				if ($post->post_password) { $should_skip = true; }
 				if ($is_variation) {
-					if ($parent_id <= 0) {
-						error_log("WCAC Indexer Filter: Skipping Variation ID {$post_id} because it has no parent ID.");
-						continue; // Skip orphan variations
-					}
-
-					// Check parent status (cache results)
-					if (!isset($parent_product_statuses[$parent_id])) {
-						$parent_product_statuses[$parent_id] = get_post_status($parent_id);
-					}
-					if ($parent_product_statuses[$parent_id] !== 'publish') {
-						error_log("WCAC Indexer Filter: Skipping Variation ID {$post_id} because parent product ID {$parent_id} status is '{$parent_product_statuses[$parent_id]}'.");
-						continue;
-					}
-
-					// Check parent visibility (cache results)
-					if (!isset($parent_product_visibility[$parent_id])) {
-						$parent_product_visibility[$parent_id] = true; // Assume visible unless excluded
+					if ($parent_id_check <= 0) { $should_skip = true; }
+					if (!$should_skip && !isset($parent_product_statuses[$parent_id_check])) { $parent_product_statuses[$parent_id_check] = get_post_status($parent_id_check); }
+					if (!$should_skip && $parent_product_statuses[$parent_id_check] !== 'publish') { $should_skip = true; }
+					if (!$should_skip && !isset($parent_product_visibility[$parent_id_check])) {
+						$parent_product_visibility[$parent_id_check] = true; // Assume visible unless proven otherwise
 						if (taxonomy_exists('product_visibility')) {
 							$hidden_terms = ['exclude-from-catalog', 'exclude-from-search'];
-							if (has_term($hidden_terms, 'product_visibility', $parent_id)) {
-								$parent_product_visibility[$parent_id] = false;
+							if (has_term($hidden_terms, 'product_visibility', $parent_id_check)) {
+								$parent_product_visibility[$parent_id_check] = false;
 							}
 						}
 					}
-					if (!$parent_product_visibility[$parent_id]) {
-						error_log("WCAC Indexer Filter: Skipping Variation ID {$post_id} because parent product ID {$parent_id} is hidden (exclude-from-catalog or exclude-from-search).");
-						continue;
-					}
+					if (!$should_skip && !$parent_product_visibility[$parent_id_check]) { $should_skip = true; }
 				}
-				// 3. Parent Product Check (for Products - this is redundant but safe)
 				elseif ($post->post_type === 'product') {
 					if (taxonomy_exists('product_visibility')) {
 						$hidden_terms = ['exclude-from-catalog', 'exclude-from-search'];
-						if (has_term($hidden_terms, 'product_visibility', $post_id)) {
-							error_log("WCAC Indexer Filter: Skipping Product ID {$post_id} because it is hidden (exclude-from-catalog or exclude-from-search).");
-							continue;
-						}
+						if (has_term($hidden_terms, 'product_visibility', $post_id)) { $should_skip = true; }
 					}
+                    // Also skip parent variable products - variations are handled separately
+                    if (!$should_skip && class_exists('WooCommerce')) {
+                        $product_obj = wc_get_product($post_id);
+                        if ($product_obj && $product_obj->is_type('variable')) {
+                             error_log("WCAC Indexer Batch: Skipped Post ID {$post_id} - Parent variable product (handled by variations).");
+                             $should_skip = true;
+                        }
+                    }
 				}
-				// --- End Visibility/Status Checks ---
 
-				$formatted_data = $this->format_content_for_llm( $post );
-				if ( $formatted_data ) {
-					$index[ $post_id ] = $formatted_data;
-					// Use null coalescing to safely increment counts
-					$counts[$post->post_type] = ($counts[$post->post_type] ?? 0) + 1;
-					$counts['total']++;
+                if ($should_skip) {
+                    // If skipping, ensure it's removed from index in case it was indexed before
+                    $this->remove_content_from_index($post_id, "Skipped during batch build due to visibility/status.");
+                    continue; // Move to next post in batch
+                }
+            } catch (Throwable $vis_error) {
+                error_log("WCAC Indexer Batch Error (Visibility Check) for Post ID {$post_id}: " . $vis_error->getMessage());
+                $error_count++;
+				$last_error_message = "Visibility check error for Post ID {$post_id}: " . $vis_error->getMessage();
+                continue; // Skip this item due to error
+            }
+            // --- End Visibility/Status Checks ---
+
+
+			// Format data
+            $formatted_data = null;
+            try {
+			    $formatted_data = $this->format_content_for_llm( $post );
+            } catch (Throwable $format_error) {
+                error_log("WCAC Indexer Batch Error (Formatting) for Post ID {$post_id}: " . $format_error->getMessage());
+				$error_count++;
+				$last_error_message = "Formatting error for Post ID {$post_id}: " . $format_error->getMessage();
+                continue; // Skip this item due to formatting error
+            }
+
+			if ( $formatted_data ) {
+				// Prepare data for insertion
+				$insert_data = [
+					'post_id'         => $post_id,
+					'post_type'       => $formatted_data['type'],
+					'title'           => $formatted_data['title'],
+					'content_snippet' => $formatted_data['content'],
+					'url'             => $formatted_data['url'],
+					'categories'      => !empty($formatted_data['categories']) ? wp_json_encode($formatted_data['categories']) : null, // Use wp_json_encode
+					'tags'            => !empty($formatted_data['tags']) ? wp_json_encode($formatted_data['tags']) : null, // Use wp_json_encode
+					'regular_price'   => $formatted_data['regular_price'],
+					'sale_price'      => $formatted_data['sale_price'],
+					'on_sale'         => $formatted_data['on_sale'] ? 1 : 0,
+					'parent_id'       => $formatted_data['parent_id'],
+				];
+				$formats = [ '%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%d' ]; // Matched to insert_data
+
+				// Log data types and lengths before replace (Keep for debugging if needed)
+				// $log_data_info = [];
+				// foreach ($insert_data as $key => $value) { $log_data_info[$key] = 'Type: ' . gettype($value) . ', Length: ' . (is_string($value) ? strlen($value) : 'N/A'); }
+				// error_log("WCAC Indexer Pre-Replace Info [Post ID: {$post_id}]: " . json_encode($log_data_info)); // REMOVE DEBUG LOG
+
+				try {
+					// Use $wpdb->replace
+					$replace_result = $wpdb->replace($table_name, $insert_data, $formats);
+
+					if ($replace_result === false) {
+						// Log actual DB error if replace returns false
+						$db_error = $wpdb->last_error ?: 'Unknown DB error (replace returned false)';
+						error_log("WCAC Indexer Batch DB Failure: Post ID {$post_id} caused replace failure. WPDB Error: '{$db_error}'");
+						$error_count++;
+						$last_error_message = "DB replace failed for Post ID {$post_id}: " . $db_error;
+						// Continue processing the rest of the batch despite the error
+					} else {
+						// Only increment processed count on successful DB operation
+						$processed_count++;
+					}
+				} catch (Throwable $e) {
+					// Catch fatal errors during the DB operation itself
+					error_log("WCAC Indexer Batch EXCEPTION during replace for Post ID {$post_id}: " . $e->getMessage());
+					// error_log("WCAC Indexer Batch EXCEPTION Trace: " . $e->getTraceAsString()); // Keep trace if needed, can be long
+					$error_count++;
+					$last_error_message = 'DB exception during replace for Post ID {$post_id}: ' . $e->getMessage();
+					// Continue processing the rest of the batch
 				}
-			}
+			} else {
+                 error_log("WCAC Indexer Batch: Skipped Post ID {$post_id} - Formatting returned null or empty.");
+                 // Ensure it's removed if formatting fails or post becomes invalid
+                 $this->remove_content_from_index($post_id, "Formatting failed or post invalid during batch build.");
+            } // end if formatted_data
+		} // end foreach post_ids_batch
 
-			// Store the combined index in wp_options
-			update_option( self::CONTENT_INDEX_KEY, $index, false );
-			wp_cache_delete( self::CONTENT_INDEX_KEY, 'options' ); // Clear cache
-			$this->update_index_meta( $counts );
+		error_log("WCAC Indexer Batch: Finished processing batch. Processed: {$processed_count}, Errors: {$error_count}.");
 
-		} catch ( \Throwable $e ) {
-			$error = 'Error during indexing: ' . $e->getMessage();
-			error_log( 'WCAC Indexer Error: ' . $error );
-			// Don't delete existing index on error
-		}
-
-		return ['counts' => $counts, 'error' => $error];
-	}
+		// Note: We don't update the overall index meta here. The caller (AJAX handler) manages progress.
+		return [
+			'processed_in_batch' => $processed_count,
+			'errors_in_batch' => $error_count,
+			'last_error_message' => $last_error_message
+		];
+	} // End build_index (refactored)
 
 	/**
-	 * Updates a single post/page/product/variation in the index if its type is selected in settings.
+	 * Updates a single post/page/product/variation in the index table.
+     * (This function remains largely unchanged, used for save_post hook)
 	 *
-	 * @since 0.1.1 (modified 0.1.3 for variations)
+	 * @since 0.1.1 (Modified 0.1.4 to use custom table)
 	 * @param int $post_id The ID of the post to update.
 	 */
 	public function update_single_content( int $post_id ): void {
+		global $wpdb;
+		$table_name = $wpdb->prefix . 'wcac_index';
+
 		$post = get_post( $post_id );
 		if ( ! $post ) {
-			$this->remove_content_from_index($post_id, "Post object not found."); // Ensure removal if post deleted
+			$this->remove_content_from_index($post_id, "Post object not found.");
 			return;
 		}
 
+		// --- Exclusion Checks (Same as in build_index) ---
 		$is_variation = ($post->post_type === 'product_variation');
 		$options = get_option( 'wcac_settings', [] );
 		$index_products = !empty($options['wcac_index_products']);
 		$index_pages = !empty($options['wcac_index_pages']);
 		$index_posts = !empty($options['wcac_index_posts']);
 
-		// --- Start Exclusion Checks ---
-
-		// 1. Check if post type should be indexed based on settings
 		$should_index_type = false;
 		if ($post->post_type === 'product' && $index_products) $should_index_type = true;
-		if ($post->post_type === 'product_variation' && $index_products) $should_index_type = true; // Variations depend on product setting
+		if ($post->post_type === 'product_variation' && $index_products) $should_index_type = true;
 		if ($post->post_type === 'page' && $index_pages) $should_index_type = true;
 		if ($post->post_type === 'post' && $index_posts) $should_index_type = true;
 
@@ -220,9 +266,6 @@ class Wcac_Indexer {
 			$this->remove_content_from_index($post_id, "Type '{$post->post_type}' is not selected for indexing.");
 			return;
 		}
-
-		// 2. Basic Status & Password Check
-		// Variations have 'publish' status but rely on parent status and their own 'enabled' state.
 		if ($post->post_status !== 'publish' && !$is_variation) {
 			$this->remove_content_from_index($post_id, "Status is '{$post->post_status}'.");
 			return;
@@ -231,123 +274,127 @@ class Wcac_Indexer {
 			$this->remove_content_from_index($post_id, "Is password protected.");
 			return;
 		}
-
-		// 3. WooCommerce Visibility Checks
 		if ( $post->post_type === 'product' && taxonomy_exists('product_visibility') ) {
 			$hidden_terms = ['exclude-from-catalog', 'exclude-from-search'];
 			if ( has_term( $hidden_terms, 'product_visibility', $post ) ) {
 				$this->remove_content_from_index($post_id, "Product has exclude-from-catalog or exclude-from-search visibility.");
-				// Also remove its variations if the parent product becomes hidden
-				if (class_exists('WooCommerce')) {
-					$product = wc_get_product($post_id);
-					if ($product && $product->is_type('variable')) {
-						$variation_ids = $product->get_children();
-						foreach ($variation_ids as $variation_id) {
-							$this->remove_content_from_index($variation_id, "Parent product ID {$post_id} became hidden.");
-						}
-					}
-				}
+				if (class_exists('WooCommerce')) { $product = wc_get_product($post_id); if ($product && $product->is_type('variable')) { foreach ($product->get_children() as $variation_id) { $this->remove_content_from_index($variation_id, "Parent product ID {$post_id} became hidden."); } } }
 				return;
 			}
 		}
-
-		// 4. Variation Specific Checks
 		if ($is_variation) {
-			$parent_id = $post->post_parent;
-			if ($parent_id <= 0) {
-				$this->remove_content_from_index($post_id, "Variation has no parent ID.");
-				return; // Orphan variation
-			}
-
-			// Check parent status and visibility
-			$parent_post = get_post($parent_id);
-			if (!$parent_post || $parent_post->post_status !== 'publish') {
-				$this->remove_content_from_index($post_id, "Parent product ID {$parent_id} is not published.");
-				return;
-			}
-			if (taxonomy_exists('product_visibility')) {
-				$hidden_terms = ['exclude-from-catalog', 'exclude-from-search'];
-				if (has_term($hidden_terms, 'product_visibility', $parent_id)) {
-					$this->remove_content_from_index($post_id, "Parent product ID {$parent_id} is hidden.");
-					return;
-				}
-			}
-
-			// Check if variation itself is enabled (WooCommerce specific)
-			if (class_exists('WooCommerce')) {
-				$variation_obj = wc_get_product($post_id);
-				// Variation might be deleted or disabled
-				if (!$variation_obj || !$variation_obj->is_purchasable() || $variation_obj->get_status() !== 'publish') {
-					// get_status might be 'private' if disabled
-					$reason = !$variation_obj ? "Variation object not found (maybe deleted)." :
-							  (!$variation_obj->is_purchasable() ? "Variation is not purchasable." :
-							  "Variation status is '{$variation_obj->get_status()}'.");
-					$this->remove_content_from_index($post_id, $reason);
-					return;
-				}
-			}
+			$parent_id = $post->post_parent; if ($parent_id <= 0) { $this->remove_content_from_index($post_id, "Variation has no parent ID."); return; }
+			$parent_post = get_post($parent_id); if (!$parent_post || $parent_post->post_status !== 'publish') { $this->remove_content_from_index($post_id, "Parent product ID {$parent_id} is not published."); return; }
+			if (taxonomy_exists('product_visibility')) { $hidden_terms = ['exclude-from-catalog', 'exclude-from-search']; if (has_term($hidden_terms, 'product_visibility', $parent_id)) { $this->remove_content_from_index($post_id, "Parent product ID {$parent_id} is hidden."); return; } }
+			if (class_exists('WooCommerce')) { $variation_obj = wc_get_product($post_id); if (!$variation_obj || !$variation_obj->is_purchasable() || $variation_obj->get_status() !== 'publish') { $reason = !$variation_obj ? "Variation object not found." : (!$variation_obj->is_purchasable() ? "Variation not purchasable." : "Variation status '{$variation_obj->get_status()}'."); $this->remove_content_from_index($post_id, $reason); return; } }
 		}
 		// --- End Exclusion Checks ---
 
-
-		// If all checks passed, format and update/add the content
-		$index = get_option( self::CONTENT_INDEX_KEY, [] );
+		// If checks passed, format and update/add the content to the custom table
 		$formatted_data = $this->format_content_for_llm( $post );
 
 		if ( $formatted_data ) {
-			error_log("WCAC Indexer Single Update: Updating/Adding Post ID {$post_id} (Type: {$post->post_type}).");
-			$index[ $post_id ] = $formatted_data;
-			update_option( self::CONTENT_INDEX_KEY, $index, false );
-			wp_cache_delete( self::CONTENT_INDEX_KEY, 'options' ); // Clear cache
+			error_log("WCAC Indexer Single Update DB: Updating/Adding Post ID {$post_id} (Type: {$post->post_type}).");
+			// Prepare data for insertion/update
+			$insert_data = [
+				'post_id'         => $post_id,
+				'post_type'       => $formatted_data['type'],
+				'title'           => $formatted_data['title'],
+				'content_snippet' => $formatted_data['content'],
+				'url'             => $formatted_data['url'],
+				'categories'      => !empty($formatted_data['categories']) ? wp_json_encode($formatted_data['categories']) : null,
+				'tags'            => !empty($formatted_data['tags']) ? wp_json_encode($formatted_data['tags']) : null,
+				'regular_price'   => $formatted_data['regular_price'],
+				'sale_price'      => $formatted_data['sale_price'],
+				'on_sale'         => $formatted_data['on_sale'] ? 1 : 0,
+				'parent_id'       => $formatted_data['parent_id'],
+			];
+			$formats = [
+				'%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%d',
+			];
+
+			$replace_result = $wpdb->replace($table_name, $insert_data, $formats);
+
+			if ($replace_result === false) {
+				error_log("WCAC Indexer Single Update DB Error: Failed to replace row for post ID {$post_id}. Error: " . $wpdb->last_error);
+			}
 		} else {
-			// Formatting failed or returned empty, remove if exists
+			// Formatting failed, ensure it's removed from the DB table
 			$this->remove_content_from_index($post_id, "Formatting failed or returned empty.");
 		}
-
-		// Note: Meta count won't be updated here for performance, rely on full rebuilds.
 	}
 
 	/**
-	 * Helper function to remove an item from the index and log the reason.
+	 * Helper function to remove an item from the index table and log the reason.
 	 *
-	 * @since 0.1.3
+	 * @since 0.1.3 (Modified 0.1.4 to use custom table)
 	 * @param int    $post_id The ID of the post/variation to remove.
 	 * @param string $reason  The reason for removal (for logging).
 	 */
 	private function remove_content_from_index(int $post_id, string $reason): void {
-		$index = get_option( self::CONTENT_INDEX_KEY, [] );
-		if (isset($index[$post_id])) {
-			error_log("WCAC Indexer Remove: Removing Post ID {$post_id}. Reason: {$reason}");
-			unset( $index[ $post_id ] );
-			update_option( self::CONTENT_INDEX_KEY, $index, false );
-			wp_cache_delete( self::CONTENT_INDEX_KEY, 'options' ); // Clear cache
+		global $wpdb;
+		$table_name = $wpdb->prefix . 'wcac_index';
+
+		$delete_result = $wpdb->delete( $table_name, [ 'post_id' => $post_id ], [ '%d' ] );
+
+		if ($delete_result !== false) {
+			// Log success only if rows were actually deleted (or 0 if it didn't exist)
+			error_log("WCAC Indexer Remove DB: Attempted removal for Post ID {$post_id}. Reason: {$reason}. Rows affected: {$delete_result}");
+		} else {
+			// Log error if the delete query itself failed
+			error_log("WCAC Indexer Remove DB Error: Failed to execute delete query for post ID {$post_id}. Error: " . $wpdb->last_error);
 		}
 	}
 
 	/**
 	 * Updates the index metadata (counts and timestamp).
+	 * This should ideally be called only once at the very end of a successful batch process.
 	 *
-	 * @since 0.1.1 (modified 0.1.3 for variations)
-	 * @param array $counts Array of counts per post type (e.g., ['product'=>10, 'page'=>5, 'total'=>15]).
+	 * @since 0.1.1 (Modified 0.1.5 for Batch Processing)
+	 * @param array|null $final_counts Array of final counts per post type, or null to recalculate from table.
 	 */
-	private function update_index_meta( array $counts ): void {
+	public function update_final_index_meta( ?array $final_counts = null ): void {
+        global $wpdb;
+		$table_name = $wpdb->prefix . 'wcac_index';
+
+        if ($final_counts === null) {
+            // Recalculate counts directly from the table if not provided
+            error_log("WCAC Indexer Meta: Recalculating final counts from table.");
+            $final_counts = [
+                'product' => 0, 'page' => 0, 'post' => 0, 'product_variation' => 0, 'total' => 0
+            ];
+            $results = $wpdb->get_results( "SELECT post_type, COUNT(*) as count FROM {$table_name} GROUP BY post_type", ARRAY_A );
+            if ($results) {
+                foreach ($results as $row) {
+                    if (isset($final_counts[$row['post_type']])) {
+                        $final_counts[$row['post_type']] = (int) $row['count'];
+                    }
+                }
+                $final_counts['total'] = array_sum($final_counts);
+            } else {
+                 error_log("WCAC Indexer Meta Error: Could not query counts from table {$table_name}. Error: " . $wpdb->last_error);
+                 // Leave counts as 0 if query fails
+            }
+        }
+
 		$meta = [
 			'last_updated' => current_time( 'mysql' ),
 			'counts' => [
-				'product'           => absint($counts['product'] ?? 0),
-				'page'              => absint($counts['page'] ?? 0),
-				'post'              => absint($counts['post'] ?? 0),
-				'product_variation' => absint($counts['product_variation'] ?? 0), // Add variation count
-				'total'             => absint($counts['total'] ?? 0)
+				'product'           => absint($final_counts['product'] ?? 0),
+				'page'              => absint($final_counts['page'] ?? 0),
+				'post'              => absint($final_counts['post'] ?? 0),
+				'product_variation' => absint($final_counts['product_variation'] ?? 0),
+				'total'             => absint($final_counts['total'] ?? 0)
 			]
 		];
-		update_option( self::META_KEY, $meta, false );
+		update_option( self::META_KEY, $meta, false ); // Use autoload 'no'
+        error_log("WCAC Indexer Meta: Final index metadata updated. Counts: " . wp_json_encode($meta['counts']));
 	}
 
 	/**
 	 * Formats post data (product, variation, page, post) into a structure suitable for LLM context.
 	 *
-	 * @since 0.1.1 (modified 0.1.3 for variations)
+	 * @since 0.1.1 (modified 0.1.5 to use wp_json_encode)
 	 * @param WP_Post $post WP_Post object for the item to format.
 	 * @return array|null Formatted data representation of the post, or null if invalid.
 	 */
@@ -367,6 +414,7 @@ class Wcac_Indexer {
 		$on_sale = false;
 		$attributes = []; // For variations
 		$main_content = ''; // Initialize main content
+		$raw_content = ''; // Store raw content for processing
 
 		// --- Handle Variations ---
 		if ( $content_type === 'product_variation' && class_exists('WooCommerce') && $parent_id > 0 ) {
@@ -408,23 +456,27 @@ class Wcac_Indexer {
 
 
 			// Get content: Use parent's description/excerpt if variation's is empty
-			$main_content = trim(wp_strip_all_tags(strip_shortcodes($variation->get_description())));
-			if (empty($main_content)) {
-				$main_content = trim($parent_product->get_short_description()); // Try parent excerpt first
-				if (empty($main_content)) {
-					$main_content = wp_strip_all_tags(strip_shortcodes($parent_product->get_description())); // Then parent content
-				}
-			}
+			$raw_content = $variation->get_description(); // Get raw variation description
+            if (empty(trim($raw_content))) {
+                $raw_content = $parent_product->get_short_description(); // Try parent excerpt raw
+                if (empty(trim($raw_content))) {
+                    $raw_content = $parent_product->get_description(); // Then parent content raw
+                }
+            }
 
 			// Get categories and tags from parent
-			$parent_term_ids = wp_get_post_terms( $parent_id, 'product_cat', ['fields' => 'ids'] );
-			$categories = $this->get_all_category_names($parent_term_ids, $parent_id);
+			$parent_term_ids = wp_get_post_terms($parent_id, 'product_cat', ['fields' => 'ids']);
+			$categories = $this->get_all_category_names($parent_term_ids, $parent_id, 'product_cat', false);
 			$tag_terms = get_the_terms( $parent_id, 'product_tag' );
 			if ( ! empty( $tag_terms ) && ! is_wp_error( $tag_terms ) ) {
 				$tags = wp_list_pluck( $tag_terms, 'name' );
 			}
 
-			$url = $parent_product->get_permalink(); // Variation uses parent URL
+			$url = $variation->get_permalink(); // Correct: Use variation's own permalink
+			if (empty($url)) { // Fallback if variation permalink fails
+				 error_log("WCAC Indexer Format WARNING: Failed to get permalink for variation ID {$post_id}, falling back to parent URL.");
+				 $url = $parent_product->get_permalink();
+			}
 
 		}
 		// --- Handle Simple/Variable Products ---
@@ -444,14 +496,14 @@ class Wcac_Indexer {
 
 
 				// Content: Use excerpt first, then description
-				$main_content = trim($product->get_short_description());
-				if (empty($main_content)) {
-					$main_content = wp_strip_all_tags(strip_shortcodes($product->get_description()));
+				$raw_content = $product->get_short_description(); // Get raw excerpt
+				if (empty(trim($raw_content))) {
+					$raw_content = $product->get_description(); // Get raw description
 				}
 
 				// Get Categories and Tags
-				$term_ids = wp_get_post_terms( $post_id, 'product_cat', ['fields' => 'ids'] );
-				$categories = $this->get_all_category_names($term_ids, $post_id);
+				$term_ids = wp_get_post_terms($post_id, 'product_cat', ['fields' => 'ids']);
+				$categories = $this->get_all_category_names($term_ids, $post_id, 'product_cat', false);
 				$tag_terms = get_the_terms( $post_id, 'product_tag' );
 				if ( ! empty( $tag_terms ) && ! is_wp_error( $tag_terms ) ) {
 					$tags = wp_list_pluck( $tag_terms, 'name' );
@@ -466,9 +518,9 @@ class Wcac_Indexer {
 		// --- Handle Pages & Posts ---
 		elseif ($content_type === 'page' || $content_type === 'post') {
 			// Content - Prioritize excerpt, then content
-			$main_content = trim($post->post_excerpt);
-			if (empty($main_content)) {
-				$main_content = wp_strip_all_tags(strip_shortcodes($post->post_content));
+			$raw_content = $post->post_excerpt; // Get raw excerpt
+			if (empty(trim($raw_content))) {
+				$raw_content = $post->post_content; // Get raw content
 			}
 			$url = get_permalink( $post->ID );
 
@@ -488,6 +540,22 @@ class Wcac_Indexer {
 		else {
 			error_log("WCAC Indexer Format Error: Unhandled post type '{$content_type}' for post ID {$post_id}.");
 			return null;
+		}
+
+		// --- Sanitize and Prepare Main Content Snippet ---
+		if (!empty($raw_content)) {
+			// 1. Attempt to convert to valid UTF-8, discarding invalid characters
+			$utf8_content = mb_convert_encoding($raw_content, 'UTF-8', 'UTF-8');
+			// 2. Strip shortcodes
+			$no_shortcodes = strip_shortcodes($utf8_content);
+			// 3. Strip all HTML tags
+			$plain_text = wp_strip_all_tags($no_shortcodes);
+			// 4. Normalize whitespace
+			$normalized_text = preg_replace('/\s+/s', ' ', $plain_text);
+			// 5. Trim and limit length using mb_substr for multibyte safety
+			$main_content_limited = mb_substr(trim($normalized_text), 0, 450, 'UTF-8'); // Shortened limit slightly
+		} else {
+			$main_content_limited = '';
 		}
 
 		// --- Assemble Common Output ---
@@ -513,9 +581,8 @@ class Wcac_Indexer {
 		}
 
 		// Add main content snippet
-		$main_content_limited = substr( $main_content, 0, 500 ); // Limit length
 		if (!empty($main_content_limited)) {
-			$output_lines[] = "Content: " . preg_replace('/\s+/s', ' ', $main_content_limited); // Normalize whitespace
+			$output_lines[] = "Content: " . $main_content_limited; // Use the sanitized, limited content
 		}
 
 		// Add categories and tags
@@ -561,87 +628,66 @@ class Wcac_Indexer {
 			'title' => $title, // Will include variation attributes
 			'type' => $content_type,
 			'url' => $url,
-			'text' => $combined_text, // The full text blob for LLM context
-			'content' => $main_content_limited, // Shorter content for keyword scoring
+			'content' => $main_content_limited, // Assign sanitized, limited content
 			'categories' => array_values(array_filter($categories)), // Store cleaned categories for scoring
 			'tags' => array_values(array_filter($tags)), // Store cleaned tags for scoring
-			'attributes' => $attributes, // Store cleaned attributes Label => Slug map
 			'regular_price' => $regular_price, // Store numeric price or null
 			'sale_price' => $sale_price, // Store numeric price or null
 			'on_sale' => $on_sale, // Store boolean
 			'parent_id' => $parent_id > 0 ? $parent_id : null, // Store parent ID for variations
 		];
-		error_log("WCAC Indexer Format DEBUG [{$content_type} ID: {$post_id}]: Storing data: " . json_encode($result));
+		// error_log("WCAC Indexer Format DEBUG [{$content_type} ID: {$post_id}]: Storing data: " . wp_json_encode($result)); // REMOVE DEBUG LOG
 		return $result;
 	}
 
 	/**
-	 * Helper function to get all category names, including parents.
-	 *
-	 * @since 0.1.3
-	 * @param array $term_ids Array of direct term IDs.
-	 * @param int $post_id The post ID (for logging context).
-	 * @param string $taxonomy The taxonomy slug (default 'product_cat').
-	 * @return array Unique list of all category names (direct and parents).
+	 * Get all category names for a product including parent categories.
+	 * 
+	 * @param array $term_ids Array of term IDs to process
+	 * @param int $post_id The post ID (for logging)
+	 * @param string $taxonomy The taxonomy name, defaults to 'product_cat'
+	 * @param bool $include_parents Whether to include parent categories, defaults to true
+	 * @return array Array of unique category names
 	 */
-	private function get_all_category_names(array $term_ids, int $post_id, string $taxonomy = 'product_cat'): array {
+	private function get_all_category_names(array $term_ids, int $post_id, string $taxonomy = 'product_cat', bool $include_parents = true): array {
 		$all_category_names = [];
-		
+		$debug_info = []; // For logging
+
 		// First collect all direct category names and their parents
 		foreach ($term_ids as $term_id) {
 			$term = get_term($term_id, $taxonomy);
 			if ($term && !is_wp_error($term)) {
 				$direct_cat_name = $term->name;
 				$all_category_names[] = $direct_cat_name; // Add direct term name
-				$parent_names_found = []; // Track parents for logging
+				$debug_info[$term_id] = ['direct' => $direct_cat_name, 'parents' => []];
 				
-				// Add parent term names recursively
-				$parent_id_term = $term->parent;
-				while ($parent_id_term != 0) {
-					$parent_term = get_term($parent_id_term, $taxonomy);
-					if ($parent_term && !is_wp_error($parent_term)) {
-						$parent_name = $parent_term->name;
-						$all_category_names[] = $parent_name;
-						$parent_names_found[] = $parent_name;
-						$parent_id_term = $parent_term->parent;
-					} else {
-						break; // Error or no parent found
+				// Add parent term names recursively (if enabled)
+				if ($include_parents) {
+					$parent_id_term = $term->parent;
+					while ($parent_id_term != 0) {
+						$parent_term = get_term($parent_id_term, $taxonomy);
+						if ($parent_term && !is_wp_error($parent_term)) {
+							$parent_name = $parent_term->name;
+							$all_category_names[] = $parent_name;
+							$debug_info[$term_id]['parents'][] = $parent_name;
+							$parent_id_term = $parent_term->parent;
+						} else {
+							break; // Error or no parent found
+						}
 					}
 				}
-				// Log the found categories for this term
-				error_log("WCAC Indexer DEBUG [Post ID: {$post_id}]: Term '{$direct_cat_name}' (ID: {$term_id}) - Found Parents: " . (!empty($parent_names_found) ? implode(', ', $parent_names_found) : 'None'));
 			}
 		}
 
-		// Now add the main "Yarn" category explicitly if any category contains "Yarn" in its name
-		// This ensures products in yarn-related categories also match "yarn" search
-		$yarn_category_match = false;
-		foreach ($all_category_names as $cat_name) {
-			if (stripos($cat_name, 'yarn') !== false) {
-				$yarn_category_match = true;
-				break;
-			}
-		}
-		
-		// Add the main "Yarn" category if this is a yarn-related product
-		if ($yarn_category_match) {
-			// Try to get the main Yarn category
-			$yarn_terms = get_terms([
-				'taxonomy' => $taxonomy,
-				'name' => 'Yarn',
-				'hide_empty' => false,
-				'number' => 1
-			]);
-			
-			if (!is_wp_error($yarn_terms) && !empty($yarn_terms)) {
-				// Add the main Yarn category name
-				$all_category_names[] = 'Yarn';
-				error_log("WCAC Indexer DEBUG [Post ID: {$post_id}]: Added main 'Yarn' category to yarn-related product");
-			}
-		}
-		
 		$unique_names = array_unique($all_category_names);
-		error_log("WCAC Indexer DEBUG [Post ID: {$post_id}]: Final unique categories stored: " . (!empty($unique_names) ? implode(', ', $unique_names) : 'None'));
+		$duplicate_count = count($all_category_names) - count($unique_names);
+		
+		// Enhanced logging showing full category hierarchy and duplicate detection
+		error_log("WCAC Indexer [Post ID: {$post_id}]: Categories - Raw count: " . count($all_category_names) . 
+				 ", Unique: " . count($unique_names) . 
+				 ", Duplicates removed: " . $duplicate_count . 
+				 " - Hierarchy: " . json_encode($debug_info));
+				 
 		return $unique_names;
 	}
 
@@ -652,7 +698,7 @@ class Wcac_Indexer {
 	 * @throws Exception If fetching data fails critically.
 	 */
 	private function generate_and_save_site_profile(): void {
-		error_log('WCAC DEBUG: Entering generate_and_save_site_profile method.');
+		// error_log('WCAC DEBUG: Entering generate_and_save_site_profile method.'); // REMOVE DEBUG LOG
 		error_log('WCAC Indexer: Generating site profile...');
 		$profile_parts = [];
 
@@ -733,5 +779,132 @@ class Wcac_Indexer {
 		}
 		// Split by newline, trim whitespace, remove empty lines, convert to lowercase for case-insensitive matching
 		return array_filter(array_map('trim', explode("\n", strtolower($keywords_raw))));
+	}
+
+	/**
+	 * Helper function to get the counts array from the index meta option.
+	 *
+	 * @since 0.1.5
+	 * @return array Associative array of counts per post type.
+	 */
+	public function get_last_meta_counts(): array {
+		$meta = get_option(self::META_KEY, []);
+		return $meta['counts'] ?? ['product' => 0, 'page' => 0, 'post' => 0, 'product_variation' => 0, 'total' => 0];
+	}
+
+	/**
+	 * Helper function to extract basic post data.
+	 */
+	private function _extract_basic_data(WP_Post $post_obj): array {
+		$post_id = $post_obj->ID;
+		$post_title = $post_obj->post_title;
+		$post_type = $post_obj->post_type;
+		$url = get_permalink($post_id);
+		$url = $url ?: ''; // Ensure URL is a string
+
+		// Process content
+		$content = apply_filters('the_content', $post_obj->post_content);
+		$content_text = $this->custom_strip_tags($content);
+		$content_snippet = mb_substr($content_text, 0, $this->content_snippet_length);
+
+		return [
+			'post_id' => $post_id,
+			'post_title' => $post_title,
+			'post_type' => $post_type,
+			'url' => $url,
+			'content_text' => $content_text,
+			'content_snippet' => $content_snippet,
+		];
+	}
+
+	/**
+	 * Helper function to extract and JSON-encode term data (categories/tags).
+	 */
+	private function _extract_term_data(int $post_id, string $taxonomy): ?string {
+		$terms_list = [];
+		if ($taxonomy === 'product_tag') {
+			$terms = wp_get_post_tags($post_id, ['fields' => 'names']);
+		} else {
+			$terms = wp_get_post_terms($post_id, $taxonomy, ['fields' => 'names']);
+		}
+		
+		if (!is_wp_error($terms) && !empty($terms)) {
+			$terms_list = $terms;
+		}
+		
+		return !empty($terms_list) ? json_encode($terms_list) : null;
+	}
+	
+	/**
+	 * Helper function to extract WooCommerce product-specific metadata.
+	 */
+	private function _extract_product_metadata(int $post_id, string $post_type): array {
+		$metadata = [
+			'regular_price' => null,
+			'sale_price' => null,
+			'on_sale' => 0,
+			'parent_id' => 0, // Default to 0
+			'stock_status' => null
+		];
+
+		if (class_exists('WooCommerce') && ($post_type === 'product' || $post_type === 'product_variation')) {
+			$product = wc_get_product($post_id);
+			if ($product) {
+				$metadata['regular_price'] = $product->get_regular_price();
+				$metadata['sale_price'] = $product->get_sale_price();
+				$metadata['on_sale'] = $product->is_on_sale() ? 1 : 0;
+				$metadata['stock_status'] = $product->get_stock_status(); // e.g., 'instock', 'outofstock'
+				
+				if ($product->is_type('variation')) {
+					$metadata['parent_id'] = $product->get_parent_id();
+				}
+			}
+		}
+		return $metadata;
+	}
+
+	/**
+	 * Extracts relevant data from a post object for indexing.
+	 *
+	 * @param WP_Post $post_obj The post object.
+	 * @return array|null Extracted data array or null if excluded.
+	 */
+	private function extract_post_data(WP_Post $post_obj): ?array {
+		// Basic data
+		$basic_data = $this->_extract_basic_data($post_obj);
+		
+		// --- Exclusion check --- 
+		$settings = get_option('wcac_settings', []);
+		$negative_keywords = isset($settings['wcac_negative_keywords']) ? preg_split('/\r\n|\r|\n/', $settings['wcac_negative_keywords']) : [];
+		if ($this->contains_negative_keyword($basic_data['post_title'] . ' ' . $basic_data['content_text'], $negative_keywords)) {
+			error_log("WCAC Indexer: Skipping post ID {$basic_data['post_id']} due to negative keyword.");
+			return null;
+		}
+
+		// --- Term data --- 
+		$categories = null;
+		if ($basic_data['post_type'] === 'product') {
+			 $categories = $this->_extract_term_data($basic_data['post_id'], 'product_cat');
+		}
+		$tags = $this->_extract_term_data($basic_data['post_id'], 'product_tag'); // Use product_tag for WC
+		
+		// --- Product metadata --- 
+		$product_metadata = $this->_extract_product_metadata($basic_data['post_id'], $basic_data['post_type']);
+
+		// --- Combine data --- 
+		return [
+			'post_id' => $basic_data['post_id'],
+			'post_type' => $basic_data['post_type'],
+			'title' => $basic_data['post_title'],
+			'content_snippet' => $basic_data['content_snippet'],
+			'url' => $basic_data['url'],
+			'categories' => $categories,
+			'tags' => $tags,
+			'regular_price' => $product_metadata['regular_price'],
+			'sale_price' => $product_metadata['sale_price'],
+			'on_sale' => $product_metadata['on_sale'],
+			'parent_id' => $product_metadata['parent_id'],
+			'stock_status' => $product_metadata['stock_status']
+		];
 	}
 } 

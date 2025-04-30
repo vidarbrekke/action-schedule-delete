@@ -1,0 +1,723 @@
+/**
+ * Admin styles for WP Customer AI Chatbot
+ */
+
+/* Settings Page Layout */
+.wcac-settings-page {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 0 20px;
+}
+
+/* Form Fields */
+.wcac-settings-page input[type="text"],
+.wcac-settings-page input[type="password"],
+.wcac-settings-page textarea {
+    width: 100%;
+    max-width: 600px;
+}
+
+/* Progress Bar */
+#wcac-reindex-progress {
+    width: 100%;
+    height: 20px;
+    margin: 10px 0;
+}
+
+#wcac-reindex-status-container {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    padding: 15px;
+    margin-top: 15px;
+    border-radius: 4px;
+}
+
+#wcac-reindex-status {
+    display: block;
+    margin-top: 10px;
+    font-style: italic;
+}
+
+/* Range Inputs */
+.wcac-settings-page input[type="range"] {
+    width: 200px;
+    vertical-align: middle;
+}
+
+.wcac-settings-page output {
+    margin-left: 10px;
+    vertical-align: middle;
+}
+
+/* Description Text */
+.wcac-settings-page .description {
+    margin-top: 5px;
+    color: #666;
+    font-style: italic;
+}
+
+/* Section Headers */
+.wcac-settings-page h2 {
+    margin: 2em 0 1em;
+    padding-bottom: 0.5em;
+    border-bottom: 1px solid #eee;
+}
+
+/* Settings Groups */
+.wcac-settings-page .form-table th {
+    width: 250px;
+}
+
+/* Buttons */
+.wcac-settings-page .button-secondary {
+    margin: 5px 0;
+}
+
+/* Restore Default Button */
+#wcac-restore-default-prompt {
+    margin-top: 10px;
+}
+
+/* Checkbox Groups */
+.wcac-settings-page fieldset label {
+    display: block;
+    margin: 5px 0;
+}
+
+/* System Prompt Textarea */
+#wc_system_prompt_field {
+    min-height: 200px;
+    font-family: monospace;
+}
+
+/* Custom CSS Textarea */
+#wcac_custom_css_field {
+    font-family: monospace;
+    min-height: 150px;
+}
+
+/* Synonym Map Textarea */
+#wcac_synonym_map_field {
+    font-family: monospace;
+    min-height: 100px;
+}
+
+/* API Key Field */
+#wcac_api_key_field {
+    font-family: monospace;
+    letter-spacing: 1px;
+}
+
+/* Status Messages */
+.wcac-status-success {
+    color: #28a745;
+}
+
+.wcac-status-error {
+    color: #dc3545;
+}
+
+.wcac-status-warning {
+    color: #ffc107;
+}
+
+/* Responsive Design */
+@media screen and (max-width: 782px) {
+    .wcac-settings-page .form-table th {
+        width: 100%;
+        display: block;
+    }
+    
+    .wcac-settings-page input[type="range"] {
+        width: 100%;
+        max-width: 300px;
+    }
+}
+
+/* WordPress Customer AI Chatbot Admin Styles */
+
+.wcac-settings-wrapper {
+    margin: 20px;
+    background: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+/* Tabs Navigation */
+.wcac-tabs {
+    margin: 20px 0;
+}
+
+.wcac-tab-nav {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-bottom: 1px solid #ccc;
+}
+
+.wcac-tab-nav li {
+    padding: 10px 20px;
+    margin: 0;
+    cursor: pointer;
+    background: #f1f1f1;
+    border: 1px solid #ccc;
+    border-bottom: none;
+    margin-right: 5px;
+    border-radius: 4px 4px 0 0;
+}
+
+.wcac-tab-nav li.active {
+    background: #fff;
+    border-bottom: 1px solid #fff;
+    margin-bottom: -1px;
+    font-weight: bold;
+}
+
+/* Tab Content */
+.wcac-tab-content {
+    display: none;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-top: none;
+    background: #fff;
+}
+
+.wcac-tab-content.active {
+    display: block;
+}
+
+/* Settings Form */
+.wcac-settings-wrapper {
+    max-width: 1200px;
+    margin: 20px 0;
+}
+
+.wcac-settings-wrapper form {
+    background: #fff;
+    padding: 20px;
+}
+
+/* Input Fields */
+.wcac-settings-wrapper input[type="text"],
+.wcac-settings-wrapper input[type="number"],
+.wcac-settings-wrapper textarea {
+    width: 100%;
+    max-width: 500px;
+}
+
+/* Description Text */
+.wcac-settings-wrapper .description {
+    color: #666;
+    font-style: italic;
+    margin-top: 5px;
+}
+
+/* Section Headers */
+.wcac-settings-wrapper h2 {
+    font-size: 1.5em;
+    margin: 1em 0;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+/* Progress Bar */
+#wcac-reindex-progress {
+    width: 100%;
+    height: 20px;
+    margin: 10px 0;
+}
+
+/* Status Container */
+#wcac-reindex-status-container {
+    margin: 15px 0;
+    padding: 10px;
+    background: #f8f8f8;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+/* Field Groups */
+.form-table {
+    margin-top: 0;
+}
+
+.form-table th {
+    padding: 20px 10px 20px 0;
+    width: 200px;
+    vertical-align: top;
+}
+
+.form-table td {
+    padding: 20px 10px;
+    vertical-align: top;
+}
+
+/* Help Text */
+.description {
+    color: #666;
+    font-style: italic;
+    margin-top: 5px;
+}
+
+/* Submit Button */
+.wcac-settings-wrapper .submit {
+    margin: 20px -20px -20px -20px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-top: 1px solid #ddd;
+    text-align: left;
+}
+
+/* Responsive Design */
+@media screen and (max-width: 782px) {
+    .wcac-tab-nav {
+        flex-direction: column;
+        padding: 0;
+    }
+    
+    .wcac-tab-nav li {
+        width: 100%;
+        text-align: center;
+        border: 1px solid #ccc;
+        margin: 0;
+        border-bottom: none;
+    }
+    
+    .wcac-tab-nav li:last-child {
+        border-bottom: 1px solid #ccc;
+    }
+    
+    .wcac-tab-nav li.active {
+        background: #fff;
+        border-bottom: 1px solid #ccc;
+    }
+
+    .form-table th {
+        padding-bottom: 5px;
+        width: 100%;
+        display: block;
+    }
+
+    .form-table td {
+        padding: 0 10px 15px;
+        display: block;
+    }
+    
+    .wcac-settings-wrapper .submit {
+        margin: 20px -10px -20px;
+        padding: 20px 10px;
+    }
+}
+
+/* Status Messages */
+.wcac-status-error {
+    color: #dc3545;
+}
+
+.wcac-status-warning {
+    color: #ffc107;
+}
+
+/* Reindex Progress */
+#wcac-reindex-status-container {
+    margin-top: 10px;
+    padding: 10px;
+    border: 1px solid #ccd0d4;
+    background-color: #f6f7f7;
+}
+
+#wcac-reindex-progress {
+    width: 100%;
+    height: 20px;
+    margin-bottom: 5px;
+}
+
+#wcac-reindex-status {
+    font-style: italic;
+    display: block;
+}
+
+/* Scoring Rules Section */
+.wcac-scoring-section {
+    margin-bottom: 30px;
+}
+
+.wcac-scoring-section h3 {
+    margin: 20px 0 10px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #eee;
+    color: #23282d;
+    font-size: 1.2em;
+}
+
+.wcac-scoring-group {
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #f9f9f9;
+    border: 1px solid #e5e5e5;
+    border-radius: 3px;
+}
+
+.wcac-scoring-group h4 {
+    margin: 0 0 10px;
+    color: #23282d;
+    font-size: 1.1em;
+}
+
+.wcac-scoring-group .description {
+    margin-bottom: 15px;
+}
+
+/* Range Inputs */
+.wcac-settings-wrapper input[type="range"] {
+    width: 100%;
+    max-width: 400px;
+    margin: 10px 0;
+}
+
+.wcac-range-value {
+    display: inline-block;
+    min-width: 40px;
+    padding: 2px 5px;
+    margin-left: 10px;
+    background: #f0f0f1;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    text-align: center;
+    font-size: 0.9em;
+}
+
+/* Customization Section */
+.wcac-customization-section textarea {
+    font-family: monospace;
+    line-height: 1.4;
+    tab-size: 4;
+}
+
+/* LLM Parameters Section */
+.wcac-llm-params-section .form-table td {
+    position: relative;
+}
+
+.wcac-llm-params-section input[type="range"] {
+    margin-right: 60px;
+}
+
+.wcac-llm-params-section .wcac-range-value {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+/* Indexing Section */
+.wcac-indexing-section fieldset {
+    margin-bottom: 15px;
+}
+
+.wcac-indexing-section label {
+    display: block;
+    margin-bottom: 8px;
+}
+
+.wcac-indexing-section input[type="checkbox"] {
+    margin-right: 8px;
+}
+
+/* Debug Logs Page */
+.log-details-content {
+    padding: 15px;
+    background-color: #f9f9f9;
+    border: 1px solid #e5e5e5;
+    margin: 10px 0;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.result-item {
+    background: #fff;
+    padding: 15px;
+    margin-bottom: 15px;
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.result-item:last-child {
+    margin-bottom: 0;
+}
+
+.result-item h4 {
+    margin: 0 0 10px 0;
+    color: #23282d;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.matched-fields-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+/* Score badges with different colors */
+.match-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    line-height: 1.4;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.match-badge.total-score {
+    background-color: #e3f2fd;
+    border: 1px solid #90caf9;
+    font-weight: 600;
+}
+
+.match-badge.title-match {
+    background-color: #e6ffe8;
+    border: 1px solid #b3deba;
+}
+
+.match-badge.content-match {
+    background-color: #fff8e6;
+    border: 1px solid #ffd591;
+}
+
+.match-badge.category-match {
+    background-color: #f5e6ff;
+    border: 1px solid #d8b3e6;
+}
+
+.match-badge.tag-match {
+    background-color: #ffe6f7;
+    border: 1px solid #ffb3e8;
+}
+
+.match-badge.direct-title {
+    background-color: #ffecec;
+    border-color: #ffb3b3;
+}
+
+.match-badge.multi-field {
+    background-color: #e6ffff;
+    border-color: #b3ffff;
+}
+
+.match-badge.all-keywords {
+    background-color: #e6f7ff;
+    border-color: #91d5ff;
+}
+
+.match-badge.on-sale {
+    background-color: #fffbe6;
+    border-color: #ffe58f;
+}
+
+/* Table layout improvements */
+.wp-list-table .column-cb {
+    width: 3%;
+}
+
+.wp-list-table .column-created_at {
+    width: 20%;
+}
+
+.wp-list-table .column-query {
+    width: 45%;
+}
+
+.wp-list-table .column-keywords {
+    width: 32%;
+}
+
+/* Delete button styling */
+.tablenav.top {
+    margin: 8px 0 15px;
+}
+
+.tablenav .button.action {
+    margin-right: 8px;
+}
+
+/* Checkbox styling */
+.wp-list-table .check-column {
+    width: 2.2em;
+    padding: 8px 10px;
+}
+
+.wp-list-table .check-column input[type="checkbox"] {
+    margin: -4px 0 0 8px;
+}
+
+/* View Details button styling */
+.button.view-details {
+    margin-bottom: 5px;
+}
+
+/* Debug Logs Table Improvements */
+.log-row {
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    position: relative;
+}
+
+.log-row:hover {
+    background-color: #f0f7ff !important;
+}
+
+.log-row td:not(.check-column) {
+    cursor: pointer;
+}
+
+.log-row.expanded {
+    background-color: #f0f7ff !important;
+}
+
+.log-row.expanded td {
+    border-bottom-color: transparent;
+}
+
+.log-details-row {
+    display: none;
+    background-color: #f8f9fa;
+}
+
+.log-details-cell {
+    padding: 0 !important;
+}
+
+.log-details-content {
+    padding: 20px;
+    border-top: 1px solid #e5e5e5;
+    animation: fadeIn 0.2s ease-in-out;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.result-item {
+    background: #fff;
+    padding: 15px;
+    margin-bottom: 15px;
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.result-item:last-child {
+    margin-bottom: 0;
+}
+
+.result-item h4 {
+    margin: 0 0 10px 0;
+    color: #23282d;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.matched-fields-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+/* Score badges with different colors */
+.match-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    line-height: 1.4;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.match-badge.total-score {
+    background-color: #e3f2fd;
+    border: 1px solid #90caf9;
+    font-weight: 600;
+}
+
+.match-badge.title {
+    background-color: #e6ffe8;
+    border: 1px solid #b3deba;
+}
+
+.match-badge.content {
+    background-color: #fff8e6;
+    border: 1px solid #ffd591;
+}
+
+.match-badge.category {
+    background-color: #f5e6ff;
+    border: 1px solid #d8b3e6;
+}
+
+.match-badge.tag {
+    background-color: #ffe6f7;
+    border: 1px solid #ffb3e8;
+}
+
+/* Table layout improvements */
+.wp-list-table .column-cb {
+    width: 3%;
+}
+
+.wp-list-table .column-created_at {
+    width: 20%;
+}
+
+.wp-list-table .column-query {
+    width: 45%;
+}
+
+.wp-list-table .column-keywords {
+    width: 32%;
+}
+
+/* Ensure checkbox column remains clickable */
+.log-row .check-column {
+    cursor: default;
+    position: relative;
+    z-index: 1;
+}
+
+.log-row .check-column input[type="checkbox"] {
+    cursor: pointer;
+    position: relative;
+    z-index: 2;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive improvements */
+@media screen and (max-width: 782px) {
+    .log-details-content {
+        padding: 15px;
+    }
+    
+    .matched-fields-summary {
+        gap: 5px;
+    }
+    
+    .match-badge {
+        font-size: 11px;
+        padding: 3px 6px;
+    }
+    
+    .result-item {
+        padding: 10px;
+    }
+} 
