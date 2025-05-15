@@ -63,6 +63,12 @@ Tune Tussle is a real-time multiplayer music quiz game where players compete to 
     - **LLM:** OpenRouter.ai (configurable model).
     - **Music Source:** YouTube Data API for search/links (manual playback).
 
+### Music Link Fetching
+
+- The system fetches music links via a single backend endpoint.
+- The provider is currently hardcoded to YouTube, but the architecture supports future expansion to Spotify, Apple Music, etc.
+- The frontend and backend are both structured to minimize future refactoring.
+
 ---
 
 ## 3. Future Features (Phase 2+)
@@ -99,6 +105,11 @@ Tune Tussle is a real-time multiplayer music quiz game where players compete to 
 - GDPR and other data privacy compliance as needed.
 - User data export/deletion features.
 
+### 3.7. Backend Architectural Enhancements
+- **Service Decomposition:** Refactor the core `gameSessionManager.ts` by decomposing it into smaller, specialized services/modules (e.g., `ParticipantManager`, `RoundManager`, `ScoringManager`) to improve modularity, testability, and reduce cognitive load as the application grows.
+- **State Machine Implementation:** Introduce a formal state machine pattern for managing game and round progression to make state transitions more explicit, robust, and easier to maintain, especially as game logic complexity increases.
+- **Persistent Data Store Integration:** Transition from in-memory session storage to a persistent database (e.g., PostgreSQL, Redis) to support data persistence across server restarts, enable future features like user accounts, and lay the groundwork for horizontal scalability. This will also involve defining clear data models and potentially an ORM strategy.
+
 ---
 
 ## 4. Technical Stack Considerations (Expanded)
@@ -121,7 +132,7 @@ Tune Tussle is a real-time multiplayer music quiz game where players compete to 
     - YouTube Data API for search/links
     - Explore licensed snippet APIs for future
 - **Testing:**
-    - Unit/integration tests for backend
+    - Unit/integration tests for backend, including real-time Socket.IO event emission and contract
     - E2E tests for frontend (Cypress/Playwright)
 - **Deployment:**
     - Vercel/Netlify for frontend
@@ -147,9 +158,25 @@ Tune Tussle is a real-time multiplayer music quiz game where players compete to 
 | Themed Game Packs              |                |     Yes      |
 | Spectator Mode                 |                |     Yes      |
 | Data Privacy Compliance        |                |     Yes      |
+| Test Coverage                 |                |     Yes      |
 
 ---
 
 ## 6. Changelog
 
+- **2024-07-XX (Current):**
+    - Implemented frontend UI for displaying final game results/winner on a dedicated `ResultsPage.tsx`.
+    - Implemented frontend UI for displaying correct answer to all players after a round in `QuestionDisplay.tsx`.
+    - Replaced `window.confirm` with a custom `ConfirmModal.tsx` for judge score adjustments.
+    - Integrated `react-hot-toast` for improved frontend notifications.
+    - Implemented frontend for YouTube video embedding in `JudgeGameControls.tsx` (awaiting backend link generation).
+    - Completed backend implementation and testing for score override functionality.
+    - Resolved all failing backend tests (Jest), including `gameSessionManager.test.ts` and integration tests like `socketGameFlow.test.ts`, addressing various logic and typing issues.
+    - Resolved all failing frontend tests (Vitest), including `useGameLogic.test.tsx` and `CreateGamePage.test.tsx`, by updating mocks, assertions, and type definitions.
+    - Fixed UI bug causing blank participant names in the lobby (CSS and type-related).
+    - Cleaned up debug console logs from recently addressed issues.
+    - **All frontend and backend automated tests are now passing. The codebase is significantly more stable and ready for further development or deployment.**
+- **2024-07-XX:** Implemented core frontend participant gameplay UI (`GamePage`, `QuestionDisplay`, `AnswerInput`, `BuzzButton`, `Scoreboard`), Socket.IO integration (`SocketContext`, `useGameLogic`), player name input flow, and comprehensive Vitest tests (all passing). Aligned frontend/backend event names.
+- **2024-07-XX:** Backend real-time gameplay implementation completed (Socket.IO event emission for game lifecycle, handling client actions like buzz-in/submit-answer, associated timer logic) and fully tested (unit and integration tests passing).
+- **2024-06-XX:** Real-time lobby updates and core game logic (with full test coverage) implemented. Next: full real-time gameplay events and UI.
 - **2024-06-XX:** Updated MVP and future features to reflect latest decisions: Local Play only, no accounts, no monetization, LLM via OpenRouter.ai, playful/clean design, accessibility not required for MVP, plan for multi-language support, no data privacy requirements for MVP.
