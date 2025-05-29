@@ -1,0 +1,40 @@
+# Node modules
+node_modules/
+
+# Build output
+dist/
+build/
+.next/
+coverage/
+
+# Environment files
+.env
+.env.*
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS/Editor files
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# TypeScript
+*.tsbuildinfo
+
+# Compiled JavaScript files in source directories (keep only TypeScript)
+backend/src/**/*.js
+frontend/src/**/*.js
+
+# Misc
+*.local
+
+# Backup files/directories from cleanup
+src_backup/
+package_backup.json
+package-lock_backup.json
+tailwind.config_backup.js 

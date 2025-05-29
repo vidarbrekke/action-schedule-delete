@@ -1,0 +1,777 @@
+[20-Mar-2025 18:10:25 UTC] WCQM Debug: Loading stored settings: Array
+(
+    [rules] => Array
+        (
+            [0] => Array
+                (
+                    [id] => rule_67dc3f103aece
+                    [type] => category
+                    [target_id] => 635
+                    [target_name] => Sandnes Garn Yarn
+                    [multiple] => 6
+                )
+
+        )
+
+    [default_multiple] => 10
+)
+
+[20-Mar-2025 18:10:25 UTC] WCQM Debug: Validating rule: Array
+(
+    [id] => rule_67dc3f103aece
+    [type] => category
+    [target_id] => 635
+    [target_name] => Sandnes Garn Yarn
+    [multiple] => 6
+)
+
+[20-Mar-2025 18:10:25 UTC] WCQM Debug: Category does not exist: 635
+[20-Mar-2025 18:10:25 UTC] WCQM Debug: Invalid rule found: Array
+(
+    [id] => rule_67dc3f103aece
+    [type] => category
+    [target_id] => 635
+    [target_name] => Sandnes Garn Yarn
+    [multiple] => 6
+)
+
+[20-Mar-2025 18:10:25 UTC] WCQM Debug: Built product-category map with 0 products
+[20-Mar-2025 18:10:25 UTC] WCQM Debug: Rules loaded successfully:
+[20-Mar-2025 18:10:25 UTC] - Default multiple: 10
+[20-Mar-2025 18:10:25 UTC] - Product rules count: 0
+[20-Mar-2025 18:10:25 UTC] - Category rules count: 0
+[20-Mar-2025 18:10:25 UTC] - Product-category map size: 0
+[20-Mar-2025 18:10:25 UTC] WCQM Debug: Rules manager initialized
+[20-Mar-2025 18:10:25 UTC] WCQM Debug: Product class initialized
+[20-Mar-2025 18:10:25 UTC] WCQM Debug: Checkout class initialized
+[20-Mar-2025 18:10:25 UTC] WCQM Debug: Rules version mismatch, checking data integrity
+[20-Mar-2025 18:10:25 UTC] WCQM Debug: Rules already loaded, skipping load
+[20-Mar-2025 18:10:25 UTC] WCQM Debug: Admin menu registration successful
+[20-Mar-2025 18:10:25 UTC] WCQM Debug: Loading stored settings: Array
+(
+    [rules] => Array
+        (
+            [0] => Array
+                (
+                    [id] => rule_67dc3f103aece
+                    [type] => category
+                    [target_id] => 635
+                    [target_name] => Sandnes Garn Yarn
+                    [multiple] => 6
+                )
+
+        )
+
+    [default_multiple] => 10
+)
+
+[20-Mar-2025 18:10:25 UTC] WCQM Debug: Validating rule: Array
+(
+    [id] => rule_67dc3f103aece
+    [type] => category
+    [target_id] => 635
+    [target_name] => Sandnes Garn Yarn
+    [multiple] => 6
+)
+
+[20-Mar-2025 18:10:25 UTC] WCQM Debug: Category does not exist: 635
+[20-Mar-2025 18:10:25 UTC] WCQM Debug: Invalid rule found: Array
+(
+    [id] => rule_67dc3f103aece
+    [type] => category
+    [target_id] => 635
+    [target_name] => Sandnes Garn Yarn
+    [multiple] => 6
+)
+
+[20-Mar-2025 18:10:25 UTC] WCQM Debug: Built product-category map with 0 products
+[20-Mar-2025 18:10:25 UTC] WCQM Debug: Rules loaded successfully:
+[20-Mar-2025 18:10:25 UTC] - Default multiple: 10
+[20-Mar-2025 18:10:25 UTC] - Product rules count: 0
+[20-Mar-2025 18:10:25 UTC] - Category rules count: 0
+[20-Mar-2025 18:10:25 UTC] - Product-category map size: 0
+[20-Mar-2025 18:10:25 UTC] WCQM Debug: Rules manager initialized
+[20-Mar-2025 18:10:25 UTC] WCQM Debug: Product class initialized
+[20-Mar-2025 18:10:25 UTC] WCQM Debug: Cart class initialized with enhanced hooks
+[20-Mar-2025 18:10:25 UTC] WCQM Debug: Checkout class initialized
+[20-Mar-2025 18:10:25 UTC] WCQM Debug: Rules version mismatch, checking data integrity
+[20-Mar-2025 18:10:25 UTC] WCQM Debug: Rules already loaded, skipping load
+[20-Mar-2025 18:10:25 UTC] WCQM Debug: Getting multiple for product 35288
+[20-Mar-2025 18:10:25 UTC] WCQM Debug: No rules found, using default multiple: 10
+[20-Mar-2025 18:10:25 UTC] WCQM Debug: Getting multiple for product 35288
+[20-Mar-2025 18:10:25 UTC] WCQM Debug: No rules found, using default multiple: 10
+[20-Mar-2025 18:10:26 UTC] WCQM Debug: Using default multiple: 10
+[20-Mar-2025 18:10:26 UTC] WCQM Debug: Saving rules: Array
+(
+    [rules] => Array
+        (
+        )
+
+    [default_multiple] => 10
+)
+
+[20-Mar-2025 18:10:26 UTC] WCQM Debug: Loading stored settings: Array
+(
+    [rules] => Array
+        (
+        )
+
+    [default_multiple] => 10
+)
+
+[20-Mar-2025 18:10:26 UTC] WCQM Debug: Getting multiple for product 5054
+[20-Mar-2025 18:10:26 UTC] WCQM Debug: No rules found, using default multiple: 10
+[20-Mar-2025 18:10:26 UTC] WCQM Debug: Getting multiple for product 50296
+[20-Mar-2025 18:10:26 UTC] WCQM Debug: No rules found, using default multiple: 10
+[20-Mar-2025 18:10:26 UTC] WCQM Debug: Getting multiple for product 50296
+[20-Mar-2025 18:10:26 UTC] WCQM Debug: No rules found, using default multiple: 10
+[20-Mar-2025 18:10:26 UTC] WCQM Debug: Getting multiple for product 50296
+[20-Mar-2025 18:10:26 UTC] WCQM Debug: No rules found, using default multiple: 10
+[20-Mar-2025 18:10:26 UTC] WCQM Debug: Built product-category map with 1413 products
+[20-Mar-2025 18:10:26 UTC] WCQM Debug: Rules loaded successfully:
+[20-Mar-2025 18:10:26 UTC] - Default multiple: 10
+[20-Mar-2025 18:10:26 UTC] - Product rules count: 0
+[20-Mar-2025 18:10:26 UTC] - Category rules count: 0
+[20-Mar-2025 18:10:26 UTC] - Product-category map size: 1413
+[20-Mar-2025 18:10:26 UTC] WCQM Debug: Rules saved and reloaded successfully
+[20-Mar-2025 18:10:27 UTC] WCQM Debug: Rules data injected with 0 pre-resolved products
+[20-Mar-2025 18:10:27 UTC] WCQM Debug: Using default multiple: 10
+[20-Mar-2025 18:10:27 UTC] WCQM Debug: Saving rules: Array
+(
+    [rules] => Array
+        (
+        )
+
+    [default_multiple] => 10
+)
+
+[20-Mar-2025 18:10:27 UTC] WCQM Debug: Failed to save rules
+[20-Mar-2025 18:10:28 UTC] WCQM Debug: Loading stored settings: Array
+(
+    [rules] => Array
+        (
+        )
+
+    [default_multiple] => 10
+)
+
+[20-Mar-2025 18:10:28 UTC] WCQM Debug: Built product-category map with 0 products
+[20-Mar-2025 18:10:28 UTC] WCQM Debug: Rules loaded successfully:
+[20-Mar-2025 18:10:28 UTC] - Default multiple: 10
+[20-Mar-2025 18:10:28 UTC] - Product rules count: 0
+[20-Mar-2025 18:10:28 UTC] - Category rules count: 0
+[20-Mar-2025 18:10:28 UTC] - Product-category map size: 0
+[20-Mar-2025 18:10:28 UTC] WCQM Debug: Rules manager initialized
+[20-Mar-2025 18:10:28 UTC] WCQM Debug: Product class initialized
+[20-Mar-2025 18:10:28 UTC] WCQM Debug: Checkout class initialized
+[20-Mar-2025 18:10:28 UTC] WCQM Debug: Rules version mismatch, checking data integrity
+[20-Mar-2025 18:10:28 UTC] WCQM Debug: Rules already loaded, skipping load
+[20-Mar-2025 18:10:28 UTC] WCQM Debug: Admin menu registration successful
+[20-Mar-2025 18:10:29 UTC] WCQM Settings: Loading admin scripts for hook: toplevel_page_wc-quantity-multiples
+[20-Mar-2025 18:10:29 UTC] WCQM Settings: Admin scripts loaded successfully
+[20-Mar-2025 18:10:29 UTC] WCQM Debug: Using default multiple: 10
+[20-Mar-2025 18:10:29 UTC] WCQM Debug: Using default multiple: 10
+[20-Mar-2025 18:10:29 UTC] WCQM Debug: Saving rules: Array
+(
+    [rules] => Array
+        (
+        )
+
+    [default_multiple] => 10
+)
+
+[20-Mar-2025 18:10:29 UTC] WCQM Debug: Failed to save rules
+[20-Mar-2025 18:10:38 UTC] WCQM Debug: Loading stored settings: Array
+(
+    [rules] => Array
+        (
+        )
+
+    [default_multiple] => 10
+)
+
+[20-Mar-2025 18:10:38 UTC] WCQM Debug: Built product-category map with 0 products
+[20-Mar-2025 18:10:38 UTC] WCQM Debug: Rules loaded successfully:
+[20-Mar-2025 18:10:38 UTC] - Default multiple: 10
+[20-Mar-2025 18:10:38 UTC] - Product rules count: 0
+[20-Mar-2025 18:10:38 UTC] - Category rules count: 0
+[20-Mar-2025 18:10:38 UTC] - Product-category map size: 0
+[20-Mar-2025 18:10:38 UTC] WCQM Debug: Rules manager initialized
+[20-Mar-2025 18:10:38 UTC] WCQM Debug: Product class initialized
+[20-Mar-2025 18:10:38 UTC] WCQM Debug: Cart class initialized with enhanced hooks
+[20-Mar-2025 18:10:38 UTC] WCQM Debug: Checkout class initialized
+[20-Mar-2025 18:10:38 UTC] WCQM Debug: Rules version mismatch, checking data integrity
+[20-Mar-2025 18:10:38 UTC] WCQM Debug: Rules already loaded, skipping load
+[20-Mar-2025 18:10:38 UTC] WCQM Debug: Using default multiple: 10
+[20-Mar-2025 18:10:38 UTC] WCQM Debug: Saving rules: Array
+(
+    [rules] => Array
+        (
+        )
+
+    [default_multiple] => 10
+)
+
+[20-Mar-2025 18:10:38 UTC] WCQM Debug: Failed to save rules
+[20-Mar-2025 18:10:40 UTC] WCQM Debug: Loading stored settings: Array
+(
+    [rules] => Array
+        (
+        )
+
+    [default_multiple] => 10
+)
+
+[20-Mar-2025 18:10:40 UTC] WCQM Debug: Built product-category map with 0 products
+[20-Mar-2025 18:10:40 UTC] WCQM Debug: Rules loaded successfully:
+[20-Mar-2025 18:10:40 UTC] - Default multiple: 10
+[20-Mar-2025 18:10:40 UTC] - Product rules count: 0
+[20-Mar-2025 18:10:40 UTC] - Category rules count: 0
+[20-Mar-2025 18:10:40 UTC] - Product-category map size: 0
+[20-Mar-2025 18:10:40 UTC] WCQM Debug: Rules manager initialized
+[20-Mar-2025 18:10:40 UTC] WCQM Debug: Product class initialized
+[20-Mar-2025 18:10:40 UTC] WCQM Debug: Cart class initialized with enhanced hooks
+[20-Mar-2025 18:10:40 UTC] WCQM Debug: Checkout class initialized
+[20-Mar-2025 18:10:40 UTC] WCQM Debug: Rules version mismatch, checking data integrity
+[20-Mar-2025 18:10:40 UTC] WCQM Debug: Rules already loaded, skipping load
+[20-Mar-2025 18:10:40 UTC] WCQM Debug: Getting multiple for product 35458
+[20-Mar-2025 18:10:40 UTC] WCQM Debug: No rules found, using default multiple: 10
+[20-Mar-2025 18:10:40 UTC] WCQM Debug: Getting multiple for product 35458
+[20-Mar-2025 18:10:40 UTC] WCQM Debug: No rules found, using default multiple: 10
+[20-Mar-2025 18:10:41 UTC] WCQM Debug: Getting multiple for product 2796
+[20-Mar-2025 18:10:41 UTC] WCQM Debug: No rules found, using default multiple: 10
+[20-Mar-2025 18:10:41 UTC] WCQM Debug: Getting multiple for product 6975
+[20-Mar-2025 18:10:41 UTC] WCQM Debug: No rules found, using default multiple: 10
+[20-Mar-2025 18:10:41 UTC] WCQM Debug: Getting multiple for product 5613
+[20-Mar-2025 18:10:41 UTC] WCQM Debug: No rules found, using default multiple: 10
+[20-Mar-2025 18:10:41 UTC] WCQM Debug: Getting multiple for product 6975
+[20-Mar-2025 18:10:41 UTC] WCQM Debug: No rules found, using default multiple: 10
+[20-Mar-2025 18:10:41 UTC] WCQM Debug: Rules data injected with 0 pre-resolved products
+[20-Mar-2025 18:10:41 UTC] WCQM Debug: Using default multiple: 10
+[20-Mar-2025 18:10:41 UTC] WCQM Debug: Saving rules: Array
+(
+    [rules] => Array
+        (
+        )
+
+    [default_multiple] => 10
+)
+
+[20-Mar-2025 18:10:41 UTC] WCQM Debug: Failed to save rules
+[20-Mar-2025 18:10:42 UTC] WCQM Debug: Loading stored settings: Array
+(
+    [rules] => Array
+        (
+        )
+
+    [default_multiple] => 10
+)
+
+[20-Mar-2025 18:10:42 UTC] WCQM Debug: Built product-category map with 0 products
+[20-Mar-2025 18:10:42 UTC] WCQM Debug: Rules loaded successfully:
+[20-Mar-2025 18:10:42 UTC] - Default multiple: 10
+[20-Mar-2025 18:10:42 UTC] - Product rules count: 0
+[20-Mar-2025 18:10:42 UTC] - Category rules count: 0
+[20-Mar-2025 18:10:42 UTC] - Product-category map size: 0
+[20-Mar-2025 18:10:42 UTC] WCQM Debug: Rules manager initialized
+[20-Mar-2025 18:10:42 UTC] WCQM Debug: Product class initialized
+[20-Mar-2025 18:10:42 UTC] WCQM Debug: Cart class initialized with enhanced hooks
+[20-Mar-2025 18:10:42 UTC] WCQM Debug: Checkout class initialized
+[20-Mar-2025 18:10:42 UTC] WCQM Debug: Rules version mismatch, checking data integrity
+[20-Mar-2025 18:10:42 UTC] WCQM Debug: Rules already loaded, skipping load
+[20-Mar-2025 18:10:42 UTC] PHP Warning:  call_user_func_array() expects parameter 1 to be a valid callback, class 'WCQM_Settings' does not have a method 'ajax_save_rule' in /home/staging/public_html/wp-includes/class-wp-hook.php on line 324
+[20-Mar-2025 18:10:42 UTC] WCQM Debug: Using default multiple: 10
+[20-Mar-2025 18:10:42 UTC] WCQM Debug: Saving rules: Array
+(
+    [rules] => Array
+        (
+        )
+
+    [default_multiple] => 10
+)
+
+[20-Mar-2025 18:10:42 UTC] WCQM Debug: Failed to save rules
+[20-Mar-2025 18:10:55 UTC] WCQM Debug: Loading stored settings: Array
+(
+    [rules] => Array
+        (
+        )
+
+    [default_multiple] => 10
+)
+
+[20-Mar-2025 18:10:55 UTC] WCQM Debug: Built product-category map with 0 products
+[20-Mar-2025 18:10:55 UTC] WCQM Debug: Rules loaded successfully:
+[20-Mar-2025 18:10:55 UTC] - Default multiple: 10
+[20-Mar-2025 18:10:55 UTC] - Product rules count: 0
+[20-Mar-2025 18:10:55 UTC] - Category rules count: 0
+[20-Mar-2025 18:10:55 UTC] - Product-category map size: 0
+[20-Mar-2025 18:10:55 UTC] WCQM Debug: Rules manager initialized
+[20-Mar-2025 18:10:55 UTC] WCQM Debug: Product class initialized
+[20-Mar-2025 18:10:55 UTC] WCQM Debug: Checkout class initialized
+[20-Mar-2025 18:10:56 UTC] WCQM Debug: Rules version mismatch, checking data integrity
+[20-Mar-2025 18:10:56 UTC] WCQM Debug: Rules already loaded, skipping load
+[20-Mar-2025 18:10:56 UTC] WCQM Debug: Admin menu registration successful
+[20-Mar-2025 18:10:56 UTC] WCQM Settings: Loading admin scripts for hook: toplevel_page_wc-quantity-multiples
+[20-Mar-2025 18:10:56 UTC] WCQM Settings: Admin scripts loaded successfully
+[20-Mar-2025 18:10:56 UTC] WCQM Debug: Loading stored settings: Array
+(
+    [rules] => Array
+        (
+        )
+
+    [default_multiple] => 10
+)
+
+[20-Mar-2025 18:10:56 UTC] WCQM Debug: Built product-category map with 0 products
+[20-Mar-2025 18:10:56 UTC] WCQM Debug: Rules loaded successfully:
+[20-Mar-2025 18:10:56 UTC] - Default multiple: 10
+[20-Mar-2025 18:10:56 UTC] - Product rules count: 0
+[20-Mar-2025 18:10:56 UTC] - Category rules count: 0
+[20-Mar-2025 18:10:56 UTC] - Product-category map size: 0
+[20-Mar-2025 18:10:56 UTC] WCQM Debug: Rules manager initialized
+[20-Mar-2025 18:10:56 UTC] WCQM Debug: Product class initialized
+[20-Mar-2025 18:10:56 UTC] WCQM Debug: Checkout class initialized
+[20-Mar-2025 18:10:56 UTC] WCQM Debug: Rules version mismatch, checking data integrity
+[20-Mar-2025 18:10:56 UTC] WCQM Debug: Rules already loaded, skipping load
+[20-Mar-2025 18:10:56 UTC] WCQM Debug: Using default multiple: 10
+[20-Mar-2025 18:10:56 UTC] WCQM Debug: Saving rules: Array
+(
+    [rules] => Array
+        (
+        )
+
+    [default_multiple] => 10
+)
+
+[20-Mar-2025 18:10:56 UTC] WCQM Debug: Failed to save rules
+[20-Mar-2025 18:10:56 UTC] WCQM Debug: Using default multiple: 10
+[20-Mar-2025 18:10:56 UTC] WCQM Debug: Using default multiple: 10
+[20-Mar-2025 18:10:56 UTC] WCQM Debug: Saving rules: Array
+(
+    [rules] => Array
+        (
+        )
+
+    [default_multiple] => 10
+)
+
+[20-Mar-2025 18:10:56 UTC] WCQM Debug: Failed to save rules
+[20-Mar-2025 18:11:00 UTC] WCQM Debug: Loading stored settings: Array
+(
+    [rules] => Array
+        (
+        )
+
+    [default_multiple] => 10
+)
+
+[20-Mar-2025 18:11:00 UTC] WCQM Debug: Built product-category map with 0 products
+[20-Mar-2025 18:11:00 UTC] WCQM Debug: Rules loaded successfully:
+[20-Mar-2025 18:11:00 UTC] - Default multiple: 10
+[20-Mar-2025 18:11:00 UTC] - Product rules count: 0
+[20-Mar-2025 18:11:00 UTC] - Category rules count: 0
+[20-Mar-2025 18:11:00 UTC] - Product-category map size: 0
+[20-Mar-2025 18:11:00 UTC] WCQM Debug: Rules manager initialized
+[20-Mar-2025 18:11:00 UTC] WCQM Debug: Product class initialized
+[20-Mar-2025 18:11:00 UTC] WCQM Debug: Cart class initialized with enhanced hooks
+[20-Mar-2025 18:11:00 UTC] WCQM Debug: Checkout class initialized
+[20-Mar-2025 18:11:00 UTC] WCQM Debug: Rules version mismatch, checking data integrity
+[20-Mar-2025 18:11:00 UTC] WCQM Debug: Rules already loaded, skipping load
+[20-Mar-2025 18:11:00 UTC] WCQM Debug: Getting multiple for product 27416
+[20-Mar-2025 18:11:00 UTC] WCQM Debug: No rules found, using default multiple: 10
+[20-Mar-2025 18:11:00 UTC] WCQM Debug: Getting multiple for product 27416
+[20-Mar-2025 18:11:00 UTC] WCQM Debug: No rules found, using default multiple: 10
+[20-Mar-2025 18:11:01 UTC] WCQM Debug: Getting multiple for product 2709
+[20-Mar-2025 18:11:01 UTC] WCQM Debug: No rules found, using default multiple: 10
+[20-Mar-2025 18:11:01 UTC] WCQM Debug: Getting multiple for product 26741
+[20-Mar-2025 18:11:01 UTC] WCQM Debug: No rules found, using default multiple: 10
+[20-Mar-2025 18:11:01 UTC] WCQM Debug: Getting multiple for product 26741
+[20-Mar-2025 18:11:01 UTC] WCQM Debug: No rules found, using default multiple: 10
+[20-Mar-2025 18:11:01 UTC] WCQM Debug: Getting multiple for product 26741
+[20-Mar-2025 18:11:01 UTC] WCQM Debug: No rules found, using default multiple: 10
+[20-Mar-2025 18:11:02 UTC] WCQM Debug: Rules data injected with 0 pre-resolved products
+[20-Mar-2025 18:11:02 UTC] WCQM Debug: Using default multiple: 10
+[20-Mar-2025 18:11:02 UTC] WCQM Debug: Saving rules: Array
+(
+    [rules] => Array
+        (
+        )
+
+    [default_multiple] => 10
+)
+
+[20-Mar-2025 18:11:02 UTC] WCQM Debug: Failed to save rules
+[20-Mar-2025 18:11:04 UTC] WCQM Debug: Loading stored settings: Array
+(
+    [rules] => Array
+        (
+        )
+
+    [default_multiple] => 10
+)
+
+[20-Mar-2025 18:11:04 UTC] WCQM Debug: Built product-category map with 0 products
+[20-Mar-2025 18:11:04 UTC] WCQM Debug: Rules loaded successfully:
+[20-Mar-2025 18:11:04 UTC] - Default multiple: 10
+[20-Mar-2025 18:11:04 UTC] - Product rules count: 0
+[20-Mar-2025 18:11:04 UTC] - Category rules count: 0
+[20-Mar-2025 18:11:04 UTC] - Product-category map size: 0
+[20-Mar-2025 18:11:04 UTC] WCQM Debug: Rules manager initialized
+[20-Mar-2025 18:11:04 UTC] WCQM Debug: Product class initialized
+[20-Mar-2025 18:11:04 UTC] WCQM Debug: Cart class initialized with enhanced hooks
+[20-Mar-2025 18:11:04 UTC] WCQM Debug: Checkout class initialized
+[20-Mar-2025 18:11:04 UTC] WCQM Debug: Rules version mismatch, checking data integrity
+[20-Mar-2025 18:11:04 UTC] WCQM Debug: Rules already loaded, skipping load
+[20-Mar-2025 18:11:05 UTC] WCQM Debug: Getting multiple for product 2796
+[20-Mar-2025 18:11:05 UTC] WCQM Debug: No rules found, using default multiple: 10
+[20-Mar-2025 18:11:05 UTC] WCQM Debug: Getting multiple for product 2796
+[20-Mar-2025 18:11:05 UTC] WCQM Debug: No rules found, using default multiple: 10
+[20-Mar-2025 18:11:05 UTC] WCQM Debug: Rules data injected with 0 pre-resolved products
+[20-Mar-2025 18:11:05 UTC] WCQM Debug: Using default multiple: 10
+[20-Mar-2025 18:11:05 UTC] WCQM Debug: Saving rules: Array
+(
+    [rules] => Array
+        (
+        )
+
+    [default_multiple] => 10
+)
+
+[20-Mar-2025 18:11:05 UTC] WCQM Debug: Failed to save rules
+[20-Mar-2025 18:11:06 UTC] WCQM Debug: Loading stored settings: Array
+(
+    [rules] => Array
+        (
+        )
+
+    [default_multiple] => 10
+)
+
+[20-Mar-2025 18:11:06 UTC] WCQM Debug: Built product-category map with 0 products
+[20-Mar-2025 18:11:06 UTC] WCQM Debug: Rules loaded successfully:
+[20-Mar-2025 18:11:06 UTC] - Default multiple: 10
+[20-Mar-2025 18:11:06 UTC] - Product rules count: 0
+[20-Mar-2025 18:11:06 UTC] - Category rules count: 0
+[20-Mar-2025 18:11:06 UTC] - Product-category map size: 0
+[20-Mar-2025 18:11:06 UTC] WCQM Debug: Rules manager initialized
+[20-Mar-2025 18:11:06 UTC] WCQM Debug: Product class initialized
+[20-Mar-2025 18:11:06 UTC] WCQM Debug: Cart class initialized with enhanced hooks
+[20-Mar-2025 18:11:06 UTC] WCQM Debug: Checkout class initialized
+[20-Mar-2025 18:11:06 UTC] WCQM Debug: Rules version mismatch, checking data integrity
+[20-Mar-2025 18:11:06 UTC] WCQM Debug: Rules already loaded, skipping load
+[20-Mar-2025 18:11:06 UTC] WCQM Debug: Using default multiple: 10
+[20-Mar-2025 18:11:06 UTC] WCQM Debug: Saving rules: Array
+(
+    [rules] => Array
+        (
+        )
+
+    [default_multiple] => 10
+)
+
+[20-Mar-2025 18:11:06 UTC] WCQM Debug: Failed to save rules
+[20-Mar-2025 18:11:18 UTC] WCQM Debug: Loading stored settings: Array
+(
+    [rules] => Array
+        (
+        )
+
+    [default_multiple] => 10
+)
+
+[20-Mar-2025 18:11:18 UTC] WCQM Debug: Built product-category map with 0 products
+[20-Mar-2025 18:11:18 UTC] WCQM Debug: Rules loaded successfully:
+[20-Mar-2025 18:11:18 UTC] - Default multiple: 10
+[20-Mar-2025 18:11:18 UTC] - Product rules count: 0
+[20-Mar-2025 18:11:18 UTC] - Category rules count: 0
+[20-Mar-2025 18:11:18 UTC] - Product-category map size: 0
+[20-Mar-2025 18:11:18 UTC] WCQM Debug: Rules manager initialized
+[20-Mar-2025 18:11:18 UTC] WCQM Debug: Product class initialized
+[20-Mar-2025 18:11:18 UTC] WCQM Debug: Cart class initialized with enhanced hooks
+[20-Mar-2025 18:11:18 UTC] WCQM Debug: Checkout class initialized
+[20-Mar-2025 18:11:18 UTC] WCQM Debug: Rules version mismatch, checking data integrity
+[20-Mar-2025 18:11:18 UTC] WCQM Debug: Rules already loaded, skipping load
+[20-Mar-2025 18:11:18 UTC] WCQM Debug: Getting multiple for product 12378
+[20-Mar-2025 18:11:18 UTC] WCQM Debug: No rules found, using default multiple: 10
+[20-Mar-2025 18:11:18 UTC] WCQM Debug: Getting multiple for product 12378
+[20-Mar-2025 18:11:18 UTC] WCQM Debug: No rules found, using default multiple: 10
+[20-Mar-2025 18:11:18 UTC] WCQM Debug: Getting multiple for product 7380
+[20-Mar-2025 18:11:18 UTC] WCQM Debug: No rules found, using default multiple: 10
+[20-Mar-2025 18:11:18 UTC] WCQM Debug: Getting multiple for product 48703
+[20-Mar-2025 18:11:18 UTC] WCQM Debug: No rules found, using default multiple: 10
+[20-Mar-2025 18:11:18 UTC] WCQM Debug: Getting multiple for product 7380
+[20-Mar-2025 18:11:18 UTC] WCQM Debug: No rules found, using default multiple: 10
+[20-Mar-2025 18:11:18 UTC] WCQM Debug: Getting multiple for product 48703
+[20-Mar-2025 18:11:18 UTC] WCQM Debug: No rules found, using default multiple: 10
+[20-Mar-2025 18:11:18 UTC] WCQM Debug: Getting multiple for product 48703
+[20-Mar-2025 18:11:18 UTC] WCQM Debug: No rules found, using default multiple: 10
+[20-Mar-2025 18:11:18 UTC] WCQM Debug: Getting multiple for product 48703
+[20-Mar-2025 18:11:18 UTC] WCQM Debug: No rules found, using default multiple: 10
+[20-Mar-2025 18:11:19 UTC] WCQM Debug: Rules data injected with 0 pre-resolved products
+[20-Mar-2025 18:11:19 UTC] WCQM Debug: Using default multiple: 10
+[20-Mar-2025 18:11:19 UTC] WCQM Debug: Saving rules: Array
+(
+    [rules] => Array
+        (
+        )
+
+    [default_multiple] => 10
+)
+
+[20-Mar-2025 18:11:19 UTC] WCQM Debug: Failed to save rules
+[20-Mar-2025 18:11:34 UTC] WCQM Debug: Loading stored settings: Array
+(
+    [rules] => Array
+        (
+        )
+
+    [default_multiple] => 10
+)
+
+[20-Mar-2025 18:11:34 UTC] WCQM Debug: Built product-category map with 0 products
+[20-Mar-2025 18:11:34 UTC] WCQM Debug: Rules loaded successfully:
+[20-Mar-2025 18:11:34 UTC] - Default multiple: 10
+[20-Mar-2025 18:11:34 UTC] - Product rules count: 0
+[20-Mar-2025 18:11:34 UTC] - Category rules count: 0
+[20-Mar-2025 18:11:34 UTC] - Product-category map size: 0
+[20-Mar-2025 18:11:34 UTC] WCQM Debug: Rules manager initialized
+[20-Mar-2025 18:11:34 UTC] WCQM Debug: Product class initialized
+[20-Mar-2025 18:11:34 UTC] WCQM Debug: Cart class initialized with enhanced hooks
+[20-Mar-2025 18:11:34 UTC] WCQM Debug: Checkout class initialized
+[20-Mar-2025 18:11:34 UTC] WCQM Debug: Rules version mismatch, checking data integrity
+[20-Mar-2025 18:11:34 UTC] WCQM Debug: Rules already loaded, skipping load
+[20-Mar-2025 18:11:34 UTC] WCQM Debug: Getting multiple for product 35458
+[20-Mar-2025 18:11:34 UTC] WCQM Debug: No rules found, using default multiple: 10
+[20-Mar-2025 18:11:34 UTC] WCQM Debug: Getting multiple for product 35458
+[20-Mar-2025 18:11:34 UTC] WCQM Debug: No rules found, using default multiple: 10
+[20-Mar-2025 18:11:34 UTC] WCQM Debug: Getting multiple for product 7380
+[20-Mar-2025 18:11:34 UTC] WCQM Debug: No rules found, using default multiple: 10
+[20-Mar-2025 18:11:34 UTC] WCQM Debug: Getting multiple for product 50328
+[20-Mar-2025 18:11:34 UTC] WCQM Debug: No rules found, using default multiple: 10
+[20-Mar-2025 18:11:34 UTC] WCQM Debug: Getting multiple for product 7380
+[20-Mar-2025 18:11:34 UTC] WCQM Debug: No rules found, using default multiple: 10
+[20-Mar-2025 18:11:34 UTC] WCQM Debug: Getting multiple for product 50328
+[20-Mar-2025 18:11:34 UTC] WCQM Debug: No rules found, using default multiple: 10
+[20-Mar-2025 18:11:34 UTC] WCQM Debug: Getting multiple for product 7380
+[20-Mar-2025 18:11:34 UTC] WCQM Debug: No rules found, using default multiple: 10
+[20-Mar-2025 18:11:34 UTC] WCQM Debug: Getting multiple for product 50328
+[20-Mar-2025 18:11:34 UTC] WCQM Debug: No rules found, using default multiple: 10
+[20-Mar-2025 18:11:34 UTC] WCQM Debug: Getting multiple for product 76628
+[20-Mar-2025 18:11:34 UTC] WCQM Debug: No rules found, using default multiple: 10
+[20-Mar-2025 18:11:34 UTC] WCQM Debug: Getting multiple for product 50328
+[20-Mar-2025 18:11:34 UTC] WCQM Debug: No rules found, using default multiple: 10
+[20-Mar-2025 18:11:34 UTC] WCQM Debug: Getting multiple for product 50328
+[20-Mar-2025 18:11:34 UTC] WCQM Debug: No rules found, using default multiple: 10
+[20-Mar-2025 18:11:34 UTC] WCQM Debug: Getting multiple for product 50328
+[20-Mar-2025 18:11:34 UTC] WCQM Debug: No rules found, using default multiple: 10
+[20-Mar-2025 18:11:35 UTC] WCQM Debug: Rules data injected with 0 pre-resolved products
+[20-Mar-2025 18:11:35 UTC] WCQM Debug: Using default multiple: 10
+[20-Mar-2025 18:11:35 UTC] WCQM Debug: Saving rules: Array
+(
+    [rules] => Array
+        (
+        )
+
+    [default_multiple] => 10
+)
+
+[20-Mar-2025 18:11:35 UTC] WCQM Debug: Failed to save rules
+[20-Mar-2025 18:11:50 UTC] WCQM Debug: Loading stored settings: Array
+(
+    [rules] => Array
+        (
+        )
+
+    [default_multiple] => 10
+)
+
+[20-Mar-2025 18:11:50 UTC] WCQM Debug: Built product-category map with 0 products
+[20-Mar-2025 18:11:50 UTC] WCQM Debug: Rules loaded successfully:
+[20-Mar-2025 18:11:50 UTC] - Default multiple: 10
+[20-Mar-2025 18:11:50 UTC] - Product rules count: 0
+[20-Mar-2025 18:11:50 UTC] - Category rules count: 0
+[20-Mar-2025 18:11:50 UTC] - Product-category map size: 0
+[20-Mar-2025 18:11:50 UTC] WCQM Debug: Rules manager initialized
+[20-Mar-2025 18:11:50 UTC] WCQM Debug: Product class initialized
+[20-Mar-2025 18:11:50 UTC] WCQM Debug: Cart class initialized with enhanced hooks
+[20-Mar-2025 18:11:50 UTC] WCQM Debug: Checkout class initialized
+[20-Mar-2025 18:11:50 UTC] WCQM Debug: Rules version mismatch, checking data integrity
+[20-Mar-2025 18:11:50 UTC] WCQM Debug: Rules already loaded, skipping load
+[20-Mar-2025 18:11:51 UTC] WCQM Debug: Getting multiple for product 35168
+[20-Mar-2025 18:11:51 UTC] WCQM Debug: No rules found, using default multiple: 10
+[20-Mar-2025 18:11:51 UTC] WCQM Debug: Getting multiple for product 35168
+[20-Mar-2025 18:11:51 UTC] WCQM Debug: No rules found, using default multiple: 10
+[20-Mar-2025 18:11:51 UTC] WCQM Debug: Loading stored settings: Array
+(
+    [rules] => Array
+        (
+        )
+
+    [default_multiple] => 10
+)
+
+[20-Mar-2025 18:11:51 UTC] WCQM Debug: Built product-category map with 0 products
+[20-Mar-2025 18:11:51 UTC] WCQM Debug: Rules loaded successfully:
+[20-Mar-2025 18:11:51 UTC] - Default multiple: 10
+[20-Mar-2025 18:11:51 UTC] - Product rules count: 0
+[20-Mar-2025 18:11:51 UTC] - Category rules count: 0
+[20-Mar-2025 18:11:51 UTC] - Product-category map size: 0
+[20-Mar-2025 18:11:51 UTC] WCQM Debug: Rules manager initialized
+[20-Mar-2025 18:11:51 UTC] WCQM Debug: Product class initialized
+[20-Mar-2025 18:11:51 UTC] WCQM Debug: Checkout class initialized
+[20-Mar-2025 18:11:51 UTC] WCQM Debug: Rules version mismatch, checking data integrity
+[20-Mar-2025 18:11:51 UTC] WCQM Debug: Rules already loaded, skipping load
+[20-Mar-2025 18:11:51 UTC] WCQM Debug: Using default multiple: 10
+[20-Mar-2025 18:11:51 UTC] WCQM Debug: Saving rules: Array
+(
+    [rules] => Array
+        (
+        )
+
+    [default_multiple] => 10
+)
+
+[20-Mar-2025 18:11:51 UTC] WCQM Debug: Failed to save rules
+[20-Mar-2025 18:11:51 UTC] WCQM Debug: Getting multiple for product 37844
+[20-Mar-2025 18:11:51 UTC] WCQM Debug: No rules found, using default multiple: 10
+[20-Mar-2025 18:11:51 UTC] WCQM Debug: Getting multiple for product 64331
+[20-Mar-2025 18:11:51 UTC] WCQM Debug: No rules found, using default multiple: 10
+[20-Mar-2025 18:11:51 UTC] WCQM Debug: Getting multiple for product 2796
+[20-Mar-2025 18:11:51 UTC] WCQM Debug: No rules found, using default multiple: 10
+[20-Mar-2025 18:11:51 UTC] WCQM Debug: Getting multiple for product 64331
+[20-Mar-2025 18:11:51 UTC] WCQM Debug: No rules found, using default multiple: 10
+[20-Mar-2025 18:11:51 UTC] WCQM Debug: Getting multiple for product 64331
+[20-Mar-2025 18:11:51 UTC] WCQM Debug: No rules found, using default multiple: 10
+[20-Mar-2025 18:11:51 UTC] WCQM Debug: Getting multiple for product 64331
+[20-Mar-2025 18:11:51 UTC] WCQM Debug: No rules found, using default multiple: 10
+[20-Mar-2025 18:11:52 UTC] WCQM Debug: Rules data injected with 0 pre-resolved products
+[20-Mar-2025 18:11:52 UTC] WCQM Debug: Using default multiple: 10
+[20-Mar-2025 18:11:52 UTC] WCQM Debug: Saving rules: Array
+(
+    [rules] => Array
+        (
+        )
+
+    [default_multiple] => 10
+)
+
+[20-Mar-2025 18:11:52 UTC] WCQM Debug: Failed to save rules
+[20-Mar-2025 18:11:58 UTC] WCQM Debug: Loading stored settings: Array
+(
+    [rules] => Array
+        (
+        )
+
+    [default_multiple] => 10
+)
+
+[20-Mar-2025 18:11:58 UTC] WCQM Debug: Built product-category map with 0 products
+[20-Mar-2025 18:11:58 UTC] WCQM Debug: Rules loaded successfully:
+[20-Mar-2025 18:11:58 UTC] - Default multiple: 10
+[20-Mar-2025 18:11:58 UTC] - Product rules count: 0
+[20-Mar-2025 18:11:58 UTC] - Category rules count: 0
+[20-Mar-2025 18:11:58 UTC] - Product-category map size: 0
+[20-Mar-2025 18:11:58 UTC] WCQM Debug: Rules manager initialized
+[20-Mar-2025 18:11:58 UTC] WCQM Debug: Product class initialized
+[20-Mar-2025 18:11:58 UTC] WCQM Debug: Cart class initialized with enhanced hooks
+[20-Mar-2025 18:11:58 UTC] WCQM Debug: Checkout class initialized
+[20-Mar-2025 18:11:58 UTC] WCQM Debug: Rules version mismatch, checking data integrity
+[20-Mar-2025 18:11:58 UTC] WCQM Debug: Rules already loaded, skipping load
+[20-Mar-2025 18:11:58 UTC] WCQM Debug: Using default multiple: 10
+[20-Mar-2025 18:11:58 UTC] WCQM Debug: Saving rules: Array
+(
+    [rules] => Array
+        (
+        )
+
+    [default_multiple] => 10
+)
+
+[20-Mar-2025 18:11:58 UTC] WCQM Debug: Failed to save rules
+[20-Mar-2025 18:12:06 UTC] WCQM Debug: Loading stored settings: Array
+(
+    [rules] => Array
+        (
+        )
+
+    [default_multiple] => 10
+)
+
+[20-Mar-2025 18:12:06 UTC] WCQM Debug: Built product-category map with 0 products
+[20-Mar-2025 18:12:06 UTC] WCQM Debug: Rules loaded successfully:
+[20-Mar-2025 18:12:06 UTC] - Default multiple: 10
+[20-Mar-2025 18:12:06 UTC] - Product rules count: 0
+[20-Mar-2025 18:12:06 UTC] - Category rules count: 0
+[20-Mar-2025 18:12:06 UTC] - Product-category map size: 0
+[20-Mar-2025 18:12:06 UTC] WCQM Debug: Rules manager initialized
+[20-Mar-2025 18:12:06 UTC] WCQM Debug: Product class initialized
+[20-Mar-2025 18:12:06 UTC] WCQM Debug: Cart class initialized with enhanced hooks
+[20-Mar-2025 18:12:06 UTC] WCQM Debug: Checkout class initialized
+[20-Mar-2025 18:12:06 UTC] WCQM Debug: Rules version mismatch, checking data integrity
+[20-Mar-2025 18:12:06 UTC] WCQM Debug: Rules already loaded, skipping load
+[20-Mar-2025 18:12:06 UTC] WCQM Debug: Getting multiple for product 51094
+[20-Mar-2025 18:12:06 UTC] WCQM Debug: No rules found, using default multiple: 10
+[20-Mar-2025 18:12:06 UTC] WCQM Debug: Getting multiple for product 51094
+[20-Mar-2025 18:12:06 UTC] WCQM Debug: No rules found, using default multiple: 10
+[20-Mar-2025 18:12:07 UTC] WCQM Debug: Rules data injected with 0 pre-resolved products
+[20-Mar-2025 18:12:07 UTC] WCQM Debug: Using default multiple: 10
+[20-Mar-2025 18:12:07 UTC] WCQM Debug: Saving rules: Array
+(
+    [rules] => Array
+        (
+        )
+
+    [default_multiple] => 10
+)
+
+[20-Mar-2025 18:12:07 UTC] WCQM Debug: Failed to save rules
+[20-Mar-2025 18:12:18 UTC] WCQM Debug: Loading stored settings: Array
+(
+    [rules] => Array
+        (
+        )
+
+    [default_multiple] => 10
+)
+
+[20-Mar-2025 18:12:18 UTC] WCQM Debug: Built product-category map with 0 products
+[20-Mar-2025 18:12:18 UTC] WCQM Debug: Rules loaded successfully:
+[20-Mar-2025 18:12:18 UTC] - Default multiple: 10
+[20-Mar-2025 18:12:18 UTC] - Product rules count: 0
+[20-Mar-2025 18:12:18 UTC] - Category rules count: 0
+[20-Mar-2025 18:12:18 UTC] - Product-category map size: 0
+[20-Mar-2025 18:12:18 UTC] WCQM Debug: Rules manager initialized
+[20-Mar-2025 18:12:18 UTC] WCQM Debug: Product class initialized
+[20-Mar-2025 18:12:18 UTC] WCQM Debug: Cart class initialized with enhanced hooks
+[20-Mar-2025 18:12:18 UTC] WCQM Debug: Checkout class initialized
+[20-Mar-2025 18:12:18 UTC] WCQM Debug: Rules version mismatch, checking data integrity
+[20-Mar-2025 18:12:18 UTC] WCQM Debug: Rules already loaded, skipping load
+[20-Mar-2025 18:12:18 UTC] WCQM Debug: Getting multiple for product 27416
+[20-Mar-2025 18:12:18 UTC] WCQM Debug: No rules found, using default multiple: 10
+[20-Mar-2025 18:12:18 UTC] WCQM Debug: Getting multiple for product 27416
+[20-Mar-2025 18:12:18 UTC] WCQM Debug: No rules found, using default multiple: 10
+[20-Mar-2025 18:12:19 UTC] WCQM Debug: Getting multiple for product 47271
+[20-Mar-2025 18:12:19 UTC] WCQM Debug: No rules found, using default multiple: 10
+[20-Mar-2025 18:12:19 UTC] WCQM Debug: Getting multiple for product 54386
+[20-Mar-2025 18:12:19 UTC] WCQM Debug: No rules found, using default multiple: 10
+[20-Mar-2025 18:12:19 UTC] WCQM Debug: Getting multiple for product 2796
+[20-Mar-2025 18:12:19 UTC] WCQM Debug: No rules found, using default multiple: 10
+[20-Mar-2025 18:12:19 UTC] WCQM Debug: Getting multiple for product 54386
+[20-Mar-2025 18:12:19 UTC] WCQM Debug: No rules found, using default multiple: 10
+[20-Mar-2025 18:12:19 UTC] WCQM Debug: Getting multiple for product 54386
+[20-Mar-2025 18:12:19 UTC] WCQM Debug: No rules found, using default multiple: 10
+[20-Mar-2025 18:12:19 UTC] WCQM Debug: Getting multiple for product 54386
+[20-Mar-2025 18:12:19 UTC] WCQM Debug: No rules found, using default multiple: 10
+[20-Mar-2025 18:12:20 UTC] WCQM Debug: Rules data injected with 0 pre-resolved products
+[20-Mar-2025 18:12:20 UTC] WCQM Debug: Using default multiple: 10
+[20-Mar-2025 18:12:20 UTC] WCQM Debug: Saving rules: Array
+(
+    [rules] => Array
+        (
+        )
+
+    [default_multiple] => 10
+)
+
+[20-Mar-2025 18:12:20 UTC] WCQM Debug: Failed to save rules

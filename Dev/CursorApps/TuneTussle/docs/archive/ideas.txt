@@ -1,0 +1,23 @@
+**Future feature ideas**
+
+
+If no-one answers within a certain amount of time, suggest some multiple choice answers.
+
+After each round ends, with a winner, or the Judge ending the round, one should show the right answer to all participants, including who got it right, and this display should include an image of the song or artist album, if any. 
+
+When the game ends, on the game over screen, there should be a link that says “learn more about the songs in this round” and it will link to a list of wikipedia articles about each song.
+
+_ When creating a new game, the judge should be able to select sample genres/prompts from a list of pre-determined prompts. We can then have a list of songs already generated (no need to use LLM or spotify search as the song urls are cached).
+
+- add a difficulty level to the app, where more difficult finds songs that are not hits/popular.
+
+
+- with all the recent UI/UX updates by various developers, can you investigate as to wheter the codebase contains deprecated or orphaned code? If so, make sure it isn't a desired/missing functionality before you remove. Finally, make sure the code is YAGNI and DRY.
+
+- check for unused imports (e.g. fonts, icons)
+
+- check if deezer can provide a lower resolution artwork than 1000x1000
+You can do this. Instead of:
+ttps://cdn-images.dzcdn.net/images/cover/364f0d4ea4b5452b59e6664b9e5480f0/1000x1000-000000-80-0-0.jpg'
+you can change it to
+https://cdn-images.dzcdn.net/images/cover/364f0d4ea4b5452b59e6664b9e5480f0/256x256-000000-80-0-0.jpg'

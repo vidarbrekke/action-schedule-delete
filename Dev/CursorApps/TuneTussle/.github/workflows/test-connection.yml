@@ -1,0 +1,32 @@
+name: Test SSH Connection (Minimal)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-ssh:
+    name: Test SSH Connection Only
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    
+    steps:
+      - name: Test SSH connection
+        timeout-minutes: 3
+        env:
+          DEPLOY_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+          SERVER_PORT: ${{ secrets.SERVER_PORT }}
+        run: |
+          echo "🔑 Testing SSH connection..."
+          mkdir -p ~/.ssh
+          echo "$DEPLOY_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          
+          SSH_OPTS="-p $SERVER_PORT -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -o ConnectTimeout=30"
+          
+          # Simple connection test
+          ssh $SSH_OPTS $SERVER_USER@$SERVER_HOST "echo 'SSH connection successful!'"
+          
+          rm -f ~/.ssh/deploy_key
+          echo "✅ SSH test completed" 

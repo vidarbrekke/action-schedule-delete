@@ -1,0 +1,38 @@
+# Directories
+/tests/
+/.git/
+/.github/
+/.wordpress-org/
+/vendor/
+/node_modules/
+/deployment/
+/tools/
+/docs/
+
+# Files
+/phpunit.xml
+/phpcs.xml
+/.editorconfig
+/.gitignore
+/.distignore
+/composer.json
+/composer.lock
+/package.json
+/package-lock.json
+/yarn.lock
+/webpack.config.js
+/.eslintrc.json
+/.eslintignore
+/.stylelintrc.json
+/DOCUMENTATION_INDEX.md
+/CONTRIBUTING.md
+/CHANGELOG.md
+/LICENSE
+
+# Patterns
+*.map
+*.zip
+*.tar.gz
+*.log
+
+# Keep test runner classes in includes/testing as they're needed for the admin UI 

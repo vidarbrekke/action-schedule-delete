@@ -1,0 +1,17 @@
+# Ignore .env file containing sensitive credentials
+.env
+
+# Ignore node_modules directory
+node_modules/
+
+# Ignore build output
+dist/
+
+# Ignore Jest coverage reports
+coverage/
+
+# Ignore OS-specific files
+.DS_Store
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log* 

@@ -1,0 +1,23 @@
+The URL to Gutenberg WordPress plugin is a comprehensive tool for converting web content into WordPress Gutenberg blocks using AI processing. The plugin implements a modular architecture with clear separation of concerns across several key components. At its core, the Content_Extractor class handles HTML extraction from URLs, cleaning the content for optimal processing. The LLM_API class communicates with OpenRouter API (supporting various LLM models) to transform HTML content into Gutenberg blocks. 
+The plugin's workflow is orchestrated through the Content_Pipeline class (newly created, not tested), which provides a seamless process from URL submission to WordPress post creation. The pipeline handles URL extraction, LLM processing, block parsing, image processing (via the Media_Handler class), and post creation (via the Post_Generator class). The admin interface provides three main access points: a URL Converter for directly converting URLs to posts, a URL Test page for testing the extraction capabilities, and a comprehensive Settings page for configuring API credentials, model selection, post defaults, and debugging options. The plugin supports both production use and detailed debugging through a robust error handling system and debug logs saved to the /wp-content/uploads/utg-debug/ directory.
+Current limitations include challenges with JavaScript-heavy websites that require client-side rendering, as the current extraction relies primarily on server-side HTML processing. Occasional block truncation can occur with extremely lengthy content, though the enhanced anti-truncation instructions have significantly improved this. Image processing may fail for certain image formats or when remote images are inaccessible, though the plugin gracefully continues processing even when image downloads fail. The plugin includes comprehensive error logging and debugging capabilities to help identify and resolve these edge cases.
+The codebase follows WordPress coding standards and employs a well-structured architecture that enables extensions and customizations. The UTG_Admin class provides a complete admin interface with settings management, AJAX handlers, and user-friendly UI components. The plugin uses transient caching to optimize performance and reduce unnecessary API calls. Recently added functionality includes the Content_Pipeline class which streamlines the previously separate workflow components into a unified process, and a dedicated pipeline test interface for comprehensive testing. Proper error handling is implemented throughout the plugin, with detailed logs available when debug mode is enabled.
+Recommended next steps include: (1) Enhancing the image processing system to better handle complex layouts and edge cases; (2) Adding support for more Gutenberg block types beyond the current implementation; (3) Implementing a more sophisticated caching system to further improve performance. Proper testing procedures should include using the admin-test.php script with ?test=pipeline&url= parameter to verify the complete pipeline, and enabling debug mode to capture detailed logs for troubleshooting any issues that arise
+
+The local development environment does not have wordpress installed, so all testing will be done on the staging server, once code is transferred there. 
+
+This is the development server we are using. 
+
+Log file: 
+/home/staging/public_html/wp-content/debug.log
+and 
+/home/staging/public_html/wp-content/uploads/wc-logs/
+
+
+Ssh login: ssh staging@45.33.31.79
+you don't need an ssh password, an authentication key is used, found here:
+/Users/vidarbrekke/Dev/socialintent/staging.motherknitter.pem
+
+sudo user password is: @Flatbygdi73?
+
+Plugin location: /home/staging/public_html/wp-content/plugins/

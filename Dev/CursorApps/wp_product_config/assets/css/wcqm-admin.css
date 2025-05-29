@@ -1,0 +1,294 @@
+/**
+ * WC Quantity Multiples - Admin Styles
+ * 
+ * Styles for the admin settings page.
+ *
+ * @package WC_Quantity_Multiples
+ * @since 1.1.0
+ */
+
+/* Settings page layout */
+.wcqm-settings-wrap {
+    margin: 20px 0;
+}
+
+.wcqm-settings-content {
+    background: #fff;
+    padding: 20px;
+    border: 1px solid #ccd0d4;
+    box-shadow: 0 1px 1px rgba(0,0,0,.04);
+}
+
+.wcqm-rule-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 10px;
+    background: #f9f9f9;
+    border: 1px solid #e5e5e5;
+}
+
+.wcqm-rule-row select,
+.wcqm-rule-row input {
+    margin-right: 10px;
+}
+
+.wcqm-rule-type {
+    width: 120px;
+}
+
+.wcqm-product-select,
+.wcqm-category-select {
+    width: 300px;
+}
+
+.wcqm-multiple {
+    width: 100px;
+}
+
+.wcqm-remove-rule {
+    color: #a00;
+}
+
+.wcqm-add-rule {
+    margin: 20px 0;
+}
+
+/* Select2 Customizations */
+.select2-container {
+    margin-right: 10px;
+}
+
+.select2-container .select2-selection--single {
+    height: 32px;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: 32px;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 30px;
+}
+
+/* Form Elements */
+.wcqm-settings-wrap input[type="number"] {
+    width: 100px;
+}
+
+.wcqm-settings-wrap .button-primary {
+    margin-top: 20px;
+}
+
+/* Notices */
+.wcqm-settings-wrap .notice {
+    margin: 20px 0;
+}
+
+/* Responsive Adjustments */
+@media screen and (max-width: 782px) {
+    .wcqm-rule-row {
+        flex-wrap: wrap;
+    }
+    
+    .wcqm-rule-row select,
+    .wcqm-rule-row input {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+    
+    .wcqm-product-select,
+    .wcqm-category-select {
+        width: 100%;
+    }
+    
+    .wcqm-remove-rule {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+.wcqm-settings-wrap h1 {
+    margin-bottom: 20px;
+}
+
+.wcqm-settings-wrap .nav-tab-wrapper {
+    margin-bottom: 20px;
+}
+
+.wcqm-rules-section,
+.wcqm-default-section {
+    background: #fff;
+    padding: 20px;
+    border: 1px solid #ccd0d4;
+    box-shadow: 0 1px 1px rgba(0,0,0,.04);
+    margin-bottom: 20px;
+}
+
+.wcqm-rules-section h2,
+.wcqm-default-section h2 {
+    margin-top: 0;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #eee;
+}
+
+.wcqm-rules-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.wcqm-rules-table th,
+.wcqm-rules-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+.wcqm-rules-table th {
+    background: #f8f9fa;
+    font-weight: 600;
+}
+
+.wcqm-rules-table tr:hover {
+    background: #f8f9fa;
+}
+
+.wcqm-add-rule-form {
+    margin-top: 20px;
+    padding: 20px;
+    background: #f8f9fa;
+    border: 1px solid #eee;
+}
+
+.wcqm-form-row {
+    margin-bottom: 15px;
+}
+
+.wcqm-form-row label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.wcqm-form-row select,
+.wcqm-form-row input[type="number"] {
+    width: 100%;
+    max-width: 300px;
+}
+
+.wcqm-target-select {
+    display: none;
+}
+
+.wcqm-target-select.active {
+    display: block;
+}
+
+.wcqm-delete-rule {
+    color: #dc3545;
+    text-decoration: none;
+}
+
+.wcqm-delete-rule:hover {
+    color: #c82333;
+    text-decoration: underline;
+}
+
+.wcqm-default-multiple-form {
+    max-width: 400px;
+}
+
+.wcqm-default-multiple-form .form-table {
+    margin-top: 0;
+}
+
+.wcqm-default-multiple-form .form-table th {
+    width: 200px;
+    padding: 20px 10px 20px 0;
+}
+
+.wcqm-default-multiple-form .form-table td {
+    padding: 15px 10px;
+}
+
+.wcqm-default-multiple-form input[type="number"] {
+    width: 100px;
+}
+
+/* Form Layout */
+#wcqm-add-rule-form p {
+    margin-bottom: 20px;
+}
+
+#wcqm-add-rule-form label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+#wcqm-add-rule-form input[type="number"] {
+    width: 100px;
+    padding: 5px 10px;
+}
+
+/* Spinner */
+.wcqm-spinner.is-active {
+    visibility: visible;
+    float: none;
+    margin: 0 10px;
+}
+
+/* Rule List */
+.wcqm-rules-list table {
+    margin-top: 20px;
+    margin-bottom: 30px;
+}
+
+/* Default Section */
+.wcqm-default-section {
+    background: #fff;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 30px;
+}
+
+.wcqm-setting-row {
+    display: flex;
+    align-items: center;
+}
+
+.wcqm-setting-row label {
+    margin-right: 15px;
+    font-weight: 600;
+}
+
+.wcqm-setting-row button {
+    margin-left: 15px;
+}
+
+/* Add Rule Section */
+.wcqm-add-rule {
+    background: #fff;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 782px) {
+    .wcqm-setting-row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .wcqm-setting-row label,
+    .wcqm-setting-row button {
+        margin: 10px 0;
+    }
+    
+    .select2-container {
+        width: 100% !important;
+    }
+} 

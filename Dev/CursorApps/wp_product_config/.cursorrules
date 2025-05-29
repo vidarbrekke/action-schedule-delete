@@ -1,0 +1,176 @@
+# PROJECT OVERVIEW
+- WordPress/WooCommerce plugin that forces users to select product quantities in multiples of 10
+- Plugin name: "WC Quantity Multiples"
+- Main functionality: Modify product, cart, and checkout interfaces to enforce quantity rules
+- Target audience: WooCommerce store owners who sell products that should only be purchased in specific quantity increments
+- Default multiple is 10, but configurable by admin
+- Respects stock levels - rules only apply when stock exceeds 10 units
+
+# PERSONALITY
+- Helpful, thoughtful, expert WordPress/WooCommerce developer
+- Consider multiple approaches and overall project implications for all new code
+- Prioritize WordPress and WooCommerce conventions and best practices
+- Balance between simplicity and extensibility
+
+# TECH STACK
+- WordPress version 6.7.2
+- WooCommerce 9.7.1
+- PHP 7.4.33
+- Linux 5.4.0-200-generic
+- Apache
+- Hosted on Linode.com
+
+# CODING STANDARDS
+- Follow WordPress PHP coding standards
+- Use WordPress hooks and filters to make the plugin extensible
+- Prefix all functions, classes, and global variables with "wcqm_" to avoid namespace conflicts
+- Use snake_case for hook names following WordPress conventions
+- Follow the WooCommerce extension development guidelines
+- Adhere to WordPress internationalization standards for all user-facing strings
+
+# ERROR FIXING PROCESS
+1. Explain the error in simple terms
+2. Evaluate 3 ways to solve the error and their impact on other files and code in the project
+3. Pick the best solution and implement
+4. Document the solution in code comments
+5. Add error logging for debugging in production environments
+
+# RULE RESOLUTION PROCESS
+1. Check for product-specific rule
+2. If no product rule exists, check for category rules
+3. For products in multiple categories, use the smallest multiple value
+4. Fall back to default multiple if no specific rules exist
+5. Disable rule enforcement when stock is below 10 units
+6. Cache rule resolutions for better performance
+7. Invalidate cache when rules are updated
+
+# BUILDING PROCESS
+1. Create proper plugin header and main plugin file
+2. Check for WooCommerce dependency before plugin activation
+3. Implement admin settings page for configuration (default multiple, display options)
+4. Add quantity field modification on product pages
+5. Implement cart validation and auto-correction
+6. Add checkout validation
+7. Implement user notifications for quantity adjustments
+8. Create uninstall routine to clean up plugin data
+9. Implement debug logging system for troubleshooting
+
+# FILE STRUCTURE
+- wc-quantity-multiples.php (main plugin file)
+- includes/
+  - class-wcqm-settings.php (admin settings page)
+  - class-wcqm-product.php (product page integration)
+  - class-wcqm-cart.php (cart validation)
+  - class-wcqm-checkout.php (checkout validation)
+  - class-wcqm-rules-manager.php (rules loading and application)
+- templates/
+  - global/quantity-input.php (product quantity template)
+  - cart/quantity-input.php (cart quantity template)
+- assets/
+  - css/
+    - wcqm-style.css (frontend styles)
+    - wcqm-admin.css (admin styles)
+  - js/
+    - wcqm-quantity.js (frontend script)
+    - wcqm-admin.js (admin UI script)
+- languages/ (for translations)
+- readme.txt
+
+# DATA STRUCTURE
+```php
+$rules = [
+    'default_multiple' => 10, // Default multiple for all products
+    'product_rules' => [
+        // product_id => multiple
+        123 => 5,
+        456 => 10
+    ],
+    'category_rules' => [
+        // category_id => multiple
+        22 => 3,
+        33 => 6
+    ]
+];
+```
+
+# GITHUB PUSH PROCESS
+1. Run PHP linting and validation checks
+2. Test all functionality on a staging site
+3. Update version number and changelog
+4. Commit with clear message format: "[type]: [description]"
+   - Types: feature, fix, docs, style, refactor, test, chore
+5. Push to repository
+
+# DATA HANDLING
+- Use WordPress options API for plugin settings
+- Avoid creating custom database tables per WordPress best practices
+- Sanitize all inputs and escape all outputs
+- Use WordPress transients for any performance-heavy operations
+- Clear transients when rules are updated
+
+# PERFORMANCE OPTIMIZATION
+- Cache rule resolutions where appropriate
+- Use transients with reasonable expiration times
+- Minimize database queries by batching operations
+- Load JavaScript only when needed
+- Keep DOM manipulations to a minimum
+- Optimize for large stores (1000+ products)
+
+# IMPORTANT
+- If files exceed 150 lines of code, refactor and split into additional file(s)
+- Always write as few lines of code as possible while maintaining readability
+- Use the DRY principle (Do Not Repeat Yourself)
+- Check if WooCommerce is active before executing plugin code
+- Make the plugin extensible through filters and actions
+- Ensure compatibility with different themes and other plugins
+- Follow WordPress plugin repository guidelines
+- Keep all business logic server-side (PHP)
+- JavaScript should only handle UI interactions
+
+# HOOKS TO USE
+- woocommerce_quantity_input_args (for product page quantity field)
+- woocommerce_add_to_cart_validation (for validating quantities)
+- woocommerce_update_cart_validation (for validating cart updates)
+- woocommerce_checkout_process (for checkout validation)
+- woocommerce_add_cart_item_data (for quantity adjustments)
+- woocommerce_before_calculate_totals (for price adjustments if needed)
+- woocommerce_get_availability_text (for stock messaging)
+- woocommerce_cart_item_quantity (for cart quantity field)
+- woocommerce_enqueue_styles (for frontend styles)
+- admin_enqueue_scripts (for admin styles)
+
+# TESTING
+- Test with simple, variable, and grouped products
+- Verify functionality with AJAX add-to-cart
+- Test with different themes and page builders
+- Check compatibility with popular payment gateways
+- Test performance impact on stores with many products
+- Test category rule inheritance and product rule overrides
+- Test stock level threshold behavior (below/above 10 units)
+- Test products in multiple categories with conflicting rules
+- Test with caching plugins enabled
+- Test with different user roles and permissions
+
+# DEBUGGING
+- Implement a debug log for tracking rule application
+- Log rule loading, saving, and application events
+- Include product IDs, rule sources, and applied multiples in logs
+- Add option to enable/disable debug logging
+- Implement log rotation to prevent excessive file growth
+
+# DOCUMENTATION
+- Include PHPDoc blocks for all classes and functions
+- Document all hooks and filters provided by the plugin
+- Create a clear readme.txt file with installation and usage instructions
+- Add inline comments for complex logic
+- Create a changelog following WordPress standards
+- Document known compatibility issues or limitations
+
+# COMMENTS
+- Make sure you ALWAYS comment your code with a description and coding choices made
+- Explain any non-obvious implementation details
+- Do not delete comments unless they are no longer needed
+- Document workarounds and compatibility considerations
+- Always consider what existing WordPress/WooCommerce functionality you can leverage
+- Use native functionality wherever possible to ensure better compatibility
+- Document rule resolution process and precedence clearly

@@ -1,0 +1,183 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Minimal Design System */
+:root {
+  /* Simple color palette */
+  --color-text: #1a1a1a;
+  --color-text-muted: #666666;
+  --color-background: #ffffff;
+  --color-border: #e5e5e5;
+  --color-primary: #2563eb;
+  --color-primary-hover: #1d4ed8;
+  --color-danger: #dc2626;
+  --color-danger-hover: #b91c1c;
+  
+  /* Typography */
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color: var(--color-text);
+  background-color: var(--color-background);
+  
+  /* Remove fancy effects */
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+/* Minimal button reset */
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+/* Focus styles for accessibility */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Remove default input styling */
+input, select, textarea {
+  font-family: inherit;
+}
+
+/* Minimal link styles */
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Mobile-optimized toast styles */
+@media (max-width: 768px) {
+  /* Ensure toasts are above virtual keyboard on mobile */
+  [data-react-hot-toast] {
+    pointer-events: none; /* Allow touches to pass through */
+  }
+  
+  [data-react-hot-toast] > div {
+    pointer-events: auto; /* But allow interaction with actual toasts */
+    
+    /* Touch-friendly sizing */
+    min-height: 44px; /* iOS recommended minimum touch target */
+    
+    /* Enhanced visibility */
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    
+    /* Smooth animations optimized for mobile */
+    transform: translateZ(0); /* Force hardware acceleration */
+    will-change: transform, opacity;
+    
+    /* Touch feedback */
+    transition: transform 0.2s ease-out, opacity 0.2s ease-out;
+  }
+  
+  /* Swipe gesture hint */
+  [data-react-hot-toast] > div:hover {
+    transform: scale(1.02);
+  }
+  
+  /* Ensure safe area compliance */
+  [data-react-hot-toast] {
+    padding-top: max(env(safe-area-inset-top), 20px) !important;
+    padding-bottom: max(env(safe-area-inset-bottom), 20px) !important;
+    padding-left: max(env(safe-area-inset-left), 16px) !important;
+    padding-right: max(env(safe-area-inset-right), 16px) !important;
+  }
+}
+
+/* Enhanced animations for toasts */
+@keyframes slideInFromTop {
+  from {
+    transform: translateY(-100%) scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutToTop {
+  from {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(-100%) scale(0.95);
+    opacity: 0;
+  }
+}
+
+@keyframes slideInFromBottom {
+  from {
+    transform: translateY(100%) scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+/* Mobile-specific toast positioning fixes */
+@supports (padding-top: env(safe-area-inset-top)) {
+  @media (max-width: 768px) {
+    [data-react-hot-toast] {
+      /* Account for notch on newer iOS devices */
+      top: env(safe-area-inset-top) !important;
+    }
+  }
+}
+
+/* Prevent zoom on input focus for mobile */
+@media (max-width: 768px) {
+  input, select, textarea {
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+}
+
+/* Utility classes for minimal design */
+@layer utilities {
+  .text-muted {
+    color: var(--color-text-muted);
+  }
+  
+  .border-minimal {
+    border: 1px solid var(--color-border);
+  }
+  
+  .bg-minimal {
+    background-color: var(--color-background);
+  }
+  
+  /* Mobile-first toast utilities */
+  .toast-mobile-optimized {
+    @apply text-base leading-relaxed;
+    word-break: break-word;
+    hyphens: auto;
+  }
+  
+  @media (max-width: 768px) {
+    .toast-mobile-optimized {
+      @apply text-lg px-5 py-4;
+      line-height: 1.4;
+    }
+  }
+}

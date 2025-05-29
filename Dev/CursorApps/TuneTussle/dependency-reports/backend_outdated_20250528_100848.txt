@@ -1,0 +1,6 @@
+Package          Current    Wanted    Latest  Location                     Depended by  Package Type     Homepage
+@types/express     5.0.1     5.0.2     5.0.2  node_modules/@types/express  backend      devDependencies  https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/express
+@types/node     22.15.17  22.15.23  22.15.23  node_modules/@types/node     backend      devDependencies  https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/node
+googleapis       148.0.0   148.0.0   149.0.0  node_modules/googleapis      backend      dependencies     https://github.com/googleapis/google-api-nodejs-client#readme
+supertest          7.1.0     7.1.1     7.1.1  node_modules/supertest       backend      devDependencies  https://github.com/ladjs/supertest#readme
+ts-jest           29.3.2    29.3.4    29.3.4  node_modules/ts-jest         backend      devDependencies  https://kulshekhar.github.io/ts-jest

@@ -1,0 +1,53 @@
+# Environment files
+*.env
+.env
+.env.*
+
+# WordPress core and plugins (if they exist in workspace)
+wp-admin/
+wp-includes/
+wp-content/plugins/*
+!wp-content/plugins/wc-quantity-multiples/
+
+# Build and dependency directories
+node_modules/
+vendor/
+composer.lock
+package-lock.json
+yarn.lock
+
+# Debug logs
+debug.log
+*.log
+logs/
+npm-debug.log*
+
+# Testing
+phpunit.xml
+tests/coverage/
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*~
+
+# IDE files
+.idea/
+.vscode/
+*.sublime-*
+.DS_Store
+
+# Build artifacts
+dist/
+build/
+assets/*.min.*
+
+# Dependency management
+composer.phar
+
+# WordPress generated files
+wp-content/upgrade/
+wp-content/backup-db/
+wp-content/cache/
+wp-content/backups/

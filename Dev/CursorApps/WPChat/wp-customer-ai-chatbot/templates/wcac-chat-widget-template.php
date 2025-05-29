@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Template for the WCAC Chatbot Shortcode.
  *
@@ -8,25 +9,28 @@
  * @version 0.1.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly.
+if (! defined('ABSPATH')) {
+    exit; // Exit if accessed directly.
 }
 
 // Define fallback functions if they don't exist
 if (!function_exists('get_option')) {
-    function get_option($key, $default = false) {
+    function get_option($key, $default = false)
+    {
         return $default;
     }
 }
 
 if (!function_exists('esc_attr')) {
-    function esc_attr($text) {
+    function esc_attr($text)
+    {
         return htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
     }
 }
 
 if (!function_exists('esc_html')) {
-    function esc_html($text) {
+    function esc_html($text)
+    {
         return htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
     }
 }
@@ -48,7 +52,7 @@ $initial_greeting = isset($options['wcac_initial_greeting']) ? $options['wcac_in
         </div>
     </form>
     <div class="wcac-branding">
-        <?php if (!isset($options['wcac_hide_branding']) || !$options['wcac_hide_branding']): ?>
+        <?php if (!isset($options['wcac_hide_branding']) || !$options['wcac_hide_branding']) : ?>
             <small>Powered by WP Customer AI Chatbot</small>
         <?php endif; ?>
     </div>

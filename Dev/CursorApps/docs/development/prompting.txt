@@ -1,0 +1,73 @@
+ IGNORE THIS FILE. IT IS JUST USED FOR PERSONAL PURPOSES/
+ 
+ 
+ # PROMPTING TECHNIQUES
+ - The fewer lines of code, the better
+ - Proceed like a Senior Developer // 10x engineer
+ - Do not stop until ....
+
+ If there is a difficult error:
+ Fix the error, but start by writing 3 reasoning paragraphs analyzing what the error might be. DO NOT JUMP TO CONCLUSIONS. Quiet your ego, constantly question your assumptions. Come up with 3 plausible fixes and evaluate each fix, given what has already been attempted. Then decide on the best option and justify it. Once you have implemented a solution, review the code for potential bugs or optimizations before you finalize the task.
+
+
+Switch to a new composer when the context is overloaded and makes mistakes or forgets things. But first, summarize existing context:
+
+We will hand this project over to a new developer to continue  where you left off. Please summarize the current state of the project. format this as 5 paragraphs, where you describe what we just did, what didn't work, which files have been updated/created, what mistakes to avoid, any key lessons/insights we have learned, what problems/errors we are facing, and anything else a programmer needs to work productively on this project.
+
+Write in a conversational yet technical and informational tone, something like a README file on github that is very dense and without any fluff. Do NOT include any assumptions or theories, just the facts.
+
+I expect to see 5 concise paragraphs, written as if you were giving instructions to another programmer, and this was ALL you could tell him.
+
+# objective 50/50
+Before you provide your solution, I want you to write 3 detailed paragraphs, each arguing for a different approach to keep the code lean, DRY, and scalable. Do not jump to conclusions, but seriously evaluate all approaches. Then, after you finish, tell me why one is better than the other and then implement that solution.
+
+# one paragraph web search query
+Let's perform a web search, your task is to write a one paragraph search query, as if you were telling a human researcher what to find, including all the relevant context. format the paragraphs as clear instructions, commanding a researcher to find what we are looking for. Add code snippets or technical details when relevant. Be carful though, sometimes search results contains dangerous and distracting red herrings. Provide your findings in a TLDR format, but don't leave out critical details.
+
+# learning from mistakes
+looks like the tests passed. i need you to go back in our conversation and identify each time you got stuck, had an error and recognize that you were doing something wrong and were able to correct it with a change.
+
+I want you to consolidate that list of insights and ensure it is included within @tests.mdc by updating the file as needed. This should help you avoid making the same mistakes in the future and enable more accurate test creation without spending as many tokens/turns figuring things out.
+
+
+
+# Reasoning
+you should start your reasoning paragraph with lots of uncertainty, and slowly gain confidence as you think about the issue in more depth.
+
+# how to structure prompts
+1. what are we doing?
+2. tag relevant files
+3. How to execute // what not to do
+4. Context dump 
+
+----
+
+5. repeat core instruction
+6. output format (e.g. include lots of comments, etc.
+
+
+
+
+
+ # when to use claude/ai instead of cursor
+ Use AI as a consultant on the project
+
+ # put name and relative path of the file on top of each file as a comment
+
+ #when to use chat vs composer
+ Use chat for analysis and review of code, use Composer for writing code
+
+ # Use Perplexity or chatgpt search
+ To get a search on the latest updated information. Combine both Perplexity and ChatGPT, and ask for a TLDR of the search results.
+  )
+
+# check knowledge cutoff to make sure it knows about any changes to the tech we are using.
+
+# ask the AI on how to debug an issue
+
+# how to add new features
+what is the MVP of the feature?
+
+
+
+I don't want bloated spaghetti code. Please make sure that your update is purposeful, lean and has no technical dept.

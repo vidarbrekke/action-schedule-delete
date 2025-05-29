@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 /**
@@ -9,16 +10,16 @@ declare(strict_types=1);
  * @package    Wcac_Customer_AI_Chatbot
  * @subpackage Wcac_Customer_AI_Chatbot/includes
  */
-class Wcac_Deactivator {
-
-	/**
-	 * Deactivation logic.
-	 *
-	 * @since    0.1.0
-	 */
-	public static function deactivate(): void {
-		// Placeholder for deactivation tasks
+class Wcac_Deactivator
+{
+    /**
+     * Deactivation logic.
+     *
+     * @since    0.1.0
+     */
+    public static function deactivate(): void
+    {
+        // Placeholder for deactivation tasks
         // E.g., removing scheduled cron jobs
-	}
-
-} 
+    }
+}

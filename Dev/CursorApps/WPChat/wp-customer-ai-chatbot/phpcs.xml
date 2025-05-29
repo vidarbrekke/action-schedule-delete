@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<ruleset name="WCAC Plugin Rules">
+    <description>PHPCS ruleset for WP Customer AI Chatbot plugin</description>
+
+    <!-- Include WordPress Coding Standards ruleset directly -->
+    <rule ref="vendor/wp-coding-standards/wpcs/WordPress/ruleset.xml" />
+
+    <!-- Exclude vendor and test directories from scanning -->
+    <exclude-pattern>*/vendor/*</exclude-pattern>
+    <exclude-pattern>*/tests/*</exclude-pattern>
+
+    <!-- Disable the Squiz NonExecutableCode sniff to avoid runtime errors -->
+    <rule ref="Squiz.PHP.NonExecutableCode">
+        <severity>0</severity>
+    </rule>
+</ruleset> 

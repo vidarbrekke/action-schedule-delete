@@ -1,0 +1,59 @@
+import { describe, it, expect } from 'vitest';
+import { render } from '@testing-library/react';
+import { ParticipantControls } from '../ParticipantControls';
+
+describe('ParticipantControls', () => {
+  it('should match snapshot', () => {
+    const { container } = render(<ParticipantControls />);
+    expect(container.firstChild).toMatchInlineSnapshot(`
+      <div
+        class="text-center"
+      >
+        <h3
+          class="text-lg font-semibold mb-4"
+        >
+          Player Status
+        </h3>
+        <div
+          class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-gray-200 p-4 rounded-lg"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-circle-check-big text-green-600 mx-auto mb-3"
+            fill="none"
+            height="32"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="32"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M21.801 10A10 10 0 1 1 17 3.335"
+            />
+            <path
+              d="m9 11 3 3L22 4"
+            />
+          </svg>
+          <span
+            aria-label="Participant is ready"
+            class="px-3 py-1 text-sm font-medium bg-green-50 text-green-700 border border-green-200 rounded-full inline-flex items-center"
+            role="status"
+          >
+            <span
+              class="w-2 h-2 mr-2 bg-green-400 rounded-full"
+            />
+            Ready to Play
+          </span>
+          <p
+            class="text-sm text-gray-500 mt-2"
+          >
+            Waiting for the judge to start the game
+          </p>
+        </div>
+      </div>
+    `);
+  });
+}); 

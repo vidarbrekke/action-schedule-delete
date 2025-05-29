@@ -1,0 +1,14 @@
+/.git
+/.gitignore
+/testing-plan.md
+/development-plan.md
+/deploy-staging.sh
+*.log
+.DS_Store
+/node_modules
+/build
+/dist
+/coverage
+*.zip
+*.tar.gz
+/dev-tools/

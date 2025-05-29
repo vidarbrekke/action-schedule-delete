@@ -1,0 +1,202 @@
+<?php
+/**
+ * Temporary Admin Fix for URL to Gutenberg
+ * 
+ * This file was a temporary fix for the settings page error.
+ * It is now DISABLED as it is no longer needed.
+ * 
+ * @package UTG
+ */
+
+// DISABLED: This entire file is now commented out as the fixes have been properly 
+// implemented in the core plugin files
+
+/*
+// Exit if accessed directly
+if (!defined('ABSPATH')) {
+    exit;
+}
+
+// Admin-only access
+if (!current_user_can('manage_options')) {
+    wp_die(__('You do not have sufficient permissions to access this page.', 'url-to-gutenberg'));
+}
+
+// Check if Settings class exists
+if (!class_exists('UTG\\Settings')) {
+    echo '<div class="error"><p>Error: UTG\\Settings class not found. The plugin may not be properly loaded.</p></div>';
+    return;
+}
+
+/**
+ * Fix Settings Page View
+ */
+function utg_fix_settings_view() {
+    // Path to the settings view file
+    $settings_view_path = plugin_dir_path(__FILE__) . 'includes/admin/views/settings.php';
+    
+    if (!file_exists($settings_view_path)) {
+        echo '<div class="error"><p>Error: Settings view file not found at: ' . esc_html($settings_view_path) . '</p></div>';
+        return false;
+    }
+    
+    // Get file contents
+    $view_content = file_get_contents($settings_view_path);
+    
+    // Check if the file already contains the fix
+    if (strpos($view_content, '$settings = $this->settings;') !== false) {
+        echo '<div class="updated"><p>Settings file already contains the fix. No changes needed.</p></div>';
+        return true;
+    }
+    
+    // Apply the fix - add the local variable assignment
+    $fixed_content = preg_replace(
+        '/(\/\*\*\s*\n\s*\*\s*Settings\s+view.*?@package\s+UTG\s*\n\s*\*\/\s*\n)/s',
+        "$1\n// Directly get settings from the \$this->settings object\n\$settings = \$this->settings;\n",
+        $view_content
+    );
+    
+    // Replace all instances of $this->settings with $settings
+    $fixed_content = str_replace('$this->settings', '$settings', $fixed_content);
+    
+    // Write the fixed content back to the file
+    if (file_put_contents($settings_view_path, $fixed_content)) {
+        echo '<div class="updated"><p>Settings file successfully updated!</p></div>';
+        return true;
+    } else {
+        echo '<div class="error"><p>Error: Could not write to the settings view file. Please check file permissions.</p></div>';
+        return false;
+    }
+}
+
+/**
+ * Check Admin Fix Status
+ */
+function utg_check_admin_fix() {
+    // Check if admin-fix.php is properly disabled
+    $admin_fix_path = plugin_dir_path(__FILE__) . 'admin-fix.php';
+    
+    if (!file_exists($admin_fix_path)) {
+        echo '<div class="notice notice-warning"><p>admin-fix.php file not found. No action needed.</p></div>';
+        return;
+    }
+    
+    $admin_fix_content = file_get_contents($admin_fix_path);
+    
+    if (strpos($admin_fix_content, '// add_action') !== false) {
+        echo '<div class="updated"><p>admin-fix.php is already disabled. No changes needed.</p></div>';
+    } else {
+        // Try to disable the file
+        $disabled_content = str_replace("add_action('admin_menu'", "// add_action('admin_menu'", $admin_fix_content);
+        
+        if (file_put_contents($admin_fix_path, $disabled_content)) {
+            echo '<div class="updated"><p>admin-fix.php has been disabled!</p></div>';
+        } else {
+            echo '<div class="error"><p>Error: Could not modify admin-fix.php. Please disable it manually by editing the file.</p></div>';
+        }
+    }
+}
+
+/**
+ * Check Settings Class
+ */
+function utg_check_settings_class() {
+    // Check if the Settings class has the is_configured method
+    if (!method_exists('UTG\\Settings', 'is_configured')) {
+        // Path to the settings class file
+        $settings_class_path = plugin_dir_path(__FILE__) . 'includes/class-settings.php';
+        
+        if (!file_exists($settings_class_path)) {
+            echo '<div class="error"><p>Error: Settings class file not found at: ' . esc_html($settings_class_path) . '</p></div>';
+            return false;
+        }
+        
+        // Get file contents
+        $class_content = file_get_contents($settings_class_path);
+        
+        // Check if the file already contains the method
+        if (strpos($class_content, 'function is_configured') !== false) {
+            echo '<div class="updated"><p>Settings class already contains the is_configured method. No changes needed.</p></div>';
+            return true;
+        }
+        
+        // Add the is_configured method before the closing brace
+        $fixed_content = preg_replace(
+            '/(}\s*$)/s',
+            "    /**\n     * Check if the API settings are properly configured\n     *\n     * @return bool True if configured, false otherwise\n     */\n    public function is_configured() {\n        return !empty(\$this->get('api_key'));\n    }\n$1",
+            $class_content
+        );
+        
+        // Write the fixed content back to the file
+        if (file_put_contents($settings_class_path, $fixed_content)) {
+            echo '<div class="updated"><p>Settings class successfully updated with is_configured method!</p></div>';
+            return true;
+        } else {
+            echo '<div class="error"><p>Error: Could not write to the settings class file. Please check file permissions.</p></div>';
+            return false;
+        }
+    } else {
+        echo '<div class="updated"><p>Settings class already has the is_configured method. No changes needed.</p></div>';
+        return true;
+    }
+}
+
+// Add admin page for running the fix - DISABLED
+// add_action('admin_menu', function() {
+//     add_submenu_page(
+//         'tools.php',
+//         'Fix URL to Gutenberg',
+//         'Fix URL to Gutenberg',
+//         'manage_options',
+//         'utg-admin-fix',
+//         'utg_render_fix_page'
+//     );
+// });
+
+/**
+ * Render the fix page
+ */
+function utg_render_fix_page() {
+    ?>
+    <div class="wrap">
+        <h1><?php echo esc_html(get_admin_page_title()); ?></h1>
+        
+        <p><?php _e('This tool will fix common issues with the URL to Gutenberg plugin.', 'url-to-gutenberg'); ?></p>
+        
+        <?php
+        if (isset($_POST['utg_run_fix']) && check_admin_referer('utg_run_fix_nonce')) {
+            echo '<div class="card">';
+            echo '<h2>Fixing Issues</h2>';
+            
+            // Run the fixes
+            utg_check_admin_fix();
+            utg_check_settings_class();
+            utg_fix_settings_view();
+            
+            echo '<p><a href="' . esc_url(admin_url('admin.php?page=url-to-gutenberg-settings')) . '" class="button button-primary">Go to Settings Page</a></p>';
+            echo '</div>';
+        } else {
+            ?>
+            <form method="post" action="">
+                <?php wp_nonce_field('utg_run_fix_nonce'); ?>
+                <p class="submit">
+                    <input type="submit" name="utg_run_fix" class="button button-primary" value="<?php _e('Run Fix', 'url-to-gutenberg'); ?>">
+                </p>
+            </form>
+            <?php
+        }
+        ?>
+        
+        <div class="card">
+            <h2><?php _e('Manual Fix Instructions', 'url-to-gutenberg'); ?></h2>
+            <ol>
+                <li><?php _e('Ensure admin-fix.php is disabled by commenting out the add_action line.', 'url-to-gutenberg'); ?></li>
+                <li><?php _e('Update includes/admin/views/settings.php to use a local $settings variable.', 'url-to-gutenberg'); ?></li>
+                <li><?php _e('Add an is_configured() method to the Settings class.', 'url-to-gutenberg'); ?></li>
+            </ol>
+        </div>
+    </div>
+    <?php
+}
+*/
+?> 

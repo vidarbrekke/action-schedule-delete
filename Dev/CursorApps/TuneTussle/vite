@@ -1,0 +1,16 @@
+
+
+  VITE v6.3.5  ready in 127 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: use --host to expose
+------------------------------------------------------------
+---------------------------------------------------------------------
+Backend logs should appear above this line in this terminal.
+Frontend is available at: http://localhost:5173
+If servers did not start, check for errors above.
+Press Ctrl+C in this terminal to stop viewing logs (servers 
+Press Ctrl+C in this terminal to stop viewing logs (servers will keep running in background).
+To stop servers, run this script again with the --stop flag:
+  ./run.sh --stop
+------------------------------------------------------------

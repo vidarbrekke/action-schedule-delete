@@ -1,14 +1,17 @@
 <?php
+
 declare(strict_types=1);
 
 /**
  * Registers all action and filter hooks for the plugin.
  *
+ * Exposes a public $indexer property for integration with the main plugin and hook registration.
+ *
  * @package    Wcac_Customer_AI_Chatbot
  * @subpackage Wcac_Customer_AI_Chatbot/includes
  */
-class Wcac_Loader {
-
+class Wcac_Loader
+{
     /**
      * The array of actions registered with WordPress.
      *
@@ -29,7 +32,7 @@ class Wcac_Loader {
 
     /**
      * The indexer instance for post indexing.
-     * 
+     *
      * @since    1.0.0
      * @access   public
      * @var      Wcac_Indexer|null    $indexer    The indexer instance.
@@ -41,10 +44,11 @@ class Wcac_Loader {
      *
      * @since    1.0.0
      */
-    public function __construct() {
+    public function __construct()
+    {
         $this->actions = [];
         $this->filters = [];
-        
+
         // Initialize the indexer if the class exists
         if (class_exists('Wcac_Indexer')) {
             $this->indexer = new Wcac_Indexer();
@@ -61,8 +65,9 @@ class Wcac_Loader {
      * @param    int                  $priority         Optional. The priority at which the function should be fired. Default is 10.
      * @param    int                  $accepted_args    Optional. The number of arguments that should be passed to the $callback. Default is 1.
      */
-    public function add_action( string $hook, object $component, string $callback, int $priority = 10, int $accepted_args = 1 ): void {
-        $this->actions = $this->add( $this->actions, $hook, $component, $callback, $priority, $accepted_args );
+    public function add_action(string $hook, object $component, string $callback, int $priority = 10, int $accepted_args = 1): void
+    {
+        $this->actions = $this->add($this->actions, $hook, $component, $callback, $priority, $accepted_args);
     }
 
     /**
@@ -75,8 +80,9 @@ class Wcac_Loader {
      * @param    int                  $priority         Optional. The priority at which the function should be fired. Default is 10.
      * @param    int                  $accepted_args    Optional. The number of arguments that should be passed to the $callback. Default is 1.
      */
-    public function add_filter( string $hook, object $component, string $callback, int $priority = 10, int $accepted_args = 1 ): void {
-        $this->filters = $this->add( $this->filters, $hook, $component, $callback, $priority, $accepted_args );
+    public function add_filter(string $hook, object $component, string $callback, int $priority = 10, int $accepted_args = 1): void
+    {
+        $this->filters = $this->add($this->filters, $hook, $component, $callback, $priority, $accepted_args);
     }
 
     /**
@@ -93,7 +99,8 @@ class Wcac_Loader {
      * @param    int                  $accepted_args    The number of arguments that should be passed to the $callback.
      * @return   array                                  The collection of actions and filters registered with WordPress.
      */
-    private function add( array $hooks, string $hook, object $component, string $callback, int $priority, int $accepted_args ): array {
+    private function add(array $hooks, string $hook, object $component, string $callback, int $priority, int $accepted_args): array
+    {
         $hooks[] = [
             'hook'          => $hook,
             'component'     => $component,
@@ -109,13 +116,14 @@ class Wcac_Loader {
      *
      * @since    1.0.0
      */
-    public function run(): void {
-        foreach ( $this->filters as $hook ) {
-            add_filter( $hook['hook'], array( $hook['component'], $hook['callback'] ), $hook['priority'], $hook['accepted_args'] );
+    public function run(): void
+    {
+        foreach ($this->filters as $hook) {
+            add_filter($hook['hook'], array( $hook['component'], $hook['callback'] ), $hook['priority'], $hook['accepted_args']);
         }
 
-        foreach ( $this->actions as $hook ) {
-            add_action( $hook['hook'], array( $hook['component'], $hook['callback'] ), $hook['priority'], $hook['accepted_args'] );
+        foreach ($this->actions as $hook) {
+            add_action($hook['hook'], array( $hook['component'], $hook['callback'] ), $hook['priority'], $hook['accepted_args']);
         }
 
         // Add specific hook for product saving
@@ -127,11 +135,11 @@ class Wcac_Loader {
         // add_action( 'wp_ajax_wcac_build_index', [ $this, 'handle_build_index_ajax' ] );
 
         // Add action for general post saving (handles products, pages, posts based on checks within the method)
-        add_action( 'save_post', [$this->indexer, 'update_single_content'], 10, 1 ); // Only pass post_id
+        add_action('save_post', [$this->indexer, 'update_single_content'], 10, 1); // Only pass post_id
     }
 
     // REMOVED: AJAX handler method is now in main plugin file.
-	// /**
+    // /**
     //  * Handles the AJAX request to manually build the index.
     //  *
     //  * @since 0.1.0
@@ -159,13 +167,13 @@ class Wcac_Loader {
     //     }
     // }
 
-	// Method to handle save_post if needed (checks post type)
-	// public function handle_save_post( int $post_id, WP_Post $post, bool $update ): void {
-	// 	if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
-	// 		return;
-	// 	}
-	// 	if ( $post->post_type === 'product' ) {
-	// 		$this->indexer->update_single_product( $post_id );
-	// 	}
-	// }
-} 
+    // Method to handle save_post if needed (checks post type)
+    // public function handle_save_post( int $post_id, WP_Post $post, bool $update ): void {
+    //  if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+    //      return;
+    //  }
+    //  if ( $post->post_type === 'product' ) {
+    //      $this->indexer->update_single_product( $post_id );
+    //  }
+    // }
+}

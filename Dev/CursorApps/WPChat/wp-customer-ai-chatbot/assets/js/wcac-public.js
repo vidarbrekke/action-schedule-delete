@@ -14,14 +14,52 @@ jQuery(document).ready(function($) {
         var chatContainer = $('#wcac-chatbot-container');
         var initialGreeting = chatContainer.data('greeting');
 
+        // Persistent conversation history key
+        var STORAGE_KEY = 'wcac_chat_history';
         // Conversation history array
         var conversation = [];
+
+        // Restore conversation from localStorage if available
+        function restoreConversation() {
+            var stored = localStorage.getItem(STORAGE_KEY);
+            if (stored) {
+                try {
+                    var parsed = JSON.parse(stored);
+                    if (Array.isArray(parsed)) {
+                        conversation = parsed;
+                        // Render all messages
+                        chatMessages.empty();
+                        parsed.forEach(function(turn) {
+                            if (turn.role === 'user') {
+                                addMessage('user', turn.content);
+                            } else if (turn.role === 'assistant') {
+                                addMessage('assistant', turn.content);
+                            }
+                        });
+                    }
+                } catch (e) {
+                    console.warn('WCAC: Failed to parse stored chat history', e);
+                }
+            }
+        }
+
+        // Save conversation to localStorage
+        function saveConversation() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(conversation));
+            } catch (e) {
+                console.warn('WCAC: Failed to save chat history', e);
+            }
+        }
 
         // Make sure required elements exist
         if (!chatForm.length || !messageInput.length || !chatMessages.length || !sendButton.length) {
             console.error('WCAC: Required chat elements not found');
             return;
         }
+
+        // Restore chat on load
+        restoreConversation();
 
         // Verify AJAX connectivity on initialization
         verifyAjaxConnectivity();
@@ -102,18 +140,24 @@ jQuery(document).ready(function($) {
                     role: sender === 'user' ? 'user' : 'assistant',
                     content: message
                 });
+                saveConversation(); // Save after each new message
             }
         }
 
         // Show typing indicator while waiting for response
         function showTypingIndicator() {
+            // Always remove any existing indicator first
+            $('#wcac-typing-indicator').remove();
             chatMessages.append('<div id="wcac-typing-indicator" class="wcac-assistant-message"><div class="wcac-message-content"><span class="wcac-dot"></span><span class="wcac-dot"></span><span class="wcac-dot"></span></div></div>');
             chatMessages.scrollTop(chatMessages[0].scrollHeight);
+            console.log('WCAC: showTypingIndicator called. Count now:', $('#wcac-typing-indicator').length);
         }
 
         // Remove typing indicator
         function removeTypingIndicator() {
+            var count = $('#wcac-typing-indicator').length;
             $('#wcac-typing-indicator').remove();
+            console.log('WCAC: removeTypingIndicator called. Removed count:', count, 'Remaining:', $('#wcac-typing-indicator').length);
         }
 
         // Verify AJAX connectivity and nonce
@@ -167,6 +211,33 @@ jQuery(document).ready(function($) {
             });
         }
 
+        // --- Add this function for automatic hyperlinking ---
+        function autoLinkTitles(text, products) {
+            if (!Array.isArray(products) || products.length === 0 || !text) return text;
+            // Build a map of lowercased titles to URLs
+            var titleToUrl = {};
+            products.forEach(function(item) {
+                var name = item.title || item.name;
+                var url = item.url;
+                if (name && url) {
+                    titleToUrl[name.toLowerCase()] = url;
+                }
+            });
+            // Sort titles by length descending to avoid partial matches
+            var titles = Object.keys(titleToUrl).sort(function(a, b) { return b.length - a.length; });
+            // Replace each title with a link, only if not already inside an <a> tag
+            titles.forEach(function(title) {
+                // Regex: match whole word, case-insensitive, not inside HTML tag
+                var regex = new RegExp('(?<![\w>])(' + title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')(?![\w<])', 'gi');
+                text = text.replace(regex, function(match) {
+                    // Avoid double-linking if already inside an <a> tag
+                    if (/<a [^>]*?>.*?/.test(match)) return match;
+                    return '<a href="' + titleToUrl[title] + '" target="_blank" rel="noopener noreferrer">' + match + '</a>';
+                });
+            });
+            return text;
+        }
+
         // Handle sending a message to the server
         function sendMessage(message) {
             if (!message.trim()) return;
@@ -187,46 +258,84 @@ jQuery(document).ready(function($) {
             $.ajax({
                 url: wcac_params.ajax_url,
                 type: 'POST',
+                dataType: 'json',
                 data: {
                     action: 'wcac_send_message',
                     message: message,
                     conversation: JSON.stringify(conversation),
                     nonce: wcac_params.nonce
                 },
-                success: function(response) {
-                    removeTypingIndicator();
+                beforeSend: function() {
+                    showTypingIndicator();
+                },
+                success: function(response, status, xhr) {
+                    console.log('WCAC: Raw AJAX Success response string:', xhr.responseText);
                     sendButton.prop('disabled', false);
-                    
-                    if (response.success && response.data && response.data.message) {
-                        addMessage('assistant', response.data.message);
-                        
-                        // Update nonce if provided
-                        if (response.data.new_nonce) {
-                            wcac_params.nonce = response.data.new_nonce;
+
+                    if (typeof response === 'string') {
+                        try {
+                            response = JSON.parse(response);
+                        } catch (e) {
+                            removeTypingIndicator();
+                            console.error('WCAC: Failed to parse JSON response', response);
+                            addMessage('assistant', 'Sorry, I encountered an error. Please try again.', true);
+                            return;
                         }
-                    } else if (!response.success && response.data && response.data.message) {
-                        addMessage('assistant', response.data.message, true);
-                    } else {
-                        addMessage('assistant', 'Sorry, I encountered an error. Please try again.', true);
-                        console.error('WCAC: Invalid response format', response);
                     }
+
+                    console.log('WCAC: Parsed AJAX Success response:', response);
+
+                    // --- Unified flat response handling ---
+                    if (response && response.success) {
+                        var data = response.data || response; // Some plugins use data, some put keys at top level
+                        var msg = data.response || data.message || '';
+                        var products = Array.isArray(data.products) ? data.products : [];
+                        // Deduplicate products by title or name (already done backend, but keep for safety)
+                        var seenTitles = new Set();
+                        var dedupedProducts = [];
+                        products.forEach(function(item) {
+                            var name = item.title || item.name || '';
+                            if (!seenTitles.has(name.toLowerCase())) {
+                                seenTitles.add(name.toLowerCase());
+                                dedupedProducts.push(item);
+                            }
+                        });
+                        // Auto-link product/page titles in the LLM response
+                        msg = autoLinkTitles(msg, dedupedProducts);
+                        // Only show the LLM's answer (with auto-linking)
+                        addMessage('assistant', msg, false);
+                        saveConversation(); // Save after assistant reply
+                        return;
+                    }
+                    // --- End unified flat response handling ---
+
+                    // Fallback for invalid format
+                    removeTypingIndicator();
+                    console.error('WCAC: Invalid response format', response);
+                    addMessage('assistant', 'Sorry, I encountered an error. Please try again.', true);
                 },
                 error: function(xhr, status, error) {
                     removeTypingIndicator();
                     sendButton.prop('disabled', false);
                     
                     console.error('WCAC: Error sending message:', status, error);
+                    removeTypingIndicator();
                     addMessage('assistant', 'Sorry, there was an error communicating with the server. Please try again.', true);
                     
                     // If it's a nonce error, try to refresh the page
                     if (xhr.status === 403) {
                         setTimeout(function() {
+                            removeTypingIndicator();
                             addMessage('assistant', 'Your session may have expired. The page will refresh in 3 seconds...', true);
                             setTimeout(function() {
                                 window.location.reload();
                             }, 3000);
                         }, 1000);
                     }
+                    
+                    console.error('WCAC: Raw AJAX response:', xhr.responseText); // Log raw response
+                    console.error('WCAC: AJAX status:', status);
+                    console.error('WCAC: AJAX error:', error);
                 }
             });
         }
@@ -246,10 +355,25 @@ jQuery(document).ready(function($) {
             }
         });
 
-        // Display initial greeting if configured
-        if (initialGreeting) {
+        // Display initial greeting if configured and not already restored
+        if (initialGreeting && conversation.length === 0) {
             addMessage('assistant', initialGreeting);
         }
+
+        // Add Clear Chat button to the chat container
+        var clearButton = $('<button type="button" id="wcac-clear-chat" class="button" style="margin-left:8px; margin-bottom:8px;">Clear Chat</button>');
+        chatContainer.prepend(clearButton);
+
+        clearButton.on('click', function() {
+            if (confirm('Clear all chat history?')) {
+                localStorage.removeItem(STORAGE_KEY);
+                conversation = [];
+                chatMessages.empty();
+                if (initialGreeting) {
+                    addMessage('assistant', initialGreeting);
+                }
+            }
+        });
     }
 
     // Initialize when document is ready

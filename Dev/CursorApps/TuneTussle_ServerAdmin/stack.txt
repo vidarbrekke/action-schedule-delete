@@ -1,0 +1,28 @@
+here's the technical stack for TuneTussle:
+Frontend:
+Node.js
+React 19
+TypeScript
+Vite (build tool)
+TailwindCSS
+Socket.io Client
+React Router DOM
+Axios for HTTP requests
+Backend:
+Node.js
+Express.js
+TypeScript
+Socket.io
+ts-node (for running TypeScript directly)
+dotenv (for environment variables)
+Google APIs
+CORS support
+Development Tools:
+Jest/Vitest (testing frameworks)
+ESLint (linting)
+You should install the following on Alpine 3.2:
+Node.js (latest LTS version)
+npm (comes with Node.js)
+Git (for deployment)
+
+The application is set up to run with npm scripts for both the frontend and backend, with the frontend running on port 5173 and the backend on port 4000 in development.

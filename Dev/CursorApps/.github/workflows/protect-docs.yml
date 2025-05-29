@@ -1,0 +1,20 @@
+name: Protect Documentation Files
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  protect-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Check for protected documentation files
+        run: |
+          for file in user-guide.md judge-guide.md handover.md initial_spec.md next-steps.md; do
+            if [ ! -f "$file" ]; then
+              echo "::error file=$file::Protected documentation file $file is missing!"
+              exit 1
+            fi
+          done 

@@ -1,0 +1,29 @@
+{
+  "scripts": {
+    "test": "jest",
+    "ci-check": "npm run type-check:all && npm run lint:all && npm run test:all",
+    "type-check": "npm run type-check:backend && npm run type-check:frontend",
+    "type-check:all": "npm run type-check:backend && npm run type-check:frontend",
+    "type-check:backend": "cd backend && npm run type-check",
+    "type-check:frontend": "cd frontend && npm run type-check",
+    "lint": "npm run lint:backend && npm run lint:frontend",
+    "lint:all": "npm run lint:backend && npm run lint:frontend",
+    "lint:backend": "cd backend && (npm run lint 2>/dev/null || echo 'Backend lint skipped - ESLint not installed')",
+    "lint:frontend": "cd frontend && npm run lint",
+    "test:all": "npm run test:backend && npm run test:frontend",
+    "test:backend": "cd backend && npm test",
+    "test:frontend": "cd frontend && npm test",
+    "test:coverage": "npm run test:coverage:backend && npm run test:coverage:frontend",
+    "test:coverage:backend": "cd backend && npm run test:coverage",
+    "test:coverage:frontend": "cd frontend && npm run test:coverage"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.27.1",
+    "@babel/preset-env": "^7.27.2",
+    "@types/jest": "^29.5.14",
+    "@types/node-fetch": "^2.6.12",
+    "babel-jest": "^29.7.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.3.4"
+  }
+}

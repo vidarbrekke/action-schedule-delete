@@ -61,8 +61,7 @@ Thumbs.db
 
 # Build artifacts and dependencies
 node_modules/
-vendor/
-bower_components/
+†bower_components/
 .sass-cache/
 *.log
 *.sql

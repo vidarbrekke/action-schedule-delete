@@ -1,0 +1,27 @@
+{
+    "name": "wordpress/url-to-gutenberg",
+    "description": "Convert web content into Gutenberg blocks using a hybrid extraction system",
+    "type": "wordpress-plugin",
+    "license": "GPL-2.0-or-later",
+    "require": {
+        "php": ">=7.4",
+        "hstanleycrow/easyphparticleextractor": "dev-main",
+        "symfony/panther": "^2.0",
+        "symfony/css-selector": "^5.4|^6.0",
+        "php-webdriver/webdriver": "^1.12",
+        "symfony/process": "^5.4|^6.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "UTG\\": "includes/"
+        },
+        "files": [
+            "vendor/hstanleycrow/easyphparticleextractor/src/simple_html_dom.php"
+        ]
+    },
+    "config": {
+        "platform": {
+            "ext-zip": "1.0"
+        }
+    }
+} 

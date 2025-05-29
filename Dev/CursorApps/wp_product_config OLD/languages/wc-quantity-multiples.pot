@@ -1,0 +1,135 @@
+# Copyright (C) 2023 Your Name
+# This file is distributed under the same license as the WC Quantity Multiples plugin.
+msgid ""
+msgstr ""
+"Project-Id-Version: WC Quantity Multiples 1.0.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wc-quantity-multiples\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2023-07-27T10:00:00+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.7.1\n"
+"X-Domain: wc-quantity-multiples\n"
+
+#. Plugin Name of the plugin
+msgid "WC Quantity Multiples"
+msgstr ""
+
+#. Plugin URI of the plugin
+msgid "https://example.com/wc-quantity-multiples"
+msgstr ""
+
+#. Description of the plugin
+msgid "Forces users to select product quantities in multiples of 10 for WooCommerce stores."
+msgstr ""
+
+#. Author of the plugin
+msgid "Your Name"
+msgstr ""
+
+#. Author URI of the plugin
+msgid "https://example.com"
+msgstr ""
+
+#: wc-quantity-multiples.php:94
+msgid "WC Quantity Multiples requires WooCommerce to be installed and active."
+msgstr ""
+
+#: includes/class-wcqm-settings.php:73
+msgid "Quantity Multiples Settings"
+msgstr ""
+
+#: includes/class-wcqm-settings.php:74
+msgid "Quantity Multiples"
+msgstr ""
+
+#: includes/class-wcqm-settings.php:93
+msgid "General Settings"
+msgstr ""
+
+#: includes/class-wcqm-settings.php:100
+msgid "Default Multiple"
+msgstr ""
+
+#: includes/class-wcqm-settings.php:107
+msgid "Apply to All Products"
+msgstr ""
+
+#: includes/class-wcqm-settings.php:114
+msgid "Specific Products"
+msgstr ""
+
+#: includes/class-wcqm-settings.php:121
+msgid "Product Categories"
+msgstr ""
+
+#: includes/class-wcqm-settings.php:131
+msgid "Configure how product quantities are enforced in your store."
+msgstr ""
+
+#: includes/class-wcqm-settings.php:141
+msgid "The default multiple for product quantities (e.g. 10 will force quantities like 10, 20, 30, etc.)"
+msgstr ""
+
+#: includes/class-wcqm-settings.php:150
+msgid "Yes"
+msgstr ""
+
+#: includes/class-wcqm-settings.php:151
+msgid "No"
+msgstr ""
+
+#: includes/class-wcqm-settings.php:153
+msgid "Apply the quantity multiple rule to all products"
+msgstr ""
+
+#: includes/class-wcqm-settings.php:163
+msgid "Search for a product&hellip;"
+msgstr ""
+
+#: includes/class-wcqm-settings.php:177
+msgid "Select specific products to apply the quantity multiple rule (only applicable if \"Apply to All Products\" is set to \"No\")"
+msgstr ""
+
+#: includes/class-wcqm-settings.php:196
+msgid "Select categories&hellip;"
+msgstr ""
+
+#: includes/class-wcqm-settings.php:204
+msgid "Select product categories to apply the quantity multiple rule (only applicable if \"Apply to All Products\" is set to \"No\")"
+msgstr ""
+
+#: includes/class-wcqm-settings.php:247
+msgid "Settings"
+msgstr ""
+
+#: includes/class-wcqm-product.php:193
+msgid "Quantity must be in multiples of "
+msgstr ""
+
+#: includes/class-wcqm-product.php:217
+msgid "Quantity must be in multiples of %1$s. We've adjusted your quantity to %2$s."
+msgstr ""
+
+#: includes/class-wcqm-cart.php:115
+msgid "\"%1$s\" quantity must be in multiples of %2$s. We've adjusted your quantity to %3$s."
+msgstr ""
+
+#: includes/class-wcqm-cart.php:199
+msgid "We've adjusted the quantity for \"%1$s\" from %2$s to %3$s (multiples of %4$s)."
+msgstr ""
+
+#: includes/class-wcqm-checkout.php:117
+msgid "Some items in your cart have been adjusted to meet quantity requirements:"
+msgstr ""
+
+#: includes/class-wcqm-checkout.php:122
+msgid "\"%1$s\" quantity changed from %2$s to %3$s (multiples of %4$s)"
+msgstr ""
+
+#: includes/class-wcqm-checkout.php:130
+msgid "Please review your updated cart before proceeding."
+msgstr ""

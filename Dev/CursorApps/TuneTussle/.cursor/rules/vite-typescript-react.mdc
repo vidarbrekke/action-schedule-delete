@@ -1,0 +1,53 @@
+---
+description: Development of Typescript, Vite, or React
+globs: 
+alwaysApply: false
+---
+# LLM Guidelines for TypeScript, Vite & React
+
+## 1. Project Setup & Config
+- Scaffold with Vite’s React-TS template:
+  ```bash
+  npm create vite@latest my-app -- --template react-ts
+  ```
+- Enable strict type-checking in `tsconfig.json`:
+  ```json
+  {
+    "compilerOptions": {
+      "strict": true,
+      "noImplicitAny": true,
+      "strictNullChecks": true
+    }
+  }
+  ```
+- Sync TS path aliases in `vite.config.ts` via the `vite-tsconfig-paths` plugin.
+
+## 2. Code Organization
+- Use a feature-based folder layout:
+  ```
+  src/
+  ├─ components/
+  ├─ pages/
+  ├─ hooks/
+  ├─ services/
+  ├─ utils/
+  └─ types/
+  ```
+- Keep files focused (< 150 lines) and maintain single-responsibility modules.
+- Use ES6 imports/exports and barrel `index.ts` files for clean imports.
+
+## 3. Type Safety & React Patterns
+- Build functional components with React Hooks; type props and state using interfaces or type aliases.
+- Avoid `any`; use `unknown` or precise union types, and leverage utility types like `Omit` and `Partial`.
+- Follow the Rules of Hooks: call hooks only at the top level and within React functions.
+
+## 4. Tooling & Testing
+- Enforce code quality with:
+  - ESLint + `@typescript-eslint`
+  - Prettier
+- Write tests using Vitest (or Jest) and React Testing Library.
+- Automate linting, formatting, and tests via Git hooks or CI pipelines.
+
+## 5. Performance & Build
+- Enable Vite’s HMR and use dynamic `import()` for code-splitting.
+- Perform bundle analysis (e.g., with `rollup-plugin-visualizer`) and rely on tree-shaking.
