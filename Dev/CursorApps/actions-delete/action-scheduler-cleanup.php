@@ -20,10 +20,15 @@ final class MK_Action_Scheduler_Cleanup {
 		// Admin UI
 		add_action('admin_menu', [$this, 'add_admin_menu']);
 		add_action('wp_ajax_action_scheduler_cleanup_run', [$this, 'manual_cleanup']);
+		add_action('wp_ajax_action_scheduler_cleanup_clear_history', [$this, 'clear_history']);
 	}
 
 	public static function activate() {
 		self::instance()->ensure_scheduled_event();
+		// Initialize history option without autoload to avoid front-end memory usage
+		if (get_option('mk_asc_history', null) === null) {
+			add_option('mk_asc_history', [], '', 'no');
+		}
 	}
 
 	public static function deactivate() {
@@ -68,7 +73,8 @@ final class MK_Action_Scheduler_Cleanup {
 		if (get_transient($lock_key)) {
 			$results['success'] = false;
 			$results['error'] = 'Cleanup already running';
-			$this->log_cleanup($results);
+			$entry = $this->log_cleanup($results);
+			$results['history_entry'] = $entry;
 			return $results;
 		}
 
@@ -80,7 +86,8 @@ final class MK_Action_Scheduler_Cleanup {
 			if (!$this->tables_exist($prefix)) {
 				$results['success'] = false;
 				$results['error'] = 'Action Scheduler tables not found';
-				$this->log_cleanup($results);
+				$entry = $this->log_cleanup($results);
+				$results['history_entry'] = $entry;
 				return $results;
 			}
 
@@ -106,7 +113,8 @@ final class MK_Action_Scheduler_Cleanup {
 			delete_transient($lock_key);
 		}
 
-		$this->log_cleanup($results);
+		$entry = $this->log_cleanup($results);
+		$results['history_entry'] = $entry;
 		return $results;
 	}
 
@@ -197,6 +205,50 @@ final class MK_Action_Scheduler_Cleanup {
 		if (!$results['success'] || (defined('WP_DEBUG') && WP_DEBUG)) {
 			error_log($log_message);
 		}
+
+		$entry = [
+			'time_gmt'          => gmdate('Y-m-d H:i:s'),
+			'trigger'           => (defined('DOING_CRON') && DOING_CRON) ? 'cron' : ((defined('DOING_AJAX') && DOING_AJAX) ? 'manual' : 'manual'),
+			'failed_actions'    => (int) ($results['failed_actions'] ?? 0),
+			'completed_actions' => (int) ($results['completed_actions'] ?? 0),
+			'orphaned_logs'     => (int) ($results['orphaned_logs'] ?? 0),
+			'success'           => (bool) ($results['success'] ?? false),
+			'error'             => $results['error'] ?? null,
+		];
+
+		$this->append_history($entry);
+		return $entry;
+	}
+
+	/**
+	 * Persist recent history (capped)
+	 */
+	private function append_history($entry) {
+		$history = get_option('mk_asc_history', []);
+		if (!is_array($history)) {
+			$history = [];
+		}
+		array_unshift($history, $entry);
+		// Cap to last 50 entries
+		$history = array_slice($history, 0, 50);
+		update_option('mk_asc_history', $history, false);
+	}
+
+	private function get_history($limit = 20) {
+		$history = get_option('mk_asc_history', []);
+		if (!is_array($history)) {
+			return [];
+		}
+		return array_slice($history, 0, max(0, (int) $limit));
+	}
+
+	public function clear_history() {
+		if (!current_user_can('manage_options')) {
+			wp_send_json_error(['message' => 'Unauthorized']);
+		}
+		check_ajax_referer('action_scheduler_cleanup_nonce', 'nonce');
+		update_option('mk_asc_history', [], false);
+		wp_send_json_success(['message' => __('History cleared.', 'action-scheduler-cleanup')]);
 	}
 
 	public function add_admin_menu() {
@@ -223,6 +275,37 @@ final class MK_Action_Scheduler_Cleanup {
 			<h2 class="title"><?php esc_html_e('Manual Run', 'action-scheduler-cleanup'); ?></h2>
 			<button id="mk-asc-run" class="button button-primary"><?php esc_html_e('Run Cleanup Now', 'action-scheduler-cleanup'); ?></button>
 			<pre id="mk-asc-result" style="margin-top:12px;background:#fff;border:1px solid #ccd0d4;padding:12px;display:none;"></pre>
+
+			<h2 class="title" style="margin-top:20px;"><?php esc_html_e('History (last 20)', 'action-scheduler-cleanup'); ?></h2>
+			<p>
+				<button id="mk-asc-clear-history" class="button"><?php esc_html_e('Clear History', 'action-scheduler-cleanup'); ?></button>
+			</p>
+			<table class="widefat fixed striped" id="mk-asc-history">
+				<thead>
+					<tr>
+						<th><?php esc_html_e('Time (UTC)', 'action-scheduler-cleanup'); ?></th>
+						<th><?php esc_html_e('Trigger', 'action-scheduler-cleanup'); ?></th>
+						<th><?php esc_html_e('Failed', 'action-scheduler-cleanup'); ?></th>
+						<th><?php esc_html_e('Completed', 'action-scheduler-cleanup'); ?></th>
+						<th><?php esc_html_e('Logs', 'action-scheduler-cleanup'); ?></th>
+						<th><?php esc_html_e('Status', 'action-scheduler-cleanup'); ?></th>
+						<th><?php esc_html_e('Error', 'action-scheduler-cleanup'); ?></th>
+					</tr>
+				</thead>
+				<tbody>
+				<?php foreach ($this->get_history(20) as $row): ?>
+					<tr>
+						<td><?php echo esc_html($row['time_gmt']); ?></td>
+						<td><?php echo esc_html($row['trigger']); ?></td>
+						<td><?php echo esc_html((string) $row['failed_actions']); ?></td>
+						<td><?php echo esc_html((string) $row['completed_actions']); ?></td>
+						<td><?php echo esc_html((string) $row['orphaned_logs']); ?></td>
+						<td><?php echo $row['success'] ? '<span style="color:green;">' . esc_html__('Success', 'action-scheduler-cleanup') . '</span>' : '<span style="color:#b32d2e;">' . esc_html__('Failed', 'action-scheduler-cleanup') . '</span>'; ?></td>
+						<td><?php echo $row['error'] ? esc_html($row['error']) : ''; ?></td>
+					</tr>
+				<?php endforeach; ?>
+				</tbody>
+			</table>
 		</div>
 		<script>
 		jQuery(function($){
@@ -243,6 +326,23 @@ final class MK_Action_Scheduler_Cleanup {
 							if (typeof resp.data.orphaned_logs !== 'undefined') counts.push('Orphaned logs removed: ' + resp.data.orphaned_logs);
 							if (resp.data.next_run_utc) counts.push('Next scheduled run: ' + resp.data.next_run_utc + ' UTC');
 							if (counts.length) message += '\n\n' + counts.join('\n');
+
+							// inject latest history row if provided
+							if (resp.data.history_entry) {
+								var r = resp.data.history_entry;
+								var $row = $('<tr>');
+								$row.append($('<td>').text(r.time_gmt));
+								$row.append($('<td>').text(r.trigger));
+								$row.append($('<td>').text(String(r.failed_actions)));
+								$row.append($('<td>').text(String(r.completed_actions)));
+								$row.append($('<td>').text(String(r.orphaned_logs)));
+								$row.append($('<td>').html(r.success ? '<span style="color:green;">Success</span>' : '<span style="color:#b32d2e;">Failed</span>'));
+								$row.append($('<td>').text(r.error || ''));
+								$('#mk-asc-history tbody').prepend($row);
+								// keep max 20 rows in UI
+								var $rows = $('#mk-asc-history tbody tr');
+								if ($rows.length > 20) { $rows.last().remove(); }
+							}
 						} else if (!resp.success && resp.data) {
 							message = resp.data.message || 'Cleanup failed.';
 						}
@@ -252,6 +352,24 @@ final class MK_Action_Scheduler_Cleanup {
 					$('#mk-asc-result').show().text('Request failed. Please check your connection and try again.');
 				}).always(function(){
 					$btn.prop('disabled', false).text('Run Cleanup Now');
+				});
+			});
+
+			$('#mk-asc-clear-history').on('click', function(){
+				var $btn = $(this);
+				$btn.prop('disabled', true).text('Clearing...');
+				$.post(ajaxurl, { action: 'action_scheduler_cleanup_clear_history', nonce: '<?php echo esc_js(wp_create_nonce('action_scheduler_cleanup_nonce')); ?>' })
+				.done(function(resp){
+					if (resp && resp.success) {
+						$('#mk-asc-history tbody').empty();
+						$('#mk-asc-result').show().text(resp.data && resp.data.message ? resp.data.message : 'History cleared.');
+					} else {
+						$('#mk-asc-result').show().text('Failed to clear history.');
+					}
+				}).fail(function(){
+					$('#mk-asc-result').show().text('Request failed.');
+				}).always(function(){
+					$btn.prop('disabled', false).text('Clear History');
 				});
 			});
 		});
