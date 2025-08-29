@@ -5,6 +5,7 @@ A WordPress plugin that automatically cleans up Action Scheduler data to prevent
 ## Features
 
 - **Automatic Cleanup**: Runs every 30 days via WordPress cron
+- **Non-blocking Activation**: First run is scheduled 1 hour after activation (no immediate run)
 - **Failed Actions**: Removes all failed actions immediately
 - **Old Completed Actions**: Removes completed actions older than 30 days
 - **Orphaned Logs**: Cleans up log entries without corresponding actions
@@ -28,6 +29,11 @@ A WordPress plugin that automatically cleans up Action Scheduler data to prevent
 - Requires `manage_options` capability
 - AJAX nonce verification
 - Proper WordPress sanitization and escaping
+
+## Implementation Notes
+
+- Uses small batched DELETEs to avoid long locks and timeouts
+- Employs a 60-minute lock to prevent concurrent cleanups on large datasets
 
 ## Database Impact
 

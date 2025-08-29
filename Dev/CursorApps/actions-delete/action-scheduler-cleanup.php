@@ -24,8 +24,6 @@ final class MK_Action_Scheduler_Cleanup {
 
 	public static function activate() {
 		self::instance()->ensure_scheduled_event();
-		// Run once on activation
-		self::instance()->cleanup_action_scheduler();
 	}
 
 	public static function deactivate() {
@@ -74,8 +72,8 @@ final class MK_Action_Scheduler_Cleanup {
 			return $results;
 		}
 
-		// Set lock for 10 minutes (should be plenty for cleanup)
-		set_transient($lock_key, true, 10 * MINUTE_IN_SECONDS);
+		// Set lock for 60 minutes to cover large cleanups
+		set_transient($lock_key, true, 60 * MINUTE_IN_SECONDS);
 
 		try {
 			// Check if tables exist
@@ -85,9 +83,6 @@ final class MK_Action_Scheduler_Cleanup {
 				$this->log_cleanup($results);
 				return $results;
 			}
-
-			// Start transaction for atomicity
-			$wpdb->query('START TRANSACTION');
 
 			// Delete failed actions with batching
 			$results['failed_actions'] = $this->delete_with_limit(
@@ -103,13 +98,7 @@ final class MK_Action_Scheduler_Cleanup {
 
 			// Delete orphaned logs with optimized query
 			$results['orphaned_logs'] = $this->delete_orphaned_logs($prefix);
-
-			// Commit transaction
-			$wpdb->query('COMMIT');
-
 		} catch (Exception $e) {
-			// Rollback on any error
-			$wpdb->query('ROLLBACK');
 			$results['success'] = false;
 			$results['error'] = $e->getMessage();
 		} finally {
@@ -163,20 +152,32 @@ final class MK_Action_Scheduler_Cleanup {
 	 */
 	private function delete_orphaned_logs($prefix) {
 		global $wpdb;
+		$total_deleted = 0;
 
-		// Use LEFT JOIN for better performance than subquery
-		$query = $wpdb->prepare(
-			"DELETE al FROM {$prefix}actionscheduler_logs al
-			 LEFT JOIN {$prefix}actionscheduler_actions aa ON al.action_id = aa.action_id
-			 WHERE aa.action_id IS NULL"
-		);
+		do {
+			// Select a batch of orphaned log IDs
+			$ids = $wpdb->get_col(
+				"SELECT al.log_id
+				 FROM {$prefix}actionscheduler_logs al
+				 LEFT JOIN {$prefix}actionscheduler_actions aa ON al.action_id = aa.action_id
+				 WHERE aa.action_id IS NULL
+				 LIMIT 1000"
+			);
 
-		$result = $wpdb->query($query);
-		if ($result === false) {
-			throw new Exception('Failed to delete orphaned logs: ' . $wpdb->last_error);
-		}
+			if (empty($ids)) {
+				break;
+			}
 
-		return (int) $result;
+			$placeholders = implode(',', array_fill(0, count($ids), '%d'));
+			$sql = "DELETE FROM {$prefix}actionscheduler_logs WHERE log_id IN ($placeholders)";
+			$deleted = $wpdb->query($wpdb->prepare($sql, $ids));
+			if ($deleted === false) {
+				throw new Exception('Failed to delete orphaned logs: ' . $wpdb->last_error);
+			}
+			$total_deleted += (int) $deleted;
+		} while (!empty($ids));
+
+		return $total_deleted;
 	}
 
 	/**
