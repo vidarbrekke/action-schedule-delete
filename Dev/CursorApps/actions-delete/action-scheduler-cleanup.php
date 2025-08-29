@@ -233,9 +233,23 @@ final class MK_Action_Scheduler_Cleanup {
 					action: 'action_scheduler_cleanup_run',
 					nonce: '<?php echo esc_js(wp_create_nonce('action_scheduler_cleanup_nonce')); ?>'
 				}).done(function(resp){
-					$('#mk-asc-result').show().text(JSON.stringify(resp, null, 2));
+					var message = 'Unexpected response';
+					if (resp && typeof resp.success !== 'undefined') {
+						if (resp.success && resp.data) {
+							message = resp.data.message || 'Cleanup completed.';
+							var counts = [];
+							if (typeof resp.data.failed_actions !== 'undefined') counts.push('Failed actions removed: ' + resp.data.failed_actions);
+							if (typeof resp.data.completed_actions !== 'undefined') counts.push('Old completed actions removed: ' + resp.data.completed_actions);
+							if (typeof resp.data.orphaned_logs !== 'undefined') counts.push('Orphaned logs removed: ' + resp.data.orphaned_logs);
+							if (resp.data.next_run_utc) counts.push('Next scheduled run: ' + resp.data.next_run_utc + ' UTC');
+							if (counts.length) message += '\n\n' + counts.join('\n');
+						} else if (!resp.success && resp.data) {
+							message = resp.data.message || 'Cleanup failed.';
+						}
+					}
+					$('#mk-asc-result').show().text(message);
 				}).fail(function(){
-					$('#mk-asc-result').show().text('Request failed');
+					$('#mk-asc-result').show().text('Request failed. Please check your connection and try again.');
 				}).always(function(){
 					$btn.prop('disabled', false).text('Run Cleanup Now');
 				});
@@ -247,20 +261,64 @@ final class MK_Action_Scheduler_Cleanup {
 
 	public function manual_cleanup() {
 		if (!current_user_can('manage_options')) {
-			wp_send_json_error(['message' => 'Unauthorized'], 403);
+			wp_send_json_error(['message' => 'Unauthorized']);
 		}
 		check_ajax_referer('action_scheduler_cleanup_nonce', 'nonce');
 
 		$results = $this->cleanup_action_scheduler();
 
+		$payload = $results;
+		$payload['next_run_utc'] = $this->get_next_run_utc();
+		$payload['message'] = $this->format_results_message($results, $payload['next_run_utc']);
+
 		if ($results['success']) {
-			wp_send_json_success($results);
+			wp_send_json_success($payload);
 		} else {
-			wp_send_json_error([
-				'message' => 'Cleanup failed: ' . ($results['error'] ?? 'Unknown error'),
-				'results' => $results
-			], 500);
+			// Return 200 with success=false so the UI can display the error message
+			wp_send_json_error(['message' => $payload['message'], 'results' => $results]);
 		}
+	}
+
+	/**
+	 * Build a friendly message for the admin UI based on cleanup results
+	 */
+	private function format_results_message($results, $next_run_utc) {
+		if (!$results['success']) {
+			if (!empty($results['error'])) {
+				if ($results['error'] === 'Cleanup already running') {
+					return __('A cleanup is already in progress. Please try again in a few minutes.', 'action-scheduler-cleanup');
+				}
+				if ($results['error'] === 'Action Scheduler tables not found') {
+					return __('Action Scheduler tables were not found for this site. Ensure WooCommerce (or Action Scheduler) is installed and active.', 'action-scheduler-cleanup');
+				}
+				return sprintf(
+					/* translators: %s is an error message */
+					__('Cleanup encountered an error: %s. Some items may have been cleaned before the error occurred.', 'action-scheduler-cleanup'),
+					esc_html($results['error'])
+				);
+			}
+			return __('Cleanup failed due to an unknown error.', 'action-scheduler-cleanup');
+		}
+
+		$failed = (int) ($results['failed_actions'] ?? 0);
+		$completed = (int) ($results['completed_actions'] ?? 0);
+		$logs = (int) ($results['orphaned_logs'] ?? 0);
+		$total = $failed + $completed + $logs;
+
+		if ($total === 0) {
+			return __('No cleanup needed. Your Action Scheduler tables are already clean.', 'action-scheduler-cleanup');
+		}
+
+		$message = __('Cleanup completed successfully.', 'action-scheduler-cleanup');
+		if ($next_run_utc) {
+			$message .= ' ' . sprintf(__('Next scheduled run: %s UTC.', 'action-scheduler-cleanup'), esc_html($next_run_utc));
+		}
+		return $message;
+	}
+
+	private function get_next_run_utc() {
+		$next = wp_next_scheduled('action_scheduler_cleanup_cron');
+		return $next ? gmdate('Y-m-d H:i:s', $next) : null;
 	}
 }
 
